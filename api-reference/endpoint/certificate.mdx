@@ -1,0 +1,155 @@
+---
+title: 'Certificates'
+description: 'Certificate data types and endpoints'
+---
+
+# Certificate Objects
+
+## Base Certificate
+
+The base certificate object contains information about a course completion certificate.
+
+### Properties
+
+<ResponseField name="id" type="integer">
+  Unique identifier for the certificate
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the certificate
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Description of the certificate
+</ResponseField>
+
+<ResponseField name="courseId" type="integer">
+  ID of the course this certificate is for
+</ResponseField>
+
+<ResponseField name="courseName" type="string">
+  Name of the course this certificate is for
+</ResponseField>
+
+<ResponseField name="imageUrl" type="string">
+  URL to the certificate image
+</ResponseField>
+
+<ResponseField name="achievedAt" type="integer">
+  Timestamp when the certificate was issued
+</ResponseField>
+
+<ResponseField name="expiresAt" type="integer">
+  Optional timestamp when the certificate expires
+</ResponseField>
+
+### Example Response
+
+<ResponseExample>
+```json
+{
+  "id": 123,
+  "name": "Certificate name",
+  "description": "Certificate description",
+  "courseId": 2,
+  "courseName": "Course name",
+  "imageUrl": "http://s3.amazonaws.com/qwerty/certificate.png",
+  "achievedAt": 1234567890,
+  "expiresAt": 1334567890
+}
+```
+</ResponseExample>
+
+## User Certificate
+
+A user certificate extends the base certificate object with user information.
+
+### Additional Properties
+
+<ResponseField name="user" type="object">
+  Information about the user who received the certificate
+  <Expandable title="User Properties">
+    <ResponseField name="id" type="string">
+      User's unique identifier
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      User's email address
+    </ResponseField>
+    <ResponseField name="firstName" type="string">
+      User's first name
+    </ResponseField>
+    <ResponseField name="lastName" type="string">
+      User's last name
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## List Responses
+
+When retrieving lists of certificates, the response includes a total count.
+
+### Certificate List
+
+<ResponseField name="certificates" type="array">
+  Array of certificate objects
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer">
+  Total number of certificates available
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "certificates": [
+    {
+      "id": 123,
+      "name": "Certificate name",
+      "description": "Certificate description",
+      "courseId": 2,
+      "courseName": "Course name",
+      "imageUrl": "http://s3.amazonaws.com/qwerty/certificate.png",
+      "achievedAt": 1234567890,
+      "expiresAt": 1334567890
+    }
+  ],
+  "totalCount": 1
+}
+```
+</ResponseExample>
+
+### User Certificate List
+
+<ResponseField name="certificates" type="array">
+  Array of user certificate objects (includes user information)
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer">
+  Total number of certificates available
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "certificates": [
+    {
+      "id": 123,
+      "name": "Certificate name",
+      "description": "Certificate description",
+      "courseId": 2,
+      "courseName": "Course name",
+      "imageUrl": "http://s3.amazonaws.com/qwerty/certificate.png",
+      "achievedAt": 1234567890,
+      "expiresAt": 1334567890,
+      "user": {
+        "id": "12345",
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe"
+      }
+    }
+  ],
+  "totalCount": 1
+}
+```
+</ResponseExample>

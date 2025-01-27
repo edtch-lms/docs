@@ -1,0 +1,87 @@
+---
+title: 'Common Data Types'
+description: 'Common data structures used across the API'
+---
+
+# Date Interval
+
+The date interval type is used to specify time periods throughout the API.
+
+## Properties
+
+<ResponseField name="measure" type="string" required>
+  The unit of time measurement. Must be one of:
+  - `hours`
+  - `days`
+  - `weeks`
+  - `months`
+</ResponseField>
+
+<ResponseField name="value" type="integer" required>
+  Number of time units
+</ResponseField>
+
+## Example
+
+<ResponseExample>
+```json
+{
+  "measure": "months",
+  "value": 6
+}
+```
+</ResponseExample>
+
+# Percent Statistics
+
+The percent statistics type represents a distribution of values across percentage ranges. Each key represents a percentage range, and its value represents the count of items in that range.
+
+## Format
+
+- Single percentages are represented as strings: `"0"` and `"100"`
+- Ranges are represented as strings with the format: `"[min]-[max]"`
+- Values are integers representing the count in each range
+
+## Ranges
+
+- `"0"`: Exactly 0%
+- `"1-10"`: 1% to 10%
+- `"11-20"`: 11% to 20%
+- `"21-30"`: 21% to 30%
+- `"31-40"`: 31% to 40%
+- `"41-50"`: 41% to 50%
+- `"51-60"`: 51% to 60%
+- `"61-70"`: 61% to 70%
+- `"71-80"`: 71% to 80%
+- `"81-90"`: 81% to 90%
+- `"91-99"`: 91% to 99%
+- `"100"`: Exactly 100%
+
+## Example
+
+<ResponseExample>
+```json
+{
+  "0": 2,
+  "1-10": 1,
+  "11-20": 3,
+  "21-30": 9,
+  "31-40": 0,
+  "41-50": 4,
+  "51-60": 3,
+  "61-70": 5,
+  "71-80": 7,
+  "81-90": 4,
+  "91-99": 3,
+  "100": 2
+}
+```
+</ResponseExample>
+
+## Usage
+
+The percent statistics type is commonly used for:
+- Progress distributions
+- Completion rates
+- Score distributions
+- Performance metrics

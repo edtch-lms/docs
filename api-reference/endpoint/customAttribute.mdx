@@ -1,0 +1,225 @@
+---
+title: 'Custom Attributes'
+description: 'Custom attribute types and their properties'
+---
+
+# Custom Attributes Overview
+
+Custom attributes allow you to extend the standard data model with additional fields. They support various data types and can be configured for different use cases.
+
+## Attribute Types
+
+<ResponseField name="type" type="integer">
+  The type of custom attribute:
+  - `1` - Text
+  - `2` - Date
+  - `3` - Single Choice
+  - `4` - Multiple Choice
+  - `5` - User Choice
+  - `6` - Yes/No
+  - `7` - External Link
+  - `8` - Number
+</ResponseField>
+
+# Base Custom Attribute
+
+## Properties
+
+<ResponseField name="id" type="integer">
+  Unique identifier for the attribute
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the attribute
+</ResponseField>
+
+<ResponseField name="apiId" type="string">
+  API identifier for the attribute
+</ResponseField>
+
+<ResponseField name="position" type="integer">
+  Position/order of the attribute
+</ResponseField>
+
+<ResponseField name="isRequired" type="boolean">
+  Whether the attribute is mandatory
+</ResponseField>
+
+<ResponseField name="extraData" type="array" optional>
+  Additional data for choice-type attributes
+  <Expandable title="Extra Data Properties">
+    <ResponseField name="id" type="integer">
+      ID of the extra data item
+    </ResponseField>
+    <ResponseField name="position" type="integer">
+      Position of the item in the list
+    </ResponseField>
+    <ResponseField name="value" type="string">
+      Value of the extra data item
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Response
+
+<ResponseExample>
+```json
+{
+  "id": 3,
+  "name": "Options list",
+  "type": 3,
+  "apiId": "custom_field_3",
+  "position": 1,
+  "isRequired": false,
+  "extraData": [
+    {
+      "id": 7,
+      "position": 1,
+      "value": "abc"
+    },
+    {
+      "id": 8,
+      "position": 2,
+      "value": "def"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+# Editable Custom Attribute
+
+Extends the base custom attribute with editability control.
+
+## Additional Properties
+
+<ResponseField name="isEditable" type="boolean">
+  Whether the attribute can be modified
+</ResponseField>
+
+### Example Response
+
+<ResponseExample>
+```json
+{
+  "id": 4,
+  "name": "Options list",
+  "type": 3,
+  "apiId": "custom_field_3",
+  "position": 1,
+  "isRequired": false,
+  "isEditable": false,
+  "extraData": [
+    {
+      "id": 7,
+      "position": 1,
+      "value": "abc"
+    },
+    {
+      "id": 8,
+      "position": 2,
+      "value": "def"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+# Create/Update Requests
+
+## Custom Attribute Request
+
+Used when creating or updating custom attributes.
+
+### Properties
+
+<ResponseField name="id" type="integer" optional>
+  Attribute ID (only for updates)
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Name of the attribute
+</ResponseField>
+
+<ResponseField name="type" type="integer" required>
+  Attribute type (1-8)
+</ResponseField>
+
+<ResponseField name="apiId" type="string" optional>
+  API identifier
+</ResponseField>
+
+<ResponseField name="position" type="integer" required>
+  Position order
+</ResponseField>
+
+<ResponseField name="isRequired" type="boolean" required>
+  Whether the attribute is mandatory
+</ResponseField>
+
+<ResponseField name="isVisible" type="boolean" required>
+  Whether the attribute is visible
+</ResponseField>
+
+### Example Request
+
+<RequestExample>
+```json
+{
+  "name": "Options list",
+  "type": 3,
+  "apiId": "custom_field_3",
+  "position": 1,
+  "isRequired": false,
+  "isVisible": true,
+  "extraData": [
+    {
+      "position": 1,
+      "value": "abc"
+    },
+    {
+      "position": 2,
+      "value": "def"
+    }
+  ]
+}
+```
+</RequestExample>
+
+# Webhook Format
+
+Custom attributes in webhooks have a specific format.
+
+## Properties
+
+<ResponseField name="apiId" type="string">
+  API identifier of the attribute
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Attribute name
+</ResponseField>
+
+<ResponseField name="type" type="integer">
+  Attribute type (1-8)
+</ResponseField>
+
+<ResponseField name="value" type="string">
+  Current value of the attribute
+</ResponseField>
+
+### Example Webhook Payload
+
+<ResponseExample>
+```json
+{
+  "apiId": "custom_field_3",
+  "name": "Custom text",
+  "type": 1,
+  "position": 1,
+  "isRequired": false,
+  "isVisible": false,
+  "value": "example"
+}
+```
+</ResponseExample>

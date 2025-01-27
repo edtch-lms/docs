@@ -1,0 +1,157 @@
+---
+title: 'Courses'
+description: 'Course data types and endpoints'
+---
+
+# Course Object
+
+The course object contains all the information about a specific course.
+
+## Properties
+
+<ResponseField name="id" type="integer">
+  Unique identifier for the course
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the course
+</ResponseField>
+
+<ResponseField name="annotation" type="string">
+  Brief annotation or summary of the course
+</ResponseField>
+
+<ResponseField name="isDraft" type="boolean">
+  Indicates whether the course is in draft state
+</ResponseField>
+
+<ResponseField name="createdAt" type="integer">
+  Timestamp when the course was created
+</ResponseField>
+
+<ResponseField name="updatedAt" type="integer">
+  Timestamp of the last update
+</ResponseField>
+
+<ResponseField name="publishedAt" type="integer">
+  Timestamp when the course was published
+</ResponseField>
+
+<ResponseField name="image" type="object">
+  Course cover image information
+  <Expandable title="properties">
+    <ResponseField name="id" type="integer">
+      Image identifier
+    </ResponseField>
+    <ResponseField name="original" type="string">
+      URL to the full-size image
+    </ResponseField>
+    <ResponseField name="mini" type="string">
+      URL to 36x36px thumbnail
+    </ResponseField>
+    <ResponseField name="small" type="string">
+      URL to 330x130px image
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Extended Course Object
+
+When retrieving a specific course, additional fields are included:
+
+<ResponseField name="description" type="string">
+  Detailed course description
+</ResponseField>
+
+<ResponseField name="attachedFiles" type="array">
+  List of files attached to the course
+  <Expandable title="properties">
+    <ResponseField name="name" type="string">
+      File name
+    </ResponseField>
+    <ResponseField name="size" type="integer">
+      File size in bytes
+    </ResponseField>
+    <ResponseField name="url" type="string">
+      Download URL
+    </ResponseField>
+    <ResponseField name="mime" type="string">
+      MIME type of the file
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Course Element Types
+
+Course elements can be of the following types:
+- `page` - Content page
+- `test` - Test element
+- `question` - Question element
+- `scormPage` - SCORM page
+- `homework` - Homework assignment
+- `classwork` - Classwork assignment
+- `survey` - Survey element
+- `surveyQuestion` - Survey question
+- `certificatePage` - Certificate page
+
+## Example Response
+
+<ResponseExample>
+```json
+{
+  "id": 123,
+  "name": "Course name",
+  "annotation": "Course annotation",
+  "isDraft": false,
+  "createdAt": 1507807711,
+  "updatedAt": 1507808372,
+  "publishedAt": 1508225229,
+  "image": {
+    "id": 1234,
+    "original": "http://example.com/images/original/1234.jpg",
+    "mini": "http://example.com/images/mini/1234.jpg",
+    "small": "http://example.com/images/small/1234.jpg"
+  }
+}
+```
+</ResponseExample>
+
+## List Courses Response
+
+When retrieving a list of courses, the response includes:
+
+<ResponseField name="courses" type="array">
+  Array of course objects
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer">
+  Total number of courses available
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "courses": [
+    {
+      "id": 123,
+      "name": "Course name",
+      "annotation": "Course annotation",
+      "isDraft": false,
+      "createdAt": 1507807711,
+      "updatedAt": 1507808372,
+      "publishedAt": 1508225229
+    },
+    {
+      "id": 456,
+      "name": "Another course",
+      "annotation": "Another course annotation",
+      "isDraft": false,
+      "createdAt": 1507807711,
+      "updatedAt": 1507808372,
+      "publishedAt": 1508225229
+    }
+  ],
+  "totalCount": 2
+}
+```
+</ResponseExample>

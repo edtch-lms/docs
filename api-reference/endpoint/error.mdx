@@ -1,0 +1,77 @@
+---
+title: 'Errors'
+description: 'API error types and formats'
+---
+
+# Error Types
+
+The API uses standard HTTP response codes and consistent error formats across all endpoints.
+
+## Base Error Format
+
+<ResponseField name="status" type="integer" required>
+  HTTP status code of the error
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  Description of the error
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "status": 422,
+  "message": "Unprocessable Entity"
+}
+```
+</ResponseExample>
+
+## Common Errors
+
+### Not Found (404)
+
+Returned when the requested resource cannot be found.
+
+<ResponseExample>
+```json
+{
+  "status": 404,
+  "message": "Not found"
+}
+```
+</ResponseExample>
+
+### Bad Request (400)
+
+Returned when the request is malformed or contains invalid parameters.
+
+<ResponseField name="errors" type="object" optional>
+  Field-specific validation errors
+</ResponseField>
+
+<ResponseExample>
+```json
+{
+  "status": 400,
+  "message": "",
+  "errors": {
+    "fieldName": [
+      "Validation error message"
+    ]
+  }
+}
+```
+</ResponseExample>
+
+### Payment Required (402)
+
+Returned when the requested action requires a payment.
+
+<ResponseExample>
+```json
+{
+  "status": 402,
+  "message": "Payment required"
+}
+```
+</ResponseExample>
