@@ -1,19 +1,16 @@
+Mintlify Configuration
+
 {
-  "$schema": "https://mintlify.com/schema.json",
-  "name": "Konstantly Docs",
+  "name": "Konstantly API",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#2D75F1",
-    "light": "#07C983",
-    "dark": "#2D75F1",
-    "anchors": {
-      "from": "#2D75F1",
-      "to": "#07C983"
-    }
+    "light": "#4D9CFF",
+    "dark": "#0050B4"
   },
   "topbarLinks": [
     {
@@ -22,62 +19,66 @@
     }
   ],
   "topbarCtaButton": {
-    "name": "Sign-in",
+    "name": "SIgn in",
     "url": "https://konstant.ly"
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
   "anchors": [
     {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://konstantly.com/blog"
+      "name": "API Reference",
+      "icon": "book-open-cover",
+      "url": "api-reference"
+    },
+    {
+      "name": "Support",
+      "icon": "messages-question",
+      "url": "mailto:support@konstantly.com"
     }
   ],
   "navigation": [
     {
-      "group": "Get Started",
+      "group": "Getting Started",
       "pages": [
         "introduction",
         "quickstart",
-        "development"
+        "authentication"
       ]
     },
     {
-      "group": "Essentials",
+      "group": "Core Resources",
       "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
+        "api-reference/endpoints/courses",
+        "api-reference/endpoints/users",
+        "api-reference/endpoints/groups",
+        "api-reference/endpoints/certificates"
       ]
     },
     {
-      "group": "API Documentation",
+      "group": "Management",
       "pages": [
-        "api-reference/introduction"
+        "api-reference/endpoints/custom-attributes",
+        "api-reference/endpoints/statistics",
+        "api-reference/endpoints/invitations",
+        "api-reference/endpoints/roles"
       ]
     },
     {
-      "group": "Endpoint Examples",
+      "group": "Integrations",
       "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete",
-        "api-reference/endpoint/assign",
-        "api-reference/endpoint/error",
-        "api-reference/endpoint/course"
+        "api-reference/endpoints/webhooks",
+        "api-reference/endpoints/zapier"
+      ]
+    },
+    {
+      "group": "Additional Resources",
+      "pages": [
+        "api-reference/errors",
+        "api-reference/rate-limits",
+        "api-reference/versioning"
       ]
     }
   ],
   "footerSocials": {
-    "x": "https://x.com/konstantlycom",
+    "twitter": "https://twitter.com/konstantly",
     "linkedin": "https://linkedin.com/company/konstantly"
   }
 }

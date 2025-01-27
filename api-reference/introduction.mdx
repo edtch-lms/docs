@@ -1,33 +1,51 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'Get started with the Konstantly API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+# Konstantly API Reference
 
-## Welcome
+**Attention:** This is a beta version of API documentation that may contain inaccuracies.
+Report errors to [support@konstantly.com](mailto:support@konstantly.com)
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URL
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```bash
+https://YOURSITE.konstant.ly/openapi/v1
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require authentication using an API key passed in the `X-API-KEY` header.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+<Note>
+  To get your API key, go to your Konstantly site > Settings > API and copy the value from there.
+</Note>
+
+<RequestExample>
+```bash
+curl --request GET \
+  --url 'https://YOURSITE.konstant.ly/openapi/v1/courses' \
+  --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+```
+</RequestExample>
+
+## Pagination
+
+Many endpoints return paginated results. By default, each page contains 20 items.
+
+<ParamField query="offset" type="integer">
+  Entry number to start listing from (e.g., 20 for the second page)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Number of items per page (where supported)
+</ParamField>
+
+## Content Type
+
+All requests and responses use JSON format.
+
+```bash
+Content-Type: application/json
 ```
