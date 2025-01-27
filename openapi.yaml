@@ -1,0 +1,1005 @@
+openapi: 3.0.0
+info:
+  title: Konstantly OpenAPI
+  version: v1
+  description: |
+    **Attention:** this is a beta version of API documentation that may contain inaccuracies.
+    Report errors to [support@konstantly.com](mailto:support@konstantly.com)
+
+servers:
+  - url: https://{site}.konstant.ly/openapi/v1
+    variables:
+      site:
+        default: YOURSITE
+        description: Your Konstantly site name
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+
+    NotFound:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Not Found"
+
+    BadRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+        errors:
+          type: object
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        isBlocked:
+          type: boolean
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /courses:
+    get:
+      summary: Get a list of courses
+      description: Get a list of courses (20 per page)
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: Entry number to start listing from
+          example: 20
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  totalCount:
+                    type: integer
+
+  /courses/{courseId}:
+    parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Course ID
+    get:
+      summary: Get course details
+      description: Get detailed information on the course by ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /courses/{courseId}/assignments:
+    parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+    post:
+      summary: Assign course
+      description: Assign the course to users/groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: integer
+                  description: User IDs to be assigned
+                groups:
+                  type: array
+                  items:
+                    type: integer
+                  description: Group IDs to be assigned
+                assignAt:
+                  type: integer
+                  description: Timestamp when the course should be assigned
+                deadlineAt:
+                  type: integer
+                  description: Deadline timestamp
+      responses:
+        '200':
+          description: Successful assignment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+
+  /users:
+    get:
+      summary: Get users list
+      description: Get a list of users (sorted by name, 20 entries per page)
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Get user info by email
+          example: user@example.com
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: Pagination offset
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  totalCount:
+                    type: integer
+
+    post:
+      summary: Create user
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: User API ID
+
+    get:
+      summary: Get user details
+      description: Get user's personal information by user ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+    patch:
+      summary: Update user
+      description: Edit user's personal information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+    delete:
+      summary: Delete user
+      description: Delete user account
+      responses:
+        '200':
+          description: User deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '422':
+          description: User cannot be removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  message:
+                    type: string
+
+  /users/{userId}/assignments:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: User API ID
+
+    get:
+      summary: Get user assignments
+      description: Get a list of courses assigned to the user
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        courseId:
+                          type: integer
+                        assignedAt:
+                          type: integer
+                        deadlineAt:
+                          type: integer
+                        status:
+                          type: string
+
+    post:
+      summary: Assign courses
+      description: Assign courses to the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                courses:
+                  type: array
+                  items:
+                    type: integer
+                  description: IDs of the courses to be assigned
+                assignAt:
+                  type: integer
+                  description: Assignment timestamp (UTC)
+                deadlineAt:
+                  type: integer
+                  description: Deadline timestamp (UTC)
+      responses:
+        '200':
+          description: Courses assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assignments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        courseId:
+                          type: integer
+                        assignedAt:
+                          type: integer
+                        deadlineAt:
+                          type: integer
+
+  /groups:
+    get:
+      summary: Get groups list
+      description: Get a list of groups (20 per page)
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: Pagination offset
+          example: 20
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+                  totalCount:
+                    type: integer
+
+    post:
+      summary: Create group
+      description: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+
+  /webhooks:
+    get:
+      summary: Get webhook events
+      description: Get data of webhook events
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        occuredAt:
+                          type: integer
+                        body:
+                          type: object
+
+  /certificates/{certificateId}:
+    parameters:
+      - name: certificateId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Certificate ID
+    get:
+      summary: Get certificate
+      description: Get a certificate by ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '404':
+          description: Certificate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /custom/attributes/users:
+    get:
+      summary: Get user custom attributes
+      description: Get a list of custom user attributes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomAttribute'
+
+    post:
+      summary: Update user custom attributes
+      description: Update custom user attributes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  required:
+                    type: boolean
+                  options:
+                    type: array
+                    items:
+                      type: string
+      responses:
+        '200':
+          description: Attributes updated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomAttribute'
+
+  /invites:
+    get:
+      summary: Get invitations
+      description: Get a list of processed invitations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invite'
+
+    post:
+      summary: Create invitations
+      description: Create new invitations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                courses:
+                  type: array
+                  items:
+                    type: integer
+                groups:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Invitations created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invite'
+
+  /webhooks/Course/Published:
+    post:
+      summary: Course published webhook
+      description: Webhook for course published event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEvent'
+                - type: object
+                  properties:
+                    body:
+                      type: object
+                      properties:
+                        courseId:
+                          type: integer
+                        title:
+                          type: string
+
+  /webhooks/Course/Started:
+    post:
+      summary: Course started webhook
+      description: Webhook for course started event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEvent'
+                - type: object
+                  properties:
+                    body:
+                      type: object
+                      properties:
+                        courseId:
+                          type: integer
+                        userId:
+                          type: string
+                        progress:
+                          type: integer
+
+  /statistics:
+    get:
+      summary: Get site statistics
+      description: Get the global statistics of Konstantly site
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+
+components:
+  schemas:
+    Certificate:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        courseId:
+          type: integer
+        issuedAt:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+
+    Statistics:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        totalCourses:
+          type: integer
+        totalGroups:
+          type: integer
+        averageProgress:
+          type: number
+          format: float
+
+    WebhookEvent:
+      type: object
+      properties:
+        type:
+          type: string
+        occuredAt:
+          type: integer
+        body:
+          type: object
+
+    Invite:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, expired]
+        createdAt:
+          type: integer
+        expiresAt:
+          type: integer
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+
+    CourseProgress:
+      type: object
+      properties:
+        userId:
+          type: string
+        courseId:
+          type: integer
+        progress:
+          type: integer
+        startedAt:
+          type: integer
+        lastActivityAt:
+          type: integer
+        completedAt:
+          type: integer
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+
+  /webhooks/User/Created:
+    post:
+      summary: User created webhook
+      description: Webhook for user created event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEvent'
+                - type: object
+                  properties:
+                    body:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        email:
+                          type: string
+                        firstName:
+                          type: string
+                        lastName:
+                          type: string
+
+  /webhooks/User/Edited:
+    post:
+      summary: User edited webhook
+      description: Webhook for user edited event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEvent'
+                - type: object
+                  properties:
+                    body:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        changes:
+                          type: object
+
+  /webhooks/Group/User/Created:
+    post:
+      summary: User added to group webhook
+      description: Webhook for user added to group event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/WebhookEvent'
+                - type: object
+                  properties:
+                    body:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        groupId:
+                          type: integer
+
+  /service/zapier/custom/attributes/users:
+    get:
+      summary: Get Zapier user attributes
+      description: Get a list of custom user attributes in Zapier format
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ZapierCustomAttribute'
+
+  /service/zapier/custom/attributes/groups:
+    get:
+      summary: Get Zapier group attributes
+      description: Get a list of custom group attributes in Zapier format
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ZapierCustomAttribute'
+
+  /service/zapier/custom/attributes/courses:
+    get:
+      summary: Get Zapier course attributes
+      description: Get a list of custom course attributes in Zapier format
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ZapierCustomAttribute'
+
+  /webhook/{event}/last:
+    parameters:
+      - name: event
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Type of webhook event to poll for
+        example: user.created
+    get:
+      summary: Get last webhook event
+      description: Get data of last webhook event of a specific type
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEvent'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+components:
+  schemas:
+    ZapierCustomAttribute:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum: [string, text, number, boolean, datetime]
+        required:
+          type: boolean
+        placeholder:
+          type: string
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              label:
+                type: string
+      required:
+        - key
+        - label
+        - type
+
+    UserWebhookPayload:
+      type: object
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        customAttributes:
+          type: object
+          additionalProperties: true
+
+    CourseWebhookPayload:
+      type: object
+      properties:
+        courseId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        customAttributes:
+          type: object
+          additionalProperties: true
+
+    GroupWebhookPayload:
+      type: object
+      properties:
+        groupId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        customAttributes:
+          type: object
+          additionalProperties: true
+
+  examples:
+    UserCreatedWebhook:
+      value:
+        type: user.created
+        occuredAt: 1641024000
+        body:
+          userId: "12345"
+          email: "user@example.com"
+          firstName: "John"
+          lastName: "Doe"
+
+    CoursePublishedWebhook:
+      value:
+        type: course.published
+        occuredAt: 1641024000
+        body:
+          courseId: 789
+          title: "Introduction to OpenAPI"
+          status: "published"
+
+    GroupUserAddedWebhook:
+      value:
+        type: group.user.created
+        occuredAt: 1641024000
+        body:
+          userId: "12345"
+          groupId: 456
+
+    CustomAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        required:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string

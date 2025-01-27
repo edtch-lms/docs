@@ -8,8 +8,12 @@
   "favicon": "/favicon.png",
   "colors": {
     "primary": "#2D75F1",
-    "light": "#4D9CFF",
-    "dark": "#0050B4"
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
   },
   "topbarLinks": [
     {
@@ -18,8 +22,8 @@
     }
   ],
   "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://app.konstantly.com"
+    "name": "Get Started",
+    "url": "https://konstant.ly"
   },
   "anchors": [
     {
@@ -28,9 +32,14 @@
       "url": "api-reference"
     },
     {
-      "name": "SDKs",
-      "icon": "code",
-      "url": "sdks"
+      "name": "Changelog",
+      "icon": "list",
+      "url": "changelog"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.example.com"
     }
   ],
   "navigation": [
@@ -38,55 +47,15 @@
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "authentication"
+        "quickstart",
+        "development"
       ]
     },
     {
-      "group": "Courses",
+      "group": "API Documentation",
       "pages": [
-        "api-reference/courses/overview",
-        "api-reference/courses/get-courses",
-        "api-reference/courses/get-course",
-        "api-reference/courses/assignments",
-        "api-reference/courses/certificates",
-        "api-reference/courses/statistics"
-      ]
-    },
-    {
-      "group": "Users",
-      "pages": [
-        "api-reference/users/overview",
-        "api-reference/users/get-users",
-        "api-reference/users/create-user",
-        "api-reference/users/get-user",
-        "api-reference/users/update-user",
-        "api-reference/users/delete-user"
-      ]
-    },
-    {
-      "group": "Groups",
-      "pages": [
-        "api-reference/groups/overview",
-        "api-reference/groups/get-groups",
-        "api-reference/groups/create-group",
-        "api-reference/groups/get-group",
-        "api-reference/groups/update-group",
-        "api-reference/groups/delete-group"
-      ]
-    },
-    {
-      "group": "Certificates",
-      "pages": [
-        "api-reference/certificates/overview",
-        "api-reference/certificates/get-certificate"
-      ]
-    },
-    {
-      "group": "Webhooks",
-      "pages": [
-        "api-reference/webhooks/overview",
-        "api-reference/webhooks/course-events",
-        "api-reference/webhooks/user-events"
+        "api-reference/authentication",
+        "api-reference/endpoints"
       ]
     }
   ],
