@@ -1,7 +1,7 @@
 Mintlify Configuration
 
 {
-  "name": "Konstantly API",
+  "name": "Konstantly API Documentation",
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
@@ -9,8 +9,8 @@ Mintlify Configuration
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#2D75F1",
-    "light": "#4D9CFF",
-    "dark": "#0050B4"
+    "light": "#07C983",
+    "dark": "#0D9373"
   },
   "topbarLinks": [
     {
@@ -19,7 +19,7 @@ Mintlify Configuration
     }
   ],
   "topbarCtaButton": {
-    "name": "SIgn in",
+    "name": "Dashboard",
     "url": "https://konstant.ly"
   },
   "anchors": [
@@ -39,41 +39,65 @@ Mintlify Configuration
       "group": "Getting Started",
       "pages": [
         "introduction",
-        "quickstart",
         "authentication"
       ]
     },
     {
       "group": "Core Resources",
       "pages": [
-        "api-reference/endpoints/courses",
-        "api-reference/endpoints/users",
-        "api-reference/endpoints/groups",
-        "api-reference/endpoints/certificates"
-      ]
-    },
-    {
-      "group": "Management",
-      "pages": [
-        "api-reference/endpoints/custom-attributes",
-        "api-reference/endpoints/statistics",
-        "api-reference/endpoints/invitations",
-        "api-reference/endpoints/roles"
-      ]
-    },
-    {
-      "group": "Integrations",
-      "pages": [
-        "api-reference/endpoints/webhooks",
-        "api-reference/endpoints/zapier"
+        {
+          "group": "Courses",
+          "pages": [
+            "api-reference/courses/get",
+            "api-reference/courses/create",
+            "api-reference/courses/assignments",
+            "api-reference/courses/certificates"
+          ]
+        },
+        {
+          "group": "Users",
+          "pages": [
+            "api-reference/users/get",
+            "api-reference/users/create",
+            "api-reference/users/update",
+            "api-reference/users/assignments",
+            "api-reference/users/certificates"
+          ]
+        },
+        {
+          "group": "Groups",
+          "pages": [
+            "api-reference/groups/get",
+            "api-reference/groups/create",
+            "api-reference/groups/update",
+            "api-reference/groups/members"
+          ]
+        }
       ]
     },
     {
       "group": "Additional Resources",
       "pages": [
-        "api-reference/errors",
-        "api-reference/rate-limits",
-        "api-reference/versioning"
+        "api-reference/certificates/overview",
+        "api-reference/custom-attributes/overview",
+        "api-reference/statistics/overview",
+        "api-reference/invites/overview",
+        "api-reference/roles/overview"
+      ]
+    },
+    {
+      "group": "Webhooks",
+      "pages": [
+        "api-reference/webhooks/overview",
+        "api-reference/webhooks/courses",
+        "api-reference/webhooks/users",
+        "api-reference/webhooks/groups"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "api-reference/zapier/overview"
       ]
     }
   ],

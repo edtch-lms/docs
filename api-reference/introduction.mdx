@@ -1,14 +1,20 @@
 ---
 title: 'Introduction'
-description: 'Get started with the Konstantly API'
+description: 'Welcome to the Konstantly API documentation'
 ---
 
-# Konstantly API Reference
+# Konstantly API Documentation
 
 **Attention:** This is a beta version of API documentation that may contain inaccuracies.
 Report errors to [support@konstantly.com](mailto:support@konstantly.com)
 
+## Overview
+
+The Konstantly API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
+
 ## Base URL
+
+All API requests should be made to:
 
 ```bash
 https://YOURSITE.konstant.ly/openapi/v1
@@ -16,36 +22,53 @@ https://YOURSITE.konstant.ly/openapi/v1
 
 ## Authentication
 
-All API requests require authentication using an API key passed in the `X-API-KEY` header.
+The Konstantly API uses API keys to authenticate requests. You can get your API key from:
+
+1. Go to your Konstantly site
+2. Navigate to Settings > API
+3. Copy your API key
+
+All API requests must include your API key in the `X-API-KEY` header:
+
+```bash
+X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv
+```
 
 <Note>
-  To get your API key, go to your Konstantly site > Settings > API and copy the value from there.
+Keep your API keys secure and never share them in publicly accessible areas such as GitHub, client-side code, etc.
 </Note>
 
-<RequestExample>
-```bash
-curl --request GET \
-  --url 'https://YOURSITE.konstant.ly/openapi/v1/courses' \
-  --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
-```
-</RequestExample>
+## Request Format
 
-## Pagination
-
-Many endpoints return paginated results. By default, each page contains 20 items.
-
-<ParamField query="offset" type="integer">
-  Entry number to start listing from (e.g., 20 for the second page)
-</ParamField>
-
-<ParamField query="limit" type="integer" default="20">
-  Number of items per page (where supported)
-</ParamField>
-
-## Content Type
-
-All requests and responses use JSON format.
+The API accepts JSON-encoded request bodies and returns JSON-encoded responses. All requests should include the following headers:
 
 ```bash
 Content-Type: application/json
+Accept: application/json
 ```
+
+## Pagination
+
+Many endpoints return paginated results. By default, endpoints return 20 items per page. You can specify which page of results to return using the `offset` parameter:
+
+<ParamField query="offset" type="integer">
+  The number of items to skip. Use this for pagination.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  The number of items to return per page (where supported).
+</ParamField>
+
+## Rate Limiting
+
+Rate limiting information is provided in the response headers:
+
+```bash
+X-RateLimit-Limit: 100      # Requests per minute allowed
+X-RateLimit-Remaining: 95   # Requests remaining in current time window
+X-RateLimit-Reset: 1538152444  # Time when rate limit resets
+```
+
+## Support
+
+If you have any questions or need help with API integration, please contact our support team at [support@konstantly.com](mailto:support@konstantly.com).

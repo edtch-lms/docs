@@ -1,4 +1,193 @@
+------
+title: 'Create Resources'
+description: 'Learn how to create resources using POST endpoints'
 ---
-title: 'Get Plants'
-openapi: 'GET /plants'
----
+
+# Create Resources
+
+This guide covers how to create different resources using POST endpoints.
+
+## Create User
+
+Create a new user account.
+
+<CodeGroup>
+    ```bash Request
+    curl -X POST "https://YOURSITE.konstant.ly/openapi/v1/users" \
+    -H "X-API-KEY: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+    "name": "Jason Wunderliebb",
+    "email": "j.wunderliebb@mycompany.tld",
+    "password": "VerySecurePas$w0rd!",
+    "roleAlias": "learner",
+    "timezone": "Europe/London",
+    "groups": [2],
+    "courses": [110, 150]
+}'
+    ```
+
+    ```json Response
+    {
+        "id": "1234567890",
+        "name": "Jason Wunderliebb",
+        "email": "j.wunderliebb@mycompany.tld",
+        "language": "en",
+        "timezone": "Europe/London",
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": true
+    }
+    ```
+</CodeGroup>
+
+### Body Parameters
+
+<ParamField body="name" type="string" required>
+    Full name of the user
+</ParamField>
+
+<ParamField body="email" type="string" required>
+    User's email address
+</ParamField>
+
+<ParamField body="password" type="string" required>
+    User's password
+</ParamField>
+
+<ParamField body="roleAlias" type="string" required>
+    Role assigned to the user
+</ParamField>
+
+<ParamField body="timezone" type="string">
+    User's timezone (TZ format)
+</ParamField>
+
+<ParamField body="groups" type="integer[]">
+    Array of group IDs to add user to
+</ParamField>
+
+<ParamField body="courses" type="integer[]">
+    Array of course IDs to assign to user
+</ParamField>
+
+## Create Group
+
+Create a new group.
+
+<CodeGroup>
+    ```bash Request
+    curl -X POST "https://YOURSITE.konstant.ly/openapi/v1/groups" \
+    -H "X-API-KEY: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+    "name": "Engineering Team",
+    "description": "Engineering department group",
+    "parentId": 12
+}'
+    ```
+
+    ```json Response
+    {
+        "id": 123,
+        "name": "Engineering Team",
+        "description": "Engineering department group",
+        "parentId": 12,
+        "usersCount": 0,
+        "coursesCount": 0
+    }
+    ```
+</CodeGroup>
+
+### Body Parameters
+
+<ParamField body="name" type="string" required>
+    Name of the group
+</ParamField>
+
+<ParamField body="description" type="string">
+    Description of the group
+</ParamField>
+
+<ParamField body="parentId" type="integer">
+    ID of the parent group
+</ParamField>
+
+## Create Invitation
+
+Create invitations for new users.
+
+<CodeGroup>
+    ```bash Request
+    curl -X POST "https://YOURSITE.konstant.ly/openapi/v1/invites" \
+    -H "X-API-KEY: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+    "emails": ["test@example.com", "sample@test.com"],
+    "roleAlias": "manager",
+    "groups": [12],
+    "text": "Welcome to our platform!"
+}'
+    ```
+
+    ```json Response
+    [
+    {
+        "id": 1,
+        "email": "test@example.com",
+        "createdAt": 1234567890,
+        "inviteUrl": "http://YOURSITE.konstant.ly/signup/1qaz2wsx3edc4rfv"
+    },
+    {
+        "id": 2,
+        "email": "sample@test.com",
+        "createdAt": 1234567890,
+        "inviteUrl": "http://YOURSITE.konstant.ly/signup/2wsx3edc4rfv5tgb"
+    }
+    ]
+    ```
+</CodeGroup>
+
+### Body Parameters
+
+<ParamField body="emails" type="string[]" required>
+    Array of email addresses to invite
+</ParamField>
+
+<ParamField body="roleAlias" type="string" default="learner">
+    Role to assign to invited users
+</ParamField>
+
+<ParamField body="groups" type="integer[]">
+    Group IDs to add users to upon acceptance
+</ParamField>
+
+<ParamField body="text" type="string">
+    Custom invitation message
+</ParamField>
+
+## Error Responses
+
+<ResponseExample>
+    ```json 400 Bad Request
+    {
+        "status": 400,
+        "message": "Validation error",
+        "errors": {
+        "email": ["Invalid email format"],
+        "name": ["Name is required"]
+    }
+    }
+    ```
+
+    ```json 422 Unprocessable Entity
+    {
+        "status": 422,
+        "message": "Unable to process request",
+        "errors": {
+        "email": ["Email already exists"]
+    }
+    }
+    ```
+</ResponseExample>
