@@ -1,0 +1,82 @@
+---
+title: 'Groups'
+description: 'Reference for group management endpoints'
+---
+
+# Groups
+
+The Groups API allows you to manage groups of users in your Konstantly site. Groups make it easier to organize users and assign courses to multiple users at once.
+
+## Group Object
+
+<ResponseField name="Group" type="object">
+    <Expandable title="Properties">
+        <ResponseField name="id" type="integer">
+            Unique identifier for the group
+        </ResponseField>
+        <ResponseField name="parentId" type="integer" optional>
+            ID of the parent group (for nested groups)
+        </ResponseField>
+        <ResponseField name="name" type="string">
+            Name of the group
+        </ResponseField>
+        <ResponseField name="usersCount" type="integer">
+            Number of users in the group
+        </ResponseField>
+        <ResponseField name="coursesCount" type="integer">
+            Number of courses assigned to the group
+        </ResponseField>
+        <ResponseField name="image" type="object" optional>
+            Group cover image
+            <Expandable title="Image properties">
+                <ResponseField name="id" type="integer">
+                    Image identifier
+                </ResponseField>
+                <ResponseField name="original" type="string">
+                    Original image URL
+                </ResponseField>
+                <ResponseField name="mini" type="string">
+                    36x36px thumbnail URL
+                </ResponseField>
+                <ResponseField name="small" type="string">
+                    330x130px image URL
+                </ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="attributes" type="object" optional>
+            Custom group attributes
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Common Use Cases
+
+### Organizing Users
+Groups help organize users based on departments, teams, locations, or any other organizational structure. You can create nested groups by setting a parent group ID.
+
+### Bulk Course Assignment
+Instead of assigning courses to users individually, you can assign courses to groups. All users in the group will automatically get access to the assigned courses.
+
+### Reporting
+Get statistics and progress reports for entire groups of users, making it easier to track team performance and course completion rates.
+
+## Available Endpoints
+
+- [List Groups](/api-reference/groups/get-groups)
+- [Create Group](/api-reference/groups/create-group)
+- [Get Group Details](/api-reference/groups/get-group)
+- [Update Group](/api-reference/groups/update-group)
+- [Delete Group](/api-reference/groups/delete-group)
+- [Group Members](/api-reference/groups/members)
+- [Group Assignments](/api-reference/groups/assignments)
+- [Group Statistics](/api-reference/groups/statistics)
+
+## Best Practices
+
+1. **Hierarchical Structure**: Use the parentId field to create a logical hierarchy of groups that matches your organization's structure.
+
+2. **Naming Convention**: Adopt a consistent naming convention for groups to make them easy to identify and manage.
+
+3. **Custom Attributes**: Use custom attributes to store additional group metadata that's specific to your organization's needs.
+
+4. **Group Size**: While there's no strict limit on group size, consider breaking very large groups into smaller subgroups for better management and performance.

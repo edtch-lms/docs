@@ -1,0 +1,149 @@
+---
+title: 'Course Assignments'
+description: 'Manage course assignments to users and groups'
+---
+
+# Course Assignments
+
+Manage course assignments to users and groups. You can assign courses, view assignments, and manage deadlines.
+
+## Assign Course
+
+<ParamField path="courseId" type="integer" required>
+    The ID of the course to assign
+</ParamField>
+
+```bash POST /courses/{courseId}/assignments
+```
+
+Assign a course to users and/or groups.
+
+### Request Body
+
+<ParamField body="users" type="array">
+    Array of user IDs to assign the course to
+</ParamField>
+
+<ParamField body="groups" type="array">
+    Array of group IDs to assign the course to
+</ParamField>
+
+<ParamField body="assignAt" type="integer">
+    Timestamp when the course should be assigned
+</ParamField>
+
+<ParamField body="deadlineAt" type="integer">
+    Deadline timestamp for course completion
+</ParamField>
+
+<RequestExample>
+    ```json Request
+    {
+        "users": [123, 456],
+        "groups": [789],
+        "assignAt": 1643673600,
+        "deadlineAt": 1646092800
+    }
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "users": [
+    {
+        "id": "123",
+        "name": "John Doe",
+        "email": "john@example.com"
+    }
+        ],
+        "groups": [
+    {
+        "id": 789,
+        "name": "Sales Team",
+        "usersCount": 15
+    }
+        ]
+    }
+    ```
+</ResponseExample>
+
+## List User Assignments
+
+```bash GET /courses/{courseId}/assignments/users
+```
+
+Get a list of users assigned to the course.
+
+<ResponseField name="assignments" type="array">
+    <Expandable title="Assignment properties">
+        <ResponseField name="assignedAt" type="integer">
+            Timestamp when the course was assigned
+        </ResponseField>
+        <ResponseField name="startedAt" type="integer">
+            When the user started the course
+        </ResponseField>
+        <ResponseField name="deadlineAt" type="integer">
+            Assignment deadline
+        </ResponseField>
+        <ResponseField name="finishedAt" type="integer">
+            When the user finished the course
+        </ResponseField>
+        <ResponseField name="progressValue" type="integer">
+            Current progress (0-100)
+        </ResponseField>
+        <ResponseField name="resultValue" type="integer">
+            Final result (0-100)
+        </ResponseField>
+        <ResponseField name="user" type="object">
+            User details
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Remove Assignment
+
+```bash DELETE /courses/{courseId}/assignments/users/{userId}
+```
+
+Remove a course assignment from a specific user.
+
+<RequestExample>
+    ```bash
+    curl --request DELETE \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/courses/123/assignments/users/456' \
+    --header 'X-API-KEY: your_api_key_here'
+    ```
+</RequestExample>
+
+## List Group Assignments
+
+```bash GET /courses/{courseId}/assignments/groups
+```
+
+Get a list of groups assigned to the course.
+
+<ResponseField name="assignments" type="array">
+    <Expandable title="Assignment properties">
+        <ResponseField name="assignedAt" type="integer">
+            Timestamp when the course was assigned
+        </ResponseField>
+        <ResponseField name="deadlineAt" type="integer">
+            Assignment deadline
+        </ResponseField>
+        <ResponseField name="deadlinePeriod" type="object">
+            Alternative to fixed deadline
+            <Expandable title="Period properties">
+                <ResponseField name="measure" type="string">
+                    Time unit (hours, days, weeks, months)
+                </ResponseField>
+                <ResponseField name="value" type="integer">
+                    Number of units
+                </ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="group" type="object">
+            Group details
+        </ResponseField>
+    </Expandable>
+</ResponseField>

@@ -1,0 +1,137 @@
+---
+title: 'Get Course Details'
+api: 'GET /courses/{courseId}'
+description: 'Get detailed information about a specific course'
+---
+
+Returns detailed information about a course, including description and attached files.
+
+## Request
+
+<ParamField header="X-API-KEY" required>
+    Your API key for authentication
+</ParamField>
+
+### URL Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="integer">
+    Unique identifier for the course
+</ResponseField>
+
+<ResponseField name="name" type="string">
+    Name of the course
+</ResponseField>
+
+<ResponseField name="annotation" type="string">
+    Course annotation
+</ResponseField>
+
+<ResponseField name="description" type="string">
+    Detailed course description
+</ResponseField>
+
+<ResponseField name="isDraft" type="boolean">
+    Whether the course is in draft state
+</ResponseField>
+
+<ResponseField name="createdAt" type="integer">
+    Timestamp of course creation
+</ResponseField>
+
+<ResponseField name="updatedAt" type="integer">
+    Timestamp of last update
+</ResponseField>
+
+<ResponseField name="publishedAt" type="integer">
+    Timestamp when the course was published
+</ResponseField>
+
+<ResponseField name="image" type="object" optional>
+    Course cover image details
+    <Expandable title="Image properties">
+        <ResponseField name="id" type="integer">
+            Image identifier
+        </ResponseField>
+        <ResponseField name="original" type="string">
+            URL to full-size image
+        </ResponseField>
+        <ResponseField name="mini" type="string">
+            URL to 36x36px thumbnail
+        </ResponseField>
+        <ResponseField name="small" type="string">
+            URL to 330x130px image
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="attachedFiles" type="array">
+    List of files attached to the course
+    <Expandable title="File properties">
+        <ResponseField name="name" type="string">
+            File name
+        </ResponseField>
+        <ResponseField name="size" type="integer">
+            File size in bytes
+        </ResponseField>
+        <ResponseField name="url" type="string">
+            Download URL
+        </ResponseField>
+        <ResponseField name="mime" type="string">
+            MIME type of the file
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash Request
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/courses/123' \
+    --header 'X-API-KEY: your_api_key_here'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "id": 123,
+        "name": "Course name",
+        "annotation": "Course annotation",
+        "description": "Detailed course description",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229,
+        "image": {
+        "id": 1234,
+        "original": "http://example.com/images/original/1234.jpg",
+        "mini": "http://example.com/images/mini/1234.jpg",
+        "small": "http://example.com/images/small/1234.jpg"
+    },
+        "attachedFiles": [
+    {
+        "name": "presentation.pdf",
+        "size": 1024000,
+        "url": "http://example.com/files/presentation.pdf",
+        "mime": "application/pdf"
+    }
+        ]
+    }
+    ```
+</ResponseExample>
+
+### Error Responses
+
+<ResponseField name="404: Not Found" type="object">
+    <ResponseField name="status" type="integer">
+        404
+    </ResponseField>
+    <ResponseField name="message" type="string">
+        "Not found"
+    </ResponseField>
+</ResponseField>

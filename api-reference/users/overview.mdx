@@ -1,0 +1,78 @@
+---
+title: 'Users'
+description: 'Reference for user management endpoints'
+---
+
+# Users
+
+The Users API allows you to manage users in your Konstantly site. You can create, retrieve, update, and delete users, as well as manage their course assignments and group memberships.
+
+## User Object
+
+<ResponseField name="User" type="object">
+    <Expandable title="Properties">
+        <ResponseField name="id" type="string">
+            Unique identifier for the user
+        </ResponseField>
+        <ResponseField name="name" type="string">
+            Full name of the user
+        </ResponseField>
+        <ResponseField name="email" type="string">
+            User's email address (must be unique)
+        </ResponseField>
+        <ResponseField name="language" type="string">
+            User's interface language (de, en, es, fr, pl, pt, ru)
+        </ResponseField>
+        <ResponseField name="occupation" type="string" optional>
+            User's job title
+        </ResponseField>
+        <ResponseField name="location" type="string" optional>
+            User's location
+        </ResponseField>
+        <ResponseField name="timezone" type="string">
+            User's timezone in TZ format
+        </ResponseField>
+        <ResponseField name="isBanned" type="boolean">
+            Whether the user is banned
+        </ResponseField>
+        <ResponseField name="role" type="string">
+            User's role alias
+        </ResponseField>
+        <ResponseField name="fromApi" type="boolean">
+            Whether the user was created via API
+        </ResponseField>
+        <ResponseField name="image" type="object" optional>
+            User's avatar
+            <Expandable title="Image properties">
+                <ResponseField name="id" type="integer">
+                    Image identifier
+                </ResponseField>
+                <ResponseField name="original" type="string">
+                    Original image URL
+                </ResponseField>
+                <ResponseField name="mini" type="string">
+                    36x36px thumbnail URL
+                </ResponseField>
+                <ResponseField name="xSmall" type="string">
+                    58x58px thumbnail URL
+                </ResponseField>
+                <ResponseField name="small" type="string">
+                    128x128px thumbnail URL
+                </ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="attributes" type="object" optional>
+            Custom user attributes
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Available Endpoints
+
+- [List Users](/api-reference/users/get-users)
+- [Create User](/api-reference/users/create-user)
+- [Get User Details](/api-reference/users/get-user)
+- [Update User](/api-reference/users/update-user)
+- [Delete User](/api-reference/users/delete-user)
+- [User Assignments](/api-reference/users/assignments)
+- [User Groups](/api-reference/users/groups)
