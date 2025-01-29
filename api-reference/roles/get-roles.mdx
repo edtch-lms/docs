@@ -1,0 +1,183 @@
+---
+title: 'Get Roles'
+api: 'GET /roles'
+description: 'Get a list of roles'
+---
+
+Retrieve a list of all available roles in the system. Roles define user permissions and access levels within your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="roles" type="array" required>
+    Array of role objects
+    <Expandable title="Role properties">
+        <ResponseField name="alias" type="string" required>
+            Role identifier used in API calls (e.g., "administrator", "manager", "expert", "learner")
+        </ResponseField>
+        <ResponseField name="name" type="string" required>
+            Display name of the role shown in web interface
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Role Types
+
+1. Built-in Roles:
+- `administrator`: Full system access
+- `manager`: Can manage users and content
+- `expert`: Can create and assess content
+- `learner`: Basic access to assigned content
+
+2. Custom Roles:
+- Identified by numeric alias
+- Have custom display names
+- Permissions configured in web interface
+
+## Usage Notes
+
+1. Role Assignment:
+- Roles are required when creating users
+- Users can only have one role
+- Role changes require user re-authentication
+
+2. Best Practices:
+- Audit role assignments regularly
+- Use least-privilege principle
+- Document custom role configurations
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/roles' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Dict
+
+    def get_roles(api_key: str) -> List[Dict[str, str]]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/roles"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()['roles']
+
+    # Example usage
+    try:
+    roles = get_roles("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+    print("Available Roles:")
+    for role in roles:
+    print(f"- {role['name']} (alias: {role['alias']})")
+    except Exception as e:
+    print(f"Error fetching roles: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getRoles(apiKey) {
+    try {
+    const response = await axios.get(
+    'https://YOURSITE.konstant.ly/openapi/v1/roles',
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data.roles;
+} catch (error) {
+    console.error('Error fetching roles:', error.message);
+    throw error;
+}
+}
+
+    // Example usage
+    getRoles('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv')
+    .then(roles => {
+    console.log('Available Roles:');
+    roles.forEach(role => {
+    console.log(`- ${role.name} (alias: ${role.alias})`);
+});
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+
+    ```php PHP
+    <?php
+
+    function getRoles($apiKey) {
+        $url = "https://YOURSITE.konstant.ly/openapi/v1/roles";
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                "X-API-KEY: {$apiKey}"
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            throw new Exception(curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+        return $data['roles'];
+    }
+
+    // Example usage
+    try {
+        $roles = getRoles("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv");
+        echo "Available Roles:\n";
+        foreach ($roles as $role) {
+            echo "- {$role['name']} (alias: {$role['alias']})\n";
+        }
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage() . "\n";
+    }
+
+    ?>
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "roles": [
+    {
+        "alias": "administrator",
+        "name": "Administrator"
+    },
+    {
+        "alias": "manager",
+        "name": "Manager"
+    },
+    {
+        "alias": "expert",
+        "name": "Expert"
+    },
+    {
+        "alias": "learner",
+        "name": "Learner"
+    },
+    {
+        "alias": "1",
+        "name": "Custom Role Title"
+    }
+        ]
+    }
+    ```
+</ResponseExample>

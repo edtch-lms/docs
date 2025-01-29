@@ -5,62 +5,174 @@
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#2D75F1",
-    "light": "#07C983",
-    "dark": "#0D9373",
-    "anchors": {
-      "from": "#0D9373",
-      "to": "#07C983"
-    }
+    "light": "#4D9CFF",
+    "dark": "#0050B4"
   },
   "topbarLinks": [
     {
       "name": "Support",
       "url": "mailto:support@konstantly.com"
+    },
+    {
+      "name": "Public Roadmap",
+      "url": "https://konstantly.com/roadmap"
     }
   ],
   "topbarCtaButton": {
-    "name": "Get Started",
+    "name": "Dashboard",
     "url": "https://konstant.ly"
   },
   "anchors": [
     {
       "name": "API Reference",
-      "icon": "book-open-cover",
+      "icon": "rectangle-terminal",
+      "url": "api-reference"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "API Reference",
       "url": "api-reference"
     },
     {
       "name": "Changelog",
-      "icon": "list",
       "url": "changelog"
-    },
-    {
-      "name": "Community",
-      "icon": "discord",
-      "url": "https://discord.example.com"
     }
   ],
   "navigation": [
     {
       "group": "Getting Started",
       "pages": [
-        "introduction",
-        "quickstart",
-        "development"
+        "api-reference/introduction",
+        "api-reference/authentication"
       ]
     },
     {
-      "group": "API Documentation",
+      "group": "Changelog",
       "pages": [
-        "api-reference/authentication",
-        "api-reference/endpoints"
+        "changelog/overview"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        {
+          "group": "Courses",
+          "icon": "graduation-cap",
+          "pages": [
+            "api-reference/courses/get-courses",
+            "api-reference/courses/get-course",
+            "api-reference/courses/course-assignments",
+            "api-reference/courses/course-assignments-users",
+            "api-reference/courses/course-assignments-groups",
+            "api-reference/courses/course-certificates",
+            "api-reference/courses/course-statistics",
+            "api-reference/courses/unassign-course-group",
+            "api-reference/courses/unassign-course-user"
+          ]
+        },
+        {
+          "group": "Users",
+          "icon": "person",
+          "pages": [
+            "api-reference/users/get-users",
+            "api-reference/users/create-user",
+            "api-reference/users/get-user",
+            "api-reference/users/update-user",
+            "api-reference/users/delete-user",
+            "api-reference/users/get-user-assignments",
+            "api-reference/users/post-user-assignments",
+            "api-reference/users/user-certificates",
+            "api-reference/users/user-groups",
+            "api-reference/users/user-sso",
+            "api-reference/users/user-statistics"
+          ]
+        },
+        {
+          "group": "Groups",
+          "icon": "people",
+          "pages": [
+            "api-reference/groups/get-groups",
+            "api-reference/groups/create-group",
+            "api-reference/groups/get-group",
+            "api-reference/groups/update-group",
+            "api-reference/groups/delete-group",
+            "api-reference/groups/group-assignments",
+            "api-reference/groups/group-users",
+            "api-reference/groups/group-statistics"
+          ]
+        },
+        {
+          "group": "Certificates",
+          "icon": "certificate",
+          "pages": [
+            "api-reference/certificates/get-certificate"
+          ]
+        },
+        {
+          "group": "Custom Attributes",
+          "icon": "code",
+          "pages": [
+            "api-reference/custom-attributes/get-user-attributes",
+            "api-reference/custom-attributes/update-user-attributes",
+            "api-reference/custom-attributes/get-group-attributes",
+            "api-reference/custom-attributes/update-group-attributes"
+          ]
+        },
+        {
+          "group": "Statistics",
+          "icon": "chart-bar",
+          "pages": [
+            "api-reference/statistics/get-global-statistics"
+          ]
+        },
+        {
+          "group": "Invitations",
+          "icon": "envelope",
+          "pages": [
+            "api-reference/invitations/get-invites",
+            "api-reference/invitations/create-invite",
+            "api-reference/invitations/get-invite",
+            "api-reference/invitations/delete-invite"
+          ]
+        },
+        {
+          "group": "Roles",
+          "icon": "shield",
+          "pages": [
+            "api-reference/roles/get-roles"
+          ]
+        },
+        {
+          "group": "Webhooks",
+          "icon": "webhook",
+          "pages": [
+            "api-reference/webhooks/overview",
+            "api-reference/webhooks/course-webhooks",
+            "api-reference/webhooks/user-webhooks",
+            "api-reference/webhooks/group-webhooks",
+            "api-reference/webhooks/get-last-event"
+          ]
+        },
+        {
+          "group": "Zapier",
+          "icon": "bolt",
+          "pages": [
+            "api-reference/zapier/overview",
+            "api-reference/zapier/custom-attributes",
+            "api-reference/zapier/triggers",
+            "api-reference/zapier/actions"
+          ]
+        }
       ]
     }
   ],
   "footerSocials": {
     "twitter": "https://twitter.com/konstantly",
-    "linkedin": "https://linkedin.com/company/konstantly"
+    "linkedin": "https://linkedin.com/company/konstantly",
+    "website": "https://konstantly.com"
   }
 }

@@ -1,0 +1,315 @@
+---
+title: 'Update Group Custom Attributes'
+api: 'POST /custom/attributes/groups'
+description: 'Update custom group attributes'
+---
+
+Update or create custom attributes for groups. This endpoint allows you to modify existing attributes or add new ones.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+Array of attribute objects, each containing:
+
+<ParamField body="name" type="string" required>
+    Attribute name
+</ParamField>
+
+<ParamField body="type" type="integer" required>
+    Attribute type:
+    - 1: text
+    - 2: date
+    - 3: single choice
+    - 4: multiple choice
+    - 5: user choice
+    - 6: yes/no
+    - 7: external link
+    - 8: number
+</ParamField>
+
+<ParamField body="apiId" type="string">
+    Attribute API identifier (generated if not provided)
+</ParamField>
+
+<ParamField body="position" type="integer" required>
+    Display position order
+</ParamField>
+
+<ParamField body="isRequired" type="boolean" required>
+    Whether attribute is mandatory
+</ParamField>
+
+<ParamField body="isVisible" type="boolean" required>
+    Whether attribute is visible in the interface
+</ParamField>
+
+<ParamField body="extraData" type="array">
+    For choice-type attributes (types 3 and 4):
+    <Expandable title="Extra data item properties">
+        <ParamField body="position" type="integer" required>Item position</ParamField>
+        <ParamField body="value" type="string" required>Item value</ParamField>
+    </Expandable>
+</ParamField>
+
+## Important Notes
+
+1. Attribute Types:
+- Text fields (type 1) are limited to 255 characters
+- Date fields (type 2) expect ISO format dates
+- Choice fields (types 3 and 4) require extraData with options
+- Yes/No fields (type 6) are stored as booleans
+
+2. Updating Existing Attributes:
+- Match existing apiId to update rather than create
+- Cannot change type of existing attributes
+- Can modify options for choice-type fields
+
+## Response
+
+Array of updated attribute objects with the same structure as the GET endpoint response.
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Validation error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Field-specific validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '[
+    {
+        "name": "Region",
+        "type": 3,
+        "apiId": "region",
+        "position": 1,
+        "isRequired": true,
+        "isVisible": true,
+        "extraData": [
+    {
+        "position": 1,
+        "value": "North America"
+    },
+    {
+        "position": 2,
+        "value": "Europe"
+    },
+    {
+        "position": 3,
+        "value": "Asia Pacific"
+    }
+        ]
+    },
+    {
+        "name": "Active Status",
+        "type": 6,
+        "apiId": "is_active",
+        "position": 2,
+        "isRequired": false,
+        "isVisible": true
+    }
+    ]'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Dict, Any
+
+    def update_group_attributes(api_key: str, attributes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    response = requests.post(url, headers=headers, json=attributes)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    attributes = [
+    {
+        "name": "Region",
+        "type": 3,
+        "apiId": "region",
+        "position": 1,
+        "isRequired": True,
+        "isVisible": True,
+        "extraData": [
+    {"position": 1, "value": "North America"},
+    {"position": 2, "value": "Europe"},
+    {"position": 3, "value": "Asia Pacific"}
+        ]
+    },
+    {
+        "name": "Active Status",
+        "type": 6,
+        "apiId": "is_active",
+        "position": 2,
+        "isRequired": False,
+        "isVisible": True
+    }
+    ]
+
+    try:
+    updated_attributes = update_group_attributes(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    attributes
+    )
+    print("Attributes updated successfully")
+    for attr in updated_attributes:
+    print(f"Updated: {attr['name']}")
+    if attr['extraData']:
+    print("Options:")
+    for option in attr['extraData']:
+    print(f"  - {option['value']}")
+    print("---")
+    except Exception as e:
+    print(f"Failed to update attributes: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function updateGroupAttributes(apiKey, attributes) {
+    try {
+    const response = await axios.post(
+    'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups',
+    attributes,
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    throw error;
+}
+}
+
+    // Example usage
+    const attributes = [
+    {
+        name: "Region",
+        type: 3,
+        apiId: "region",
+        position: 1,
+        isRequired: true,
+        isVisible: true,
+        extraData: [
+    { position: 1, value: "North America" },
+    { position: 2, value: "Europe" },
+    { position: 3, value: "Asia Pacific" }
+        ]
+    },
+    {
+        name: "Active Status",
+        type: 6,
+        apiId: "is_active",
+        position: 2,
+        isRequired: false,
+        isVisible: true
+    }
+    ];
+
+    updateGroupAttributes('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', attributes)
+    .then(updatedAttributes => {
+    console.log('Attributes updated successfully');
+    updatedAttributes.forEach(attr => {
+    console.log(`Updated: ${attr.name}`);
+    if (attr.extraData?.length) {
+    console.log('Options:');
+    attr.extraData.forEach(option => {
+    console.log(`  - ${option.value}`);
+});
+}
+    console.log('---');
+});
+})
+    .catch(error => console.error('Failed to update attributes:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    [
+    {
+        "id": 1,
+        "name": "Region",
+        "type": 3,
+        "apiId": "region",
+        "position": 1,
+        "isRequired": true,
+        "extraData": [
+    {
+        "id": 1,
+        "position": 1,
+        "value": "North America"
+    },
+    {
+        "id": 2,
+        "position": 2,
+        "value": "Europe"
+    },
+    {
+        "id": 3,
+        "position": 3,
+        "value": "Asia Pacific"
+    }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Active Status",
+        "type": 6,
+        "apiId": "is_active",
+        "position": 2,
+        "isRequired": false,
+        "extraData": null
+    }
+    ]
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "attributes[0].name": ["Name is required"],
+        "attributes[0].type": ["Invalid attribute type"],
+        "attributes[0].extraData": ["Options required for choice type attributes"]
+    }
+    }
+    ```
+</ResponseExample>

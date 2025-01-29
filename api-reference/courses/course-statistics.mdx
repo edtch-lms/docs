@@ -1,0 +1,141 @@
+---
+title: 'Get Course Statistics'
+api: 'GET /courses/{courseId}/statistics'
+description: 'Get detailed statistics for a specific course'
+---
+
+Retrieve comprehensive statistics for a specific course, including user progress, completion rates, and test results.
+
+## Path Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="statistics" type="object" required>
+    General course statistics
+    <Expandable title="Statistics properties">
+        <ResponseField name="sharedCoursesCount" type="integer" required>Number of courses shared to users</ResponseField>
+        <ResponseField name="assignedCoursesCount" type="integer" required>Number of courses assigned to users</ResponseField>
+        <ResponseField name="startUsersCount" type="integer" required>Number of users who started the course</ResponseField>
+        <ResponseField name="finishedUsersCount" type="integer" required>Number of users who finished the course</ResponseField>
+        <ResponseField name="averageResultValue" type="integer" required>Average progress across all users</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="tests" type="array" required>
+    Course test statistics
+    <Expandable title="Test statistics properties">
+        <ResponseField name="id" type="integer" required>Test ID</ResponseField>
+        <ResponseField name="name" type="string" required>Test name</ResponseField>
+        <ResponseField name="questionsCount" type="integer" required>Number of questions</ResponseField>
+        <ResponseField name="usersCount" type="integer" required>Number of users taken the test</ResponseField>
+        <ResponseField name="attemptsCount" type="integer" required>Total number of attempts</ResponseField>
+        <ResponseField name="successUsersCount" type="integer" required>Number of successful completions</ResponseField>
+        <ResponseField name="averageResultValue" type="integer" required>Average test result</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="progress" type="object" required>
+    Users distribution by progress ranges
+    <Expandable title="Progress ranges">
+        <ResponseField name="0" type="integer">Users with 0% progress</ResponseField>
+        <ResponseField name="1-10" type="integer">Users with 1-10% progress</ResponseField>
+        <ResponseField name="11-20" type="integer">Users with 11-20% progress</ResponseField>
+        <ResponseField name="21-30" type="integer">Users with 21-30% progress</ResponseField>
+        <ResponseField name="31-40" type="integer">Users with 31-40% progress</ResponseField>
+        <ResponseField name="41-50" type="integer">Users with 41-50% progress</ResponseField>
+        <ResponseField name="51-60" type="integer">Users with 51-60% progress</ResponseField>
+        <ResponseField name="61-70" type="integer">Users with 61-70% progress</ResponseField>
+        <ResponseField name="71-80" type="integer">Users with 71-80% progress</ResponseField>
+        <ResponseField name="81-90" type="integer">Users with 81-90% progress</ResponseField>
+        <ResponseField name="91-99" type="integer">Users with 91-99% progress</ResponseField>
+        <ResponseField name="100" type="integer">Users with 100% progress</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="tags" type="array" required>
+    Question tag statistics
+    <Expandable title="Tag statistics properties">
+        <ResponseField name="tagId" type="integer" required>Tag ID</ResponseField>
+        <ResponseField name="tag" type="string" required>Tag name</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Average result value for this tag (0-100)</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the course is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash
+    curl --request GET \
+    --url https://YOURSITE.konstant.ly/openapi/v1/courses/123/statistics \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json
+    {
+        "statistics": {
+        "sharedCoursesCount": 10,
+        "assignedCoursesCount": 50,
+        "startUsersCount": 45,
+        "finishedUsersCount": 30,
+        "averageResultValue": 85
+    },
+        "tests": [
+    {
+        "id": 1,
+        "name": "Final Test",
+        "questionsCount": 20,
+        "usersCount": 40,
+        "attemptsCount": 45,
+        "successUsersCount": 35,
+        "averageResultValue": 88
+    }
+        ],
+        "progress": {
+        "0": 2,
+        "1-10": 1,
+        "11-20": 3,
+        "21-30": 9,
+        "31-40": 0,
+        "41-50": 4,
+        "51-60": 3,
+        "61-70": 5,
+        "71-80": 7,
+        "81-90": 4,
+        "91-99": 3,
+        "100": 2
+    },
+        "tags": [
+    {
+        "tagId": 1,
+        "tag": "Sales Basics",
+        "resultValue": 85
+    },
+    {
+        "tagId": 2,
+        "tag": "Advanced Techniques",
+        "resultValue": 75
+    }
+        ]
+    }
+    ```
+</ResponseExample>

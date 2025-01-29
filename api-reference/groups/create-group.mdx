@@ -1,0 +1,435 @@
+---
+title: 'Create Group'
+api: 'POST /groups'
+description: 'Create a new group'
+---
+
+Create a new group on your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+    Group name
+</ParamField>
+
+<ParamField body="parentId" type="integer">
+    Parent group ID
+</ParamField>
+
+<ParamField body="description" type="string">
+    Group description
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="integer" required>Group ID</ResponseField>
+<ResponseField name="parentId" type="integer">Parent group ID</ResponseField>
+<ResponseField name="name" type="string" required>Name of the group</ResponseField>
+<ResponseField name="usersCount" type="integer" required>Number of users in the group</ResponseField>
+<ResponseField name="coursesCount" type="integer" required>Number of courses assigned to the group</ResponseField>
+<ResponseField name="image" type="object">
+    Group cover image details
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+        <ResponseField name="mini" type="string" required>URL to image 36x36 px</ResponseField>
+        <ResponseField name="small" type="string" required>URL to image 330x130 px</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Returned when the request is invalid
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Validation errors by field</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "name": "New Sales Team",
+    "parentId": 1,
+    "description": "Sales team for new region"
+}'
+    ```
+
+    ```python Python
+    import requests
+    from dataclasses import dataclass
+    from typing import Optional, Dict, Any
+
+    @dataclass
+    class GroupRequest:
+    name: str
+    parent_id: Optional[int] = None
+    description: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+    return {
+    "name": self.name,
+    "parentId": self.parent_id,
+    "description": self.description
+}
+
+    def create_group(api_key: str, group_request: GroupRequest) -> Dict[str, Any]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/groups"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    try:
+    response = requests.post(url, headers=headers, json=group_request.to_dict())
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error creating group: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    group_request = GroupRequest(
+    name="New Sales Team",
+    parent_id=1,
+    description="Sales team for new region"
+    )
+
+    group = create_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", group_request)
+
+    print(f"Group created successfully!")
+    print(f"ID: {group['id']}")
+    print(f"Name: {group['name']}")
+    print(f"Users Count: {group['usersCount']}")
+    print(f"Courses Count: {group['coursesCount']}")
+
+    if group.get('parentId'):
+    print(f"Parent Group ID: {group['parentId']}")
+
+    except Exception as e:
+    print(f"Failed to create group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+});
+}
+
+    async createGroup({ name, parentId, description }) {
+    try {
+    const response = await this.client.post('/groups', {
+    name,
+    parentId,
+    description
+});
+
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    throw new Error(`Failed to create group: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const group = await groupsApi.createGroup({
+    name: 'New Sales Team',
+    parentId: 1,
+    description: 'Sales team for new region'
+});
+
+    console.log('Group created successfully!');
+    console.log(`ID: ${group.id}`);
+    console.log(`Name: ${group.name}`);
+    console.log(`Users Count: ${group.usersCount}`);
+    console.log(`Courses Count: ${group.coursesCount}`);
+
+    if (group.parentId) {
+    console.log(`Parent Group ID: ${group.parentId}`);
+}
+
+} catch (error) {
+    console.error('Failed to create group:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function createGroup($groupData) {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups";
+        $jsonData = json_encode($groupData);
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $jsonData,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey,
+                'Content-Type: application/json'
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        $responseData = json_decode($response, true);
+
+        if ($httpCode === 400) {
+            echo "Validation errors:\n";
+            if (isset($responseData['errors'])) {
+                foreach ($responseData['errors'] as $field => $errors) {
+                    echo "$field: " . implode(', ', $errors) . "\n";
+                }
+            }
+            throw new Exception($responseData['message'] ?? 'Invalid request');
+        }
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to create group. Status code: $httpCode");
+        }
+
+        return $responseData;
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        $groupData = [
+            'name' => 'New Sales Team',
+            'parentId' => 1,
+            'description' => 'Sales team for new region'
+        ];
+
+        $group = $groupsApi->createGroup($groupData);
+
+        echo "Group created successfully!\n";
+        echo "ID: {$group['id']}\n";
+        echo "Name: {$group['name']}\n";
+        echo "Users Count: {$group['usersCount']}\n";
+        echo "Courses Count: {$group['coursesCount']}\n";
+
+        if (isset($group['parentId'])) {
+            echo "Parent Group ID: {$group['parentId']}\n";
+        }
+
+    } catch (Exception $e) {
+        echo "Failed to create group: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.Map;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // Request class
+    public static class GroupRequest {
+    @JsonProperty("name")
+    public String name;
+
+    @JsonProperty("parentId")
+    public Integer parentId;
+
+    @JsonProperty("description")
+    public String description;
+
+    public GroupRequest(String name, Integer parentId, String description) {
+    this.name = name;
+    this.parentId = parentId;
+    this.description = description;
+}
+}
+
+    // Response class (reusing from list endpoint)
+    public static class Group {
+    @JsonProperty("id")
+    public int id;
+
+    @JsonProperty("parentId")
+    public Integer parentId;
+
+    @JsonProperty("name")
+    public String name;
+
+    @JsonProperty("usersCount")
+    public int usersCount;
+
+    @JsonProperty("coursesCount")
+    public int coursesCount;
+
+    @JsonProperty("image")
+    public GroupImage image;
+}
+
+    public Group createGroup(GroupRequest request) throws Exception {
+    String jsonBody = mapper.writeValueAsString(request);
+
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups"))
+    .header("X-API-KEY", API_KEY)
+    .header("Content-Type", "application/json")
+    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+    .build();
+
+    HttpResponse<String> response = client.send(httpRequest,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 400) {
+    Map<String, Object> errorResponse = mapper.readValue(response.body(), Map.class);
+    System.out.println("Validation errors:");
+    if (errorResponse.containsKey("errors")) {
+    Map<String, Object> errors = (Map<String, Object>) errorResponse.get("errors");
+    errors.forEach((field, messages) -> {
+    System.out.println(field + ": " + messages);
+});
+}
+    throw new Exception(errorResponse.getOrDefault("message", "Invalid request").toString());
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to create group. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Group.class);
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    GroupRequest request = new GroupRequest(
+    "New Sales Team",
+    1,
+    "Sales team for new region"
+    );
+
+    Group group = api.createGroup(request);
+
+    System.out.println("Group created successfully!");
+    System.out.println("ID: " + group.id);
+    System.out.println("Name: " + group.name);
+    System.out.println("Users Count: " + group.usersCount);
+    System.out.println("Courses Count: " + group.coursesCount);
+
+    if (group.parentId != null) {
+    System.out.println("Parent Group ID: " + group.parentId);
+}
+
+} catch (Exception e) {
+    System.err.println("Failed to create group: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        "id": 2,
+        "parentId": 1,
+        "name": "New Sales Team",
+        "usersCount": 0,
+        "coursesCount": 0,
+        "image": null
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "name": ["Name is required"]
+    }
+    }
+    ```
+
+</ResponseExample>

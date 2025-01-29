@@ -1,0 +1,386 @@
+---
+title: 'Group Statistics'
+api: 'GET /groups/{groupId}/statistics'
+description: 'Get statistics for a group'
+---
+
+Retrieve detailed statistics and analytics information for a specific group.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group to get statistics for
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="group" type="object" required>
+    Basic group information
+    <Expandable title="Group Object">
+        <ResponseField name="id" type="integer" required>Group ID</ResponseField>
+        <ResponseField name="name" type="string" required>Group name</ResponseField>
+        <ResponseField name="parentId" type="integer">Parent group ID if applicable</ResponseField>
+        <ResponseField name="usersCount" type="integer" required>Number of users in group</ResponseField>
+        <ResponseField name="coursesCount" type="integer" required>Number of courses assigned to group</ResponseField>
+        <ResponseField name="image" type="object">Group image information</ResponseField>
+        <ResponseField name="attributes" type="object">Custom group attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="usersWithoutActivity" type="array" required>
+    List of users with no activity in the group
+    <Expandable title="User Object">
+        <ResponseField name="id" type="string" required>User identifier</ResponseField>
+        <ResponseField name="name" type="string" required>Full name</ResponseField>
+        <ResponseField name="email" type="string" required>Email address</ResponseField>
+        <ResponseField name="role" type="object" required>User role</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="usersWithoutResults" type="array" required>
+    List of users who haven't completed any assessments
+    <Expandable title="User Object">
+        <ResponseField name="id" type="string" required>User identifier</ResponseField>
+        <ResponseField name="name" type="string" required>Full name</ResponseField>
+        <ResponseField name="email" type="string" required>Email address</ResponseField>
+        <ResponseField name="role" type="object" required>User role</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="leaders" type="array" required>
+    Top performing users in the group
+    <Expandable title="Leader Object">
+        <ResponseField name="coursesCount" type="integer" required>Number of completed courses</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Average result (0-100)</ResponseField>
+        <ResponseField name="user" type="object" required>User information</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the group is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123/statistics' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Dict
+
+    def get_group_statistics(api_key: str, group_id: int) -> Dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}/statistics"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Group {group_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error getting group statistics: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    stats = get_group_statistics("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+    print(f"Group: {stats['group']['name']}")
+    print(f"Total users: {stats['group']['usersCount']}")
+    print(f"Users without activity: {len(stats['usersWithoutActivity'])}")
+    print(f"Top performers: {len(stats['leaders'])}")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to get group statistics: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async getGroupStatistics(groupId) {
+    try {
+    const response = await this.client.get(`/groups/${groupId}/statistics`);
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`Group ${groupId} not found`);
+}
+    throw error;
+}
+}
+
+    // Helper method to get summary of statistics
+    async getGroupStatisticsSummary(groupId) {
+    const stats = await this.getGroupStatistics(groupId);
+    return {
+    groupName: stats.group.name,
+    totalUsers: stats.group.usersCount,
+    inactiveUsers: stats.usersWithoutActivity.length,
+    topPerformers: stats.leaders.length
+};
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    // Get full statistics
+    const stats = await groupsApi.getGroupStatistics(123);
+    console.log('Group:', stats.group.name);
+    console.log('Total users:', stats.group.usersCount);
+
+    // Or get summary
+    const summary = await groupsApi.getGroupStatisticsSummary(123);
+    console.log('Statistics summary:', summary);
+} catch (error) {
+    console.error('Failed to get group statistics:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function getGroupStatistics($groupId) {
+        $ch = curl_init();
+
+    $url = "{$this->baseUrl}/groups/{$groupId}/statistics";
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'X-API-KEY: ' . $this->apiKey
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch)) {
+        throw new Exception('Error: ' . curl_error($ch));
+    }
+
+    curl_close($ch);
+
+    if ($httpCode === 404) {
+        throw new Exception("Group $groupId not found");
+    }
+
+    if ($httpCode !== 200) {
+        throw new Exception("Failed to get statistics. Status code: $httpCode");
+    }
+
+    return json_decode($response, true);
+}
+
+    // Helper method to get summary of statistics
+    public function getGroupStatisticsSummary($groupId) {
+        $stats = $this->getGroupStatistics($groupId);
+        return [
+            'groupName' => $stats['group']['name'],
+            'totalUsers' => $stats['group']['usersCount'],
+            'inactiveUsers' => count($stats['usersWithoutActivity']),
+            'topPerformers' => count($stats['leaders'])
+        ];
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    // Get full statistics
+    $stats = $groupsApi->getGroupStatistics(123);
+    echo "Group: {$stats['group']['name']}\n";
+    echo "Total users: {$stats['group']['usersCount']}\n";
+
+    // Or get summary
+    $summary = $groupsApi->getGroupStatisticsSummary(123);
+    echo "Statistics summary:\n";
+    print_r($summary);
+
+    } catch (Exception $e) {
+        echo "Failed to get group statistics: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.Map;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public Map<String, Object> getGroupStatistics(int groupId) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups/" + groupId + "/statistics"))
+    .header("X-API-KEY", API_KEY)
+    .GET()
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Group " + groupId + " not found");
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to get statistics. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Map.class);
+}
+
+    // Helper method to get summary of statistics
+    public Map<String, Object> getGroupStatisticsSummary(int groupId) throws Exception {
+    Map<String, Object> stats = getGroupStatistics(groupId);
+    Map<String, Object> group = (Map<String, Object>) stats.get("group");
+    List<Object> inactive = (List<Object>) stats.get("usersWithoutActivity");
+    List<Object> leaders = (List<Object>) stats.get("leaders");
+
+    Map<String, Object> summary = new HashMap<>();
+    summary.put("groupName", group.get("name"));
+    summary.put("totalUsers", group.get("usersCount"));
+    summary.put("inactiveUsers", inactive.size());
+    summary.put("topPerformers", leaders.size());
+
+    return summary;
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    // Get full statistics
+    Map<String, Object> stats = api.getGroupStatistics(123);
+    Map<String, Object> group = (Map<String, Object>) stats.get("group");
+    System.out.println("Group: " + group.get("name"));
+    System.out.println("Total users: " + group.get("usersCount"));
+
+    // Or get summary
+    Map<String, Object> summary = api.getGroupStatisticsSummary(123);
+    System.out.println("Statistics summary: " + summary);
+
+} catch (Exception e) {
+    System.err.println("Failed to get group statistics: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "group": {
+        "id": 123,
+        "name": "Marketing Team",
+        "parentId": null,
+        "usersCount": 25,
+        "coursesCount": 10,
+        "image": null,
+        "attributes": {}
+    },
+        "usersWithoutActivity": [
+    {
+        "id": "user1",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+        ],
+        "usersWithoutResults": [
+    {
+        "id": "user2",
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+        ],
+        "leaders": [
+    {
+        "coursesCount": 8,
+        "resultValue": 95,
+        "user": {
+        "id": "user3",
+        "name": "Mike Johnson",
+        "email": "mike@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+    }
+        ]
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Group not found"
+    }
+    ```
+</ResponseExample>

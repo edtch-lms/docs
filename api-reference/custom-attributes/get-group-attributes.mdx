@@ -1,0 +1,222 @@
+---
+title: 'Get Group Custom Attributes'
+api: 'GET /custom/attributes/groups'
+description: 'Get a list of custom group attributes'
+---
+
+Retrieve all custom attributes configured for groups on your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+Array of custom attribute objects with the following properties:
+
+<ResponseField name="id" type="integer" required>
+    Attribute ID
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+    Attribute name
+</ResponseField>
+
+<ResponseField name="type" type="integer" required>
+    Attribute type:
+    - 1: text
+    - 2: date
+    - 3: single choice
+    - 4: multiple choice
+    - 5: user choice
+    - 6: yes/no
+    - 7: external link
+    - 8: number
+</ResponseField>
+
+<ResponseField name="apiId" type="string" required>
+    Attribute API identifier
+</ResponseField>
+
+<ResponseField name="position" type="integer" required>
+    Display position order
+</ResponseField>
+
+<ResponseField name="isRequired" type="boolean" required>
+    Whether the attribute is mandatory
+</ResponseField>
+
+<ResponseField name="extraData" type="array">
+    Additional data for choice-type attributes
+    <Expandable title="Extra data item properties">
+        <ResponseField name="id" type="integer" required>Item ID</ResponseField>
+        <ResponseField name="position" type="integer" required>Item position</ResponseField>
+        <ResponseField name="value" type="string" required>Item value</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Notes on Attribute Types
+
+- Text (type 1): Single-line text input
+- Date (type 2): Date selector
+- Single Choice (type 3): Dropdown with single selection
+- Multiple Choice (type 4): Checkbox list with multiple selections
+- User Choice (type 5): User selector
+- Yes/No (type 6): Boolean toggle
+- External Link (type 7): URL input
+- Number (type 8): Numeric input
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Dict, Any
+
+    def get_group_attributes(api_key: str) -> List[Dict[str, Any]]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    attributes = get_group_attributes("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+
+    def get_type_name(type_id: int) -> str:
+    types = {
+    1: "Text",
+    2: "Date",
+    3: "Single Choice",
+    4: "Multiple Choice",
+    5: "User Choice",
+    6: "Yes/No",
+    7: "External Link",
+    8: "Number"
+}
+    return types.get(type_id, "Unknown")
+
+    for attr in attributes:
+    print(f"Attribute: {attr['name']}")
+    print(f"Type: {get_type_name(attr['type'])}")
+    print(f"Required: {attr['isRequired']}")
+    if attr['extraData']:
+    print("Options:")
+    for option in attr['extraData']:
+    print(f"  - {option['value']}")
+    print("---")
+    except Exception as e:
+    print(f"Error fetching group attributes: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getGroupAttributes(apiKey) {
+    try {
+    const response = await axios.get(
+    'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/groups',
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    console.error('Error fetching group attributes:', error.message);
+    throw error;
+}
+}
+
+    // Example usage
+    const getTypeName = (typeId) => {
+    const types = {
+    1: 'Text',
+    2: 'Date',
+    3: 'Single Choice',
+    4: 'Multiple Choice',
+    5: 'User Choice',
+    6: 'Yes/No',
+    7: 'External Link',
+    8: 'Number'
+};
+    return types[typeId] || 'Unknown';
+};
+
+    getGroupAttributes('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv')
+    .then(attributes => {
+    attributes.forEach(attr => {
+        console.log(`Attribute: ${attr.name}`);
+        console.log(`Type: ${getTypeName(attr.type)}`);
+        console.log(`Required: ${attr.isRequired}`);
+        if (attr.extraData?.length) {
+            console.log('Options:');
+            attr.extraData.forEach(option => {
+                console.log(`  - ${option.value}`);
+            });
+        }
+        console.log('---');
+    });
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    [
+    {
+        "id": 1,
+        "name": "Region",
+        "type": 3,
+        "apiId": "region",
+        "position": 1,
+        "isRequired": true,
+        "extraData": [
+    {
+        "id": 1,
+        "position": 1,
+        "value": "North America"
+    },
+    {
+        "id": 2,
+        "position": 2,
+        "value": "Europe"
+    },
+    {
+        "id": 3,
+        "position": 3,
+        "value": "Asia Pacific"
+    }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Budget Center",
+        "type": 1,
+        "apiId": "budget_center",
+        "position": 2,
+        "isRequired": true,
+        "extraData": null
+    },
+    {
+        "id": 3,
+        "name": "Active",
+        "type": 6,
+        "apiId": "is_active",
+        "position": 3,
+        "isRequired": false,
+        "extraData": null
+    }
+    ]
+    ```
+</ResponseExample>

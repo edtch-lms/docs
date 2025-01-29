@@ -1,0 +1,260 @@
+---
+title: 'Get User by Email'
+api: 'GET /users/byEmail/{userEmail}'
+description: 'Get user information by email address'
+---
+
+Retrieve detailed information about a specific user using their email address.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userEmail" type="string" required>
+    Email address of the user to retrieve
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string" required>User ID</ResponseField>
+<ResponseField name="name" type="string" required>Full name</ResponseField>
+<ResponseField name="language" type="string" required>Interface language (de, en, es, fr, pl, pt, ru)</ResponseField>
+<ResponseField name="occupation" type="string">Job title</ResponseField>
+<ResponseField name="location" type="string">Location</ResponseField>
+<ResponseField name="timezone" type="string" required>Timezone</ResponseField>
+<ResponseField name="email" type="string" required>Email address</ResponseField>
+<ResponseField name="isBanned" type="boolean" required>Ban status</ResponseField>
+<ResponseField name="role" type="string" required>User role</ResponseField>
+<ResponseField name="fromApi" type="boolean" required>API management status</ResponseField>
+<ResponseField name="image" type="object">
+    User avatar
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>Full-size image URL</ResponseField>
+        <ResponseField name="mini" type="string" required>36x36px image URL</ResponseField>
+        <ResponseField name="xSmall" type="string" required>58x58px image URL</ResponseField>
+        <ResponseField name="small" type="string" required>128x128px image URL</ResponseField>
+    </Expandable>
+</ResponseField>
+<ResponseField name="attributes" type="object">Custom attributes</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Returned for validation errors
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Field-specific validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="404" type="object">
+    Returned when user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/byEmail/user@example.com' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Dict
+
+    def get_user_by_email(api_key: str, email: str) -> Dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/byEmail/{email}"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"User with email {email} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error fetching user: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    user = get_user_by_email(
+    api_key="1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    email="user@example.com"
+    )
+
+    print(f"Found user: {user['name']}")
+    print(f"ID: {user['id']}")
+    print(f"Role: {user['role']['alias']}")
+
+    except Exception as e:
+    print(f"Failed to fetch user: {str(e)}")
+    ```
+
+    ```php PHP
+    <?php
+
+    class UsersAPI {
+        private $apiKey;
+        private $baseUrl;
+
+        public function __construct($apiKey) {
+            $this->apiKey = $apiKey;
+            $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+        }
+
+        public function getUserByEmail($email) {
+            $ch = curl_init();
+
+            $url = "{$this->baseUrl}/users/byEmail/" . urlencode($email);
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'X-API-KEY: ' . $this->apiKey
+                ]
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception('Error: ' . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            $responseData = json_decode($response, true);
+
+            if ($httpCode === 404) {
+                throw new Exception("User with email {$email} not found");
+            }
+
+            if ($httpCode !== 200) {
+                throw new Exception("Failed to fetch user. Status code: {$httpCode}");
+            }
+
+            return $responseData;
+        }
+    }
+
+    // Example usage
+    try {
+        $usersApi = new UsersAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        $user = $usersApi->getUserByEmail('user@example.com');
+
+        echo "Found user: {$user['name']}\n";
+        echo "ID: {$user['id']}\n";
+        echo "Role: {$user['role']['alias']}\n";
+
+    } catch (Exception $e) {
+        echo "Failed to fetch user: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class UsersAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async getUserByEmail(email) {
+    try {
+    const response = await this.client.get(`/users/byEmail/${encodeURIComponent(email)}`);
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 404) {
+    throw new Error(`User with email ${email} not found`);
+}
+    throw new Error(`Failed to fetch user: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const usersApi = new UsersAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const user = await usersApi.getUserByEmail('user@example.com');
+
+    console.log(`Found user: ${user.name}`);
+    console.log(`ID: ${user.id}`);
+    console.log(`Role: ${user.role.alias}`);
+
+} catch (error) {
+    console.error('Failed to fetch user:', error.message);
+}
+}
+
+    main();
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "id": "1234567890",
+        "name": "John Doe",
+        "language": "en",
+        "occupation": "Salesman",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "user@example.com",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": false,
+        "image": null,
+        "attributes": {}
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "User not found"
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Invalid email format"
+    }
+    ```
+</ResponseExample>

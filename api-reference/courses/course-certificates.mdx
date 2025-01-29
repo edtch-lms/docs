@@ -1,0 +1,104 @@
+---
+title: 'List Course Certificates'
+api: 'GET /courses/{courseId}/certificates'
+description: 'Get a list of certificates for the course (20 per page)'
+---
+
+Retrieve a list of all certificates issued for a specific course.
+
+## Path Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="offset" type="integer">
+    Entry number to start listing from
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+    The number of entries to be listed
+</ParamField>
+
+## Response
+
+<ResponseField name="certificates" type="array" required>
+    Array of certificate objects
+    <Expandable title="Certificate object properties">
+        <ResponseField name="id" type="integer" required>Certificate ID</ResponseField>
+        <ResponseField name="name" type="string" required>Certificate name</ResponseField>
+        <ResponseField name="description" type="string" required>Certificate description</ResponseField>
+        <ResponseField name="courseId" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="courseName" type="string" required>Course name</ResponseField>
+        <ResponseField name="imageUrl" type="string" required>URL to the certificate image</ResponseField>
+        <ResponseField name="achievedAt" type="integer" required>Timestamp of certificate issue</ResponseField>
+        <ResponseField name="expiresAt" type="integer">Timestamp when certificate expires</ResponseField>
+        <ResponseField name="user" type="object" required>
+            User who received the certificate
+            <Expandable title="User object properties">
+                <ResponseField name="id" type="string" required>User ID</ResponseField>
+                <ResponseField name="name" type="string" required>Full name</ResponseField>
+                <ResponseField name="email" type="string" required>Email address</ResponseField>
+                <ResponseField name="role" type="object" required>User role information</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    Total number of certificates
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the course is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash
+    curl --request GET \
+    --url https://YOURSITE.konstant.ly/openapi/v1/courses/123/certificates \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json
+    {
+        "certificates": [
+    {
+        "id": 123,
+        "name": "Course Completion Certificate",
+        "description": "Certificate of completion",
+        "courseId": 2,
+        "courseName": "Advanced Sales Techniques",
+        "imageUrl": "http://s3.amazonaws.com/certificates/cert123.png",
+        "achievedAt": 1234567890,
+        "expiresAt": 1334567890,
+        "user": {
+        "id": "1234567890",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+</ResponseExample>

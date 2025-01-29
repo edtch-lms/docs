@@ -1,83 +1,26 @@
 ---
 title: 'Authentication'
-description: 'Learn how to authenticate your API requests'
+description: 'Learn how to authenticate with the Konstantly API'
 ---
 
-# Authentication
-
-The Konstantly API uses API keys for authentication. You must include your API key in all API requests.
+The Konstantly API uses API keys for authentication. You need to include your API key in the `X-API-KEY` header with every request.
 
 ## Getting Your API Key
 
-1. Go to your Konstantly site
-2. Navigate to Settings > API
+1. Go to your Konstantly site's Settings
+2. Navigate to the API section
 3. Copy your API key
 
-## Using API Keys
+## Using the API Key
 
-Include your API key in the `X-API-KEY` header with all API requests:
+Include the API key in the `X-API-KEY` header with all requests:
 
-<CodeGroup>
-    ```bash cURL
-    curl -X GET "https://YOURSITE.konstant.ly/openapi/v1/courses" \
-    -H "X-API-KEY: YOUR_API_KEY"
-    ```
+```bash
+curl -H "X-API-KEY: YOUR_API_KEY" https://YOURSITE.konstant.ly/openapi/v1/courses
+```
 
-    ```javascript JavaScript
-    const headers = {
-    'X-API-KEY': 'YOUR_API_KEY'
-};
-
-    fetch('https://YOURSITE.konstant.ly/openapi/v1/courses', {
-    headers: headers
-})
-    ```
-
-    ```python Python
-    import requests
-
-    headers = {
-    'X-API-KEY': 'YOUR_API_KEY'
-}
-
-    response = requests.get(
-    'https://YOURSITE.konstant.ly/openapi/v1/courses',
-    headers=headers
-    )
-    ```
-</CodeGroup>
-
-## Best Practices
-
-- Keep your API key secure
-- Never expose your API key in client-side code
-- Don't share your API key in public repositories
-- Use environment variables to store API keys
-- Generate new API keys if an existing key is compromised
+## API Key Security
 
 <Warning>
-    Your API key carries many privileges. Be sure to keep it secure! Do not share your API key in publicly accessible areas such as GitHub, client-side code, etc.
+    Keep your API key secure and never share it publicly. The API key provides full access to your account.
 </Warning>
-
-## Error Codes
-
-If authentication fails, you'll receive one of these error responses:
-
-- `401 Unauthorized`: No valid API key provided
-- `403 Forbidden`: The API key doesn't have permissions to perform the request
-
-<ResponseExample>
-    ```json 401 Unauthorized
-    {
-        "status": 401,
-        "message": "No API key provided"
-    }
-    ```
-
-    ```json 403 Forbidden
-    {
-        "status": 403,
-        "message": "Invalid API key provided"
-    }
-    ```
-</ResponseExample>ave any questions or need help with API integration, please contact our support team at [support@konstantly.com](mailto:support@konstantly.com).

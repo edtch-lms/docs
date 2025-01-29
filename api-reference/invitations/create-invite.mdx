@@ -1,0 +1,222 @@
+---
+title: 'Create Invitations'
+api: 'POST /invites'
+description: 'Create invitations for new users'
+---
+
+Send email invitations to potential users to join your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+<ParamField body="emails" type="array" required>
+    Array of email addresses to send invitations to
+</ParamField>
+
+<ParamField body="text" type="string">
+    Custom invitation message
+</ParamField>
+
+<ParamField body="roleAlias" type="string" default="learner">
+    Role to assign to users when they accept the invitation
+</ParamField>
+
+<ParamField body="groups" type="array">
+    Array of group IDs to add users to upon acceptance
+</ParamField>
+
+<ParamField body="courses" type="array">
+    Array of course IDs to assign to users upon acceptance
+</ParamField>
+
+<ParamField body="deadlineAt" type="integer">
+    Timestamp for course assignment deadlines
+</ParamField>
+
+## Response
+
+Array of created invitation objects.
+
+<ResponseField name="id" type="integer" required>Invitation ID</ResponseField>
+<ResponseField name="email" type="string" required>Recipient email address</ResponseField>
+<ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+<ResponseField name="inviteUrl" type="string" required>Signup URL for recipient</ResponseField>
+
+## Notes
+
+1. Email requirements:
+- Must be valid email format
+- Cannot be already registered users
+- One invitation per email address
+
+2. Role assignment:
+- Default role is "learner"
+- Role must exist in system
+- Custom roles must be valid
+
+3. URL expiration:
+- Signup URLs are valid for 7 days
+- New invitations invalidate old ones
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/invites' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "emails": [
+    "test@example.com",
+    "another@example.com"
+    ],
+    "roleAlias": "learner",
+    "groups": [12],
+    "courses": [110, 150],
+    "text": "Welcome to our learning platform!"
+}'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Optional, Dict, Any
+
+    def create_invitations(
+    api_key: str,
+    emails: List[str],
+    text: Optional[str] = None,
+    role_alias: str = "learner",
+    groups: Optional[List[int]] = None,
+    courses: Optional[List[int]] = None,
+    deadline_at: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/invites"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    data = {
+    "emails": emails,
+    "roleAlias": role_alias
+}
+
+    if text:
+    data["text"] = text
+    if groups:
+    data["groups"] = groups
+    if courses:
+    data["courses"] = courses
+    if deadline_at:
+    data["deadlineAt"] = deadline_at
+
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    emails = ["test@example.com", "another@example.com"]
+    invites = create_invitations(
+    api_key="1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    emails=emails,
+    text="Welcome to our learning platform!",
+    groups=[12],
+    courses=[110, 150]
+    )
+
+    print(f"Created {len(invites)} invitations:")
+    for invite in invites:
+    print(f"\nInvite for: {invite['email']}")
+    print(f"URL: {invite['inviteUrl']}")
+    except Exception as e:
+    print(f"Error creating invitations: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function createInvitations(
+    apiKey,
+    emails,
+    {
+        text = null,
+        roleAlias = 'learner',
+        groups = null,
+        courses = null,
+        deadlineAt = null
+    } = {}
+    ) {
+    const data = {
+    emails,
+    roleAlias
+};
+
+    if (text) data.text = text;
+    if (groups) data.groups = groups;
+    if (courses) data.courses = courses;
+    if (deadlineAt) data.deadlineAt = deadlineAt;
+
+    try {
+    const response = await axios.post(
+    'https://YOURSITE.konstant.ly/openapi/v1/invites',
+    data,
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    console.error('Error creating invitations:', error.message);
+    throw error;
+}
+}
+
+    // Example usage
+    const emails = ['test@example.com', 'another@example.com'];
+    createInvitations(
+    '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv',
+    emails,
+    {
+        text: 'Welcome to our learning platform!',
+        groups: [12],
+        courses: [110, 150]
+    }
+    )
+    .then(invites => {
+    console.log(`Created ${invites.length} invitations:`);
+    invites.forEach(invite => {
+    console.log('\nInvite details:');
+    console.log(`Email: ${invite.email}`);
+    console.log(`URL: ${invite.inviteUrl}`);
+});
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    [
+    {
+        "id": 1,
+        "email": "test@example.com",
+        "createdAt": 1234567890,
+        "inviteUrl": "https://YOURSITE.konstant.ly/signup/1qaz2wsx3edc4rfv"
+    },
+    {
+        "id": 2,
+        "email": "another@example.com",
+        "createdAt": 1234567890,
+        "inviteUrl": "https://YOURSITE.konstant.ly/signup/2wsx3edc4rfv5tgb"
+    }
+    ]
+    ```
+</ResponseExample>

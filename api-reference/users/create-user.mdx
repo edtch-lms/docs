@@ -1,99 +1,351 @@
 ---
 title: 'Create User'
 api: 'POST /users'
-description: 'Create a new user in your Konstantly site'
+description: 'Create a new user'
 ---
 
-Create a new user account with specified details, role, and optional course assignments.
+Create a new user on your platform with specified details and optional group/course assignments.
 
-## Request
+## Request Headers
 
-<ParamField header="X-API-KEY" required>
-    Your API key for authentication
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
 </ParamField>
 
-### Request Body
+## Request Body
 
 <ParamField body="name" type="string" required>
     Full name of the user
 </ParamField>
 
 <ParamField body="email" type="string" required>
-    User's email address (must be unique)
+    Email of the user (must be unique across the site)
 </ParamField>
 
 <ParamField body="password" type="string" required>
-    User's password
+    User password
 </ParamField>
 
 <ParamField body="roleAlias" type="string" required>
-    Role alias to assign to the user
+    Alias or identifier of role to assign to user
 </ParamField>
 
 <ParamField body="id" type="string">
-    Custom user ID (optional, generated automatically if not provided)
+    User ID (alphanumeric unique identifier). Generated automatically if not provided.
 </ParamField>
 
 <ParamField body="bio" type="string">
-    User's bio description
+    Optional bio description for About me section
 </ParamField>
 
 <ParamField body="occupation" type="string">
-    User's job title
+    Optional job title
 </ParamField>
 
 <ParamField body="location" type="string">
-    User's location
+    Optional location
 </ParamField>
 
 <ParamField body="timezone" type="string">
-    User's timezone in TZ format (e.g., "Europe/London")
+    Timezone name in TZ format (e.g. "Europe/London")
 </ParamField>
 
-<ParamField body="fromApi" type="boolean">
-    Whether the user data is editable via web interface (defaults to true)
+<ParamField body="fromApi" type="boolean" default="true">
+    When true, user data can only be edited via API. Set false to allow web interface editing.
 </ParamField>
 
-<ParamField body="courses" type="array">
-    Array of course IDs to assign to the user
+<ParamField body="courses" type="integer[]">
+    List of course IDs to assign to the user
 </ParamField>
 
 <ParamField body="deadlineAt" type="integer">
-    Timestamp for course assignment deadlines
+    Timestamp for course assignment deadline
 </ParamField>
 
-<ParamField body="groups" type="array">
-    Array of group IDs to add the user to
+<ParamField body="groups" type="integer[]">
+    List of group IDs to add the user to
 </ParamField>
 
 <ParamField body="attributes" type="object">
-    Custom user attributes
+    Custom user attributes specific to your site
 </ParamField>
 
+## Response
+
+<ResponseField name="id" type="string" required>User ID</ResponseField>
+<ResponseField name="name" type="string" required>Full name</ResponseField>
+<ResponseField name="language" type="string" required>Interface language (de, en, es, fr, pl, pt, ru)</ResponseField>
+<ResponseField name="occupation" type="string">Job title</ResponseField>
+<ResponseField name="location" type="string">Location</ResponseField>
+<ResponseField name="timezone" type="string" required>Timezone</ResponseField>
+<ResponseField name="email" type="string" required>Email address</ResponseField>
+<ResponseField name="isBanned" type="boolean" required>Ban status</ResponseField>
+<ResponseField name="role" type="string" required>User role</ResponseField>
+<ResponseField name="fromApi" type="boolean" required>API management status</ResponseField>
+<ResponseField name="image" type="object">
+    User avatar
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>Full-size image URL</ResponseField>
+        <ResponseField name="mini" type="string" required>36x36px image URL</ResponseField>
+        <ResponseField name="xSmall" type="string" required>58x58px image URL</ResponseField>
+        <ResponseField name="small" type="string" required>128x128px image URL</ResponseField>
+    </Expandable>
+</ResponseField>
+<ResponseField name="attributes" type="object">Custom attributes</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Returned when request validation fails
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Field-specific validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
 <RequestExample>
-    ```json Request
-    {
-        "name": "Jason Wunderliebb",
-        "email": "j.wunderliebb@mycompany.tld",
-        "password": "VerySecurePas$w0rd!",
-        "roleAlias": "learner",
-        "bio": "Hi folks! I love to sell and teach about sales. Check out my courses there.",
-        "occupation": "Associate",
-        "location": "London",
-        "timezone": "Europe/London",
-        "fromApi": false,
-        "courses": [110, 150],
-        "deadlineAt": 1234567890,
-        "groups": [2],
-        "attributes": {
-        "designation": 4,
-        "state": 1,
-        "department": 15,
-        "mobile_number": "+44 0 144 44 444",
-        "crm_id": "UAw84js03jsjsr4"
-    }
-    }
+
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "name": "Jason Wunderliebb",
+    "email": "j.wunderliebb@mycompany.tld",
+    "password": "VerySecurePas$w0rd!",
+    "roleAlias": "learner",
+    "bio": "Hi folks! I love to sell and teach about sales.",
+    "occupation": "Associate",
+    "location": "London",
+    "timezone": "Europe/London",
+    "fromApi": false,
+    "courses": [110, 150],
+    "deadlineAt": 1234567890,
+    "groups": [2],
+    "attributes": {
+    "designation": 4,
+    "department": 15,
+    "mobile_number": "+44 0 144 44 444"
+}
+}'
     ```
+
+    ```python Python
+    import requests
+    from typing import List, Dict, Optional
+
+    class UserAPI:
+    def __init__(self, api_key: str):
+    self.api_key = api_key
+    self.base_url = "https://YOURSITE.konstant.ly/openapi/v1"
+
+    def create_user(
+    self,
+    name: str,
+    email: str,
+    password: str,
+    role_alias: str,
+    occupation: Optional[str] = None,
+    location: Optional[str] = None,
+    timezone: Optional[str] = None,
+    bio: Optional[str] = None,
+    from_api: bool = True,
+    courses: Optional[List[int]] = None,
+    deadline_at: Optional[int] = None,
+    groups: Optional[List[int]] = None,
+    attributes: Optional[Dict] = None
+    ) -> dict:
+    url = f"{self.base_url}/users"
+
+    data = {
+    "name": name,
+    "email": email,
+    "password": password,
+    "roleAlias": role_alias,
+    "fromApi": from_api
+}
+
+    # Add optional fields if provided
+    if occupation:
+    data["occupation"] = occupation
+    if location:
+    data["location"] = location
+    if timezone:
+    data["timezone"] = timezone
+    if bio:
+    data["bio"] = bio
+    if courses:
+    data["courses"] = courses
+    if deadline_at:
+    data["deadlineAt"] = deadline_at
+    if groups:
+    data["groups"] = groups
+    if attributes:
+    data["attributes"] = attributes
+
+    headers = {
+    "X-API-KEY": self.api_key,
+    "Content-Type": "application/json"
+}
+
+    try:
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error creating user: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    api = UserAPI("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+
+    try:
+    user = api.create_user(
+    name="Jason Wunderliebb",
+    email="j.wunderliebb@mycompany.tld",
+    password="VerySecurePas$w0rd!",
+    role_alias="learner",
+    occupation="Associate",
+    location="London",
+    timezone="Europe/London",
+    bio="Hi folks! I love to sell and teach about sales.",
+    from_api=False,
+    courses=[110, 150],
+    deadline_at=1234567890,
+    groups=[2],
+    attributes={
+    "designation": 4,
+    "department": 15,
+    "mobile_number": "+44 0 144 44 444"
+}
+    )
+
+    print("User created successfully!")
+    print(f"ID: {user['id']}")
+    print(f"Name: {user['name']}")
+    print(f"Email: {user['email']}")
+
+    except Exception as e:
+    print(f"Failed to create user: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class UsersAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+});
+}
+
+    async createUser({
+    name,
+    email,
+    password,
+    roleAlias,
+    bio,
+    occupation,
+    location,
+    timezone,
+    fromApi = true,
+    courses,
+    deadlineAt,
+    groups,
+    attributes
+}) {
+    try {
+    const response = await this.client.post('/users', {
+    name,
+    email,
+    password,
+    roleAlias,
+    bio,
+    occupation,
+    location,
+    timezone,
+    fromApi,
+    courses,
+    deadlineAt,
+    groups,
+    attributes
+});
+
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    throw new Error(`Failed to create user: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const usersApi = new UsersAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const user = await usersApi.createUser({
+    name: "Jason Wunderliebb",
+    email: "j.wunderliebb@mycompany.tld",
+    password: "VerySecurePas$w0rd!",
+    roleAlias: "learner",
+    bio: "Hi folks! I love to sell and teach about sales.",
+    occupation: "Associate",
+    location: "London",
+    timezone: "Europe/London",
+    fromApi: false,
+    courses: [110, 150],
+    deadlineAt: 1234567890,
+    groups: [2],
+    attributes: {
+    designation: 4,
+    department: 15,
+    mobile_number: "+44 0 144 44 444"
+}
+});
+
+    console.log('User created successfully!');
+    console.log(`ID: ${user.id}`);
+    console.log(`Name: ${user.name}`);
+    console.log(`Email: ${user.email}`);
+
+} catch (error) {
+    console.error('Failed to create user:', error.message);
+}
+}
+
+    main();
+    ```
+
 </RequestExample>
 
 <ResponseExample>
@@ -114,56 +366,20 @@ Create a new user account with specified details, role, and optional course assi
         "image": null,
         "attributes": {
         "designation": 4,
-        "state": 1,
         "department": 15,
-        "mobile_number": "+44 0 144 44 444",
-        "crm_id": "UAw84js03jsjsr4"
+        "mobile_number": "+44 0 144 44 444"
+    }
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "email": ["Email is already taken"],
+        "password": ["Password must be at least 8 characters"]
     }
     }
     ```
 </ResponseExample>
-
-## Response
-
-<ResponseField name="id" type="string">
-    Generated user ID
-</ResponseField>
-
-<ResponseField name="name" type="string">
-    User's full name
-</ResponseField>
-
-<ResponseField name="language" type="string">
-    Interface language
-</ResponseField>
-
-<ResponseField name="email" type="string">
-    User's email address
-</ResponseField>
-
-<ResponseField name="role" type="object">
-    <ResponseField name="alias" type="string">
-        Role alias assigned to the user
-    </ResponseField>
-</ResponseField>
-
-<ResponseField name="attributes" type="object">
-    Custom attributes as provided in the request
-</ResponseField>
-
-### Error Responses
-
-<ResponseField name="400: Bad Request" type="object">
-    Returned when the request is invalid
-    <Expandable title="Error Properties">
-        <ResponseField name="status" type="integer">
-            400
-        </ResponseField>
-        <ResponseField name="message" type="string">
-            Error message
-        </ResponseField>
-        <ResponseField name="errors" type="object">
-            Validation errors by field
-        </ResponseField>
-    </Expandable>
-</ResponseField>

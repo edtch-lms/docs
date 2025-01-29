@@ -1,0 +1,270 @@
+---
+title: 'Group Webhook Events'
+description: 'Group-related webhook events and payloads'
+---
+
+Group webhooks notify you about changes in group membership and structure. Currently, this includes notifications when users are added to groups.
+
+## Group/User/Created
+
+Triggered when a user is added to a group.
+
+### Payload
+
+<ResponseField name="user" type="object" required>
+    User added to the group
+    <Expandable title="User properties">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>Full name</ResponseField>
+        <ResponseField name="language" type="string" required>Interface language</ResponseField>
+        <ResponseField name="occupation" type="string">Job title</ResponseField>
+        <ResponseField name="location" type="string">Location</ResponseField>
+        <ResponseField name="timezone" type="string" required>Timezone</ResponseField>
+        <ResponseField name="email" type="string" required>Email address</ResponseField>
+        <ResponseField name="isBanned" type="boolean" required>Ban status</ResponseField>
+        <ResponseField name="role" type="string" required>User role</ResponseField>
+        <ResponseField name="fromApi" type="boolean" required>API creation flag</ResponseField>
+        <ResponseField name="image" type="object">User avatar</ResponseField>
+        <ResponseField name="userAttributes" type="array">Custom attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="group" type="object" required>
+    Group the user was added to
+    <Expandable title="Group properties">
+        <ResponseField name="id" type="integer" required>Group ID</ResponseField>
+        <ResponseField name="name" type="string" required>Group name</ResponseField>
+        <ResponseField name="description" type="string" required>Group description</ResponseField>
+        <ResponseField name="image" type="object">Group cover image</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Usage Notes
+
+1. Common Use Cases:
+- Syncing group memberships with external systems
+- Updating access permissions
+- Tracking organizational changes
+- Auditing group additions
+
+2. Implementation Tips:
+- Process events asynchronously
+- Verify user and group IDs
+- Handle duplicate events gracefully
+- Update caches if needed
+
+3. Best Practices:
+- Store event history for auditing
+- Track group size changes
+- Monitor group additions patterns
+- Log unusual activity
+
+<RequestExample>
+    ```python Python
+    # Example webhook handler for group events
+    from flask import Flask, request, jsonify
+    import logging
+
+    app = Flask(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    @app.route('/webhook/group', methods=['POST'])
+    def handle_group_webhook():
+    event_data = request.json
+    event_type = event_data['type']
+
+    if event_type == 'Group/User/Created':
+    handle_group_addition(event_data['body'])
+
+    return jsonify({'status': 'success'}), 200
+
+    def handle_group_addition(payload):
+    user = payload['user']
+    group = payload['group']
+
+    logging.info(f"User added to group: {user['name']} -> {group['name']}")
+
+    # Example: Sync with external system
+    try:
+    sync_external_group_membership(
+    user_id=user['id'],
+    group_id=group['id'],
+    user_email=user['email'],
+    group_name=group['name']
+    )
+    except Exception as e:
+    logging.error(f"Failed to sync group membership: {str(e)}")
+    # Handle error but don't re-raise to maintain webhook response
+
+    # Example: Update internal permissions
+    try:
+    update_user_permissions(
+    user_id=user['id'],
+    group_id=group['id']
+    )
+    except Exception as e:
+    logging.error(f"Failed to update permissions: {str(e)}")
+
+    if __name__ == '__main__':
+    app.run(port=5000)
+    ```
+
+    ```javascript Node.js
+    // Example webhook handler for group events
+    const express = require('express');
+    const app = express();
+    const logger = require('./logger');  // Your logging setup
+
+    app.use(express.json());
+
+    app.post('/webhook/group', (req, res) => {
+    const { type, body } = req.body;
+
+    if (type === 'Group/User/Created') {
+    handleGroupAddition(body)
+    .catch(error => {
+    logger.error('Error processing group addition:', error);
+    // Don't reject the webhook, just log the error
+});
+}
+
+    // Return success quickly
+    res.status(200).json({ status: 'success' });
+});
+
+    async function handleGroupAddition(payload) {
+    const { user, group } = payload;
+
+    logger.info(`User added to group: ${user.name} -> ${group.name}`);
+
+    // Example: Sync with external system
+    try {
+    await syncExternalGroupMembership({
+    userId: user.id,
+    groupId: group.id,
+    userEmail: user.email,
+    groupName: group.name
+});
+} catch (error) {
+    logger.error('Failed to sync group membership:', error);
+    // Handle error but continue processing
+}
+
+    // Example: Update internal permissions
+    try {
+    await updateUserPermissions({
+    userId: user.id,
+    groupId: group.id
+});
+} catch (error) {
+    logger.error('Failed to update permissions:', error);
+}
+}
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+    console.log(`Webhook server running on port ${PORT}`);
+});
+    ```
+
+    ```php PHP
+    <?php
+    // Example webhook handler for group events
+
+    // Get webhook data
+    $eventData = json_decode(file_get_contents('php://input'), true);
+    $eventType = $eventData['type'];
+
+    if ($eventType === 'Group/User/Created') {
+        handleGroupAddition($eventData['body']);
+    }
+
+    // Return success quickly
+    http_response_code(200);
+    echo json_encode(['status' => 'success']);
+
+    function handleGroupAddition($payload) {
+        $user = $payload['user'];
+        $group = $payload['group'];
+
+        error_log(sprintf(
+            "User added to group: %s -> %s",
+            $user['name'],
+            $group['name']
+        ));
+
+        // Example: Sync with external system
+        try {
+            syncExternalGroupMembership(
+                $user['id'],
+                $group['id'],
+                $user['email'],
+                $group['name']
+            );
+        } catch (Exception $e) {
+            error_log("Failed to sync group membership: " . $e->getMessage());
+            // Handle error but continue processing
+        }
+
+        // Example: Update internal permissions
+        try {
+            updateUserPermissions(
+                $user['id'],
+                $group['id']
+            );
+        } catch (Exception $e) {
+            error_log("Failed to update permissions: " . $e->getMessage());
+        }
+    }
+
+    function syncExternalGroupMembership($userId, $groupId, $userEmail, $groupName) {
+        // Your external system sync logic here
+    }
+
+    function updateUserPermissions($userId, $groupId) {
+        // Your permissions update logic here
+    }
+
+    ?>
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Group/User/Created
+    {
+        "occuredAt": 1673531200,
+        "type": "Group/User/Created",
+        "body": {
+        "user": {
+        "id": "user123",
+        "name": "John Smith",
+        "language": "en",
+        "occupation": "Sales Manager",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "john@example.com",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": true,
+        "image": null,
+        "userAttributes": [
+    {
+        "apiId": "department",
+        "name": "Department",
+        "type": 1,
+        "value": "Sales"
+    }
+        ]
+    },
+        "group": {
+        "id": 456,
+        "name": "Sales Team",
+        "description": "Global Sales Department",
+        "image": null
+    }
+    }
+    }
+    ```
+</ResponseExample>

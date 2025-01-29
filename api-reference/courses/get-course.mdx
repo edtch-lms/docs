@@ -1,108 +1,244 @@
 ---
-title: 'Get Course Details'
+title: 'Get Course'
 api: 'GET /courses/{courseId}'
 description: 'Get detailed information about a specific course'
 ---
 
-Returns detailed information about a course, including description and attached files.
+Retrieve detailed information about a specific course by its ID.
 
-## Request
-
-<ParamField header="X-API-KEY" required>
-    Your API key for authentication
-</ParamField>
-
-### URL Parameters
+## Path Parameters
 
 <ParamField path="courseId" type="integer" required>
     The unique identifier of the course
 </ParamField>
 
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
 ## Response
 
-<ResponseField name="id" type="integer">
-    Unique identifier for the course
-</ResponseField>
+<ResponseField name="id" type="integer" required>Course ID</ResponseField>
+<ResponseField name="name" type="string" required>Course name</ResponseField>
+<ResponseField name="annotation" type="string" required>Course annotation</ResponseField>
+<ResponseField name="isDraft" type="boolean" required>Indicates whether the course is a draft</ResponseField>
+<ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+<ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+<ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
 
-<ResponseField name="name" type="string">
-    Name of the course
-</ResponseField>
-
-<ResponseField name="annotation" type="string">
-    Course annotation
-</ResponseField>
-
-<ResponseField name="description" type="string">
-    Detailed course description
-</ResponseField>
-
-<ResponseField name="isDraft" type="boolean">
-    Whether the course is in draft state
-</ResponseField>
-
-<ResponseField name="createdAt" type="integer">
-    Timestamp of course creation
-</ResponseField>
-
-<ResponseField name="updatedAt" type="integer">
-    Timestamp of last update
-</ResponseField>
-
-<ResponseField name="publishedAt" type="integer">
-    Timestamp when the course was published
-</ResponseField>
-
-<ResponseField name="image" type="object" optional>
+<ResponseField name="image" type="object">
     Course cover image details
-    <Expandable title="Image properties">
-        <ResponseField name="id" type="integer">
-            Image identifier
-        </ResponseField>
-        <ResponseField name="original" type="string">
-            URL to full-size image
-        </ResponseField>
-        <ResponseField name="mini" type="string">
-            URL to 36x36px thumbnail
-        </ResponseField>
-        <ResponseField name="small" type="string">
-            URL to 330x130px image
-        </ResponseField>
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+        <ResponseField name="mini" type="string" required>URL to image 36x36 px</ResponseField>
+        <ResponseField name="small" type="string" required>URL to image 330x130 px</ResponseField>
     </Expandable>
 </ResponseField>
 
-<ResponseField name="attachedFiles" type="array">
-    List of files attached to the course
-    <Expandable title="File properties">
-        <ResponseField name="name" type="string">
-            File name
-        </ResponseField>
-        <ResponseField name="size" type="integer">
-            File size in bytes
-        </ResponseField>
-        <ResponseField name="url" type="string">
-            Download URL
-        </ResponseField>
-        <ResponseField name="mime" type="string">
-            MIME type of the file
-        </ResponseField>
+<ResponseField name="description" type="string" required>Course description</ResponseField>
+
+<ResponseField name="attachedFiles" type="array" required>
+    Attached files
+    <Expandable title="File object properties">
+        <ResponseField name="name" type="string" required>File name</ResponseField>
+        <ResponseField name="size" type="integer" required>File size in bytes</ResponseField>
+        <ResponseField name="url" type="string" required>Download URL</ResponseField>
+        <ResponseField name="mime" type="string" required>MIME type</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the course is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
     </Expandable>
 </ResponseField>
 
 <RequestExample>
-    ```bash Request
+
+    ```bash cURL
     curl --request GET \
     --url 'https://YOURSITE.konstant.ly/openapi/v1/courses/123' \
-    --header 'X-API-KEY: your_api_key_here'
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
     ```
+
+    ```python Python
+    import requests
+
+    def get_course(course_id):
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/courses/{course_id}"
+    headers = {
+    "X-API-KEY": "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv"
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()  # Raises an exception for 4XX/5XX errors
+    return response.json()
+    except requests.exceptions.RequestException as e:
+    if response.status_code == 404:
+    print(f"Course {course_id} not found")
+    else:
+    print(f"Error fetching course: {str(e)}")
+    return None
+
+    # Example usage
+    course = get_course(123)
+    if course:
+    print(f"Course name: {course['name']}")
+    print(f"Description: {course['description']}")
+
+    # Print attached files
+    for file in course.get('attachedFiles', []):
+    print(f"Attached file: {file['name']} ({file['size']} bytes)")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getCourse(courseId) {
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/courses/${courseId}`,
+{
+    headers: {
+    'X-API-KEY': '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+}
+}
+    );
+
+    return response.data;
+} catch (error) {
+    if (error.response && error.response.status === 404) {
+    console.error(`Course ${courseId} not found`);
+} else {
+    console.error('Error fetching course:', error.message);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    getCourse(123)
+    .then(course => {
+    console.log(`Course: ${course.name}`);
+    console.log(`Description: ${course.description}`);
+
+    // Log attached files
+    course.attachedFiles?.forEach(file => {
+    console.log(`Attached file: ${file.name} (${file.size} bytes)`);
+});
+})
+    .catch(error => {
+    console.error('Failed to get course:', error);
+});
+    ```
+
+    ```php PHP
+    <?php
+
+    function getCourse($courseId) {
+        $ch = curl_init();
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "https://YOURSITE.konstant.ly/openapi/v1/courses/$courseId",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+            return null;
+        }
+
+        curl_close($ch);
+
+        if ($httpCode === 404) {
+            echo "Course $courseId not found\n";
+            return null;
+        }
+
+        return json_decode($response, true);
+    }
+
+    // Example usage
+    $course = getCourse(123);
+    if ($course) {
+        echo "Course: " . $course['name'] . "\n";
+        echo "Description: " . $course['description'] . "\n";
+
+        // Print attached files
+        foreach ($course['attachedFiles'] as $file) {
+            echo "Attached file: {$file['name']} ({$file['size']} bytes)\n";
+        }
+    }
+    ?>
+    ```
+
+    ```java Java
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+
+    public class GetCourse {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+
+    public static void getCourse(int courseId) {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/courses/" + courseId))
+    .header("X-API-KEY", API_KEY)
+    .GET()
+    .build();
+
+    try {
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    System.out.println("Course " + courseId + " not found");
+    return;
+}
+
+    if (response.statusCode() != 200) {
+    System.out.println("Error: " + response.statusCode());
+    return;
+}
+
+    System.out.println(response.body());
+} catch (Exception e) {
+    e.printStackTrace();
+}
+}
+
+    public static void main(String[] args) {
+    getCourse(123);
+}
+}
+    ```
+
 </RequestExample>
 
 <ResponseExample>
+
     ```json Response
     {
         "id": 123,
         "name": "Course name",
         "annotation": "Course annotation",
-        "description": "Detailed course description",
         "isDraft": false,
         "createdAt": 1507807711,
         "updatedAt": 1507808372,
@@ -113,25 +249,23 @@ Returns detailed information about a course, including description and attached 
         "mini": "http://example.com/images/mini/1234.jpg",
         "small": "http://example.com/images/small/1234.jpg"
     },
+        "description": "Detailed course description",
         "attachedFiles": [
     {
-        "name": "presentation.pdf",
-        "size": 1024000,
-        "url": "http://example.com/files/presentation.pdf",
-        "mime": "application/pdf"
+        "name": "myfile.txt",
+        "size": 123,
+        "url": "http://example.com/files/myfile.txt",
+        "mime": "text/plain"
     }
         ]
     }
     ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+
 </ResponseExample>
-
-### Error Responses
-
-<ResponseField name="404: Not Found" type="object">
-    <ResponseField name="status" type="integer">
-        404
-    </ResponseField>
-    <ResponseField name="message" type="string">
-        "Not found"
-    </ResponseField>
-</ResponseField>

@@ -1,0 +1,274 @@
+---
+title: 'Webhooks Overview'
+description: 'Understanding and using Konstantly webhooks'
+---
+
+Webhooks allow you to receive real-time notifications about events happening in your Konstantly platform. Each webhook event contains detailed information about what happened and the relevant resources.
+
+## Event Types
+
+### Course Events
+
+<ResponseField name="Course/Published" type="event">
+    Triggered when a course is published
+</ResponseField>
+
+<ResponseField name="Course/Unpublished" type="event">
+    Triggered when a course is unpublished
+</ResponseField>
+
+<ResponseField name="Course/Assigned" type="event">
+    Triggered when a course is assigned to a user
+</ResponseField>
+
+<ResponseField name="Course/Started" type="event">
+    Triggered when a user starts a course
+</ResponseField>
+
+<ResponseField name="Course/Progress" type="event">
+    Triggered when a user makes progress in a course
+</ResponseField>
+
+<ResponseField name="Course/Finished" type="event">
+    Triggered when a user completes a course
+</ResponseField>
+
+### User Events
+
+<ResponseField name="User/Created" type="event">
+    Triggered when a new user is created
+</ResponseField>
+
+<ResponseField name="User/Edited" type="event">
+    Triggered when user information is updated
+</ResponseField>
+
+### Group Events
+
+<ResponseField name="Group/User/Created" type="event">
+    Triggered when a user is added to a group
+</ResponseField>
+
+## Common Properties
+
+All webhook events share these common properties:
+
+<ResponseField name="occuredAt" type="integer" required>
+    Timestamp when the event occurred
+</ResponseField>
+
+<ResponseField name="type" type="string" required>
+    Event type identifier
+</ResponseField>
+
+<ResponseField name="body" type="object" required>
+    Event-specific payload data
+</ResponseField>
+
+## Best Practices
+
+1. Webhook Handling:
+- Implement proper error handling
+- Use retry logic for failed deliveries
+- Process webhooks asynchronously
+- Validate webhook signatures
+- Respond quickly (2xx status)
+
+2. Security:
+- Use HTTPS endpoints
+- Validate event data
+- Keep endpoint URLs secret
+- Monitor for unusual patterns
+
+3. Implementation Tips:
+- Store raw webhook data
+- Process events idempotently
+- Set reasonable timeouts
+- Log webhook failures
+
+## Testing Webhooks
+
+1. Event History:
+- Use GET /webhook/:event/last to fetch recent events
+- Test handling with real event data
+- Verify payload processing
+
+2. Development:
+- Set up test environment endpoints
+- Use event simulator when available
+- Test all event types
+- Verify error handling
+
+<RequestExample>
+    ```python Python
+    from flask import Flask, request, jsonify
+    import hmac
+    import hashlib
+
+    app = Flask(__name__)
+
+    @app.route('/webhook', methods=['POST'])
+    def handle_webhook():
+    # Get webhook data
+    event_data = request.json
+
+    # Extract common properties
+    event_type = event_data['type']
+    occurred_at = event_data['occuredAt']
+    payload = event_data['body']
+
+    # Handle different event types
+    if event_type == 'Course/Published':
+    handle_course_published(payload)
+    elif event_type == 'User/Created':
+    handle_user_created(payload)
+    elif event_type == 'Course/Progress':
+    handle_course_progress(payload)
+
+    # Return success quickly
+    return jsonify({'status': 'success'}), 200
+
+    def handle_course_published(payload):
+    course = payload['course']
+    print(f"Course published: {course['name']} (ID: {course['id']})")
+    # Add your course publication handling logic here
+
+    def handle_user_created(payload):
+    user = payload['user']
+    print(f"New user: {user['name']} (Email: {user['email']})")
+    # Add your user creation handling logic here
+
+    def handle_course_progress(payload):
+    user = payload['user']
+    course = payload['course']
+    progress = payload['progressValue']
+    print(f"Progress update: User {user['name']} - {progress}% in {course['name']}")
+    # Add your progress handling logic here
+
+    if __name__ == '__main__':
+    app.run(port=5000)
+    ```
+
+    ```javascript Node.js
+    const express = require('express');
+    const app = express();
+
+    app.use(express.json());
+
+    app.post('/webhook', (req, res) => {
+    // Get webhook data
+    const { type, occuredAt, body } = req.body;
+
+    // Handle different event types
+    try {
+    switch (type) {
+    case 'Course/Published':
+    handleCoursePublished(body);
+    break;
+    case 'User/Created':
+    handleUserCreated(body);
+    break;
+    case 'Course/Progress':
+    handleCourseProgress(body);
+    break;
+    default:
+    console.log(`Unhandled event type: ${type}`);
+}
+
+    // Return success quickly
+    res.status(200).json({ status: 'success' });
+} catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).json({ error: 'Internal server error' });
+}
+});
+
+    function handleCoursePublished(payload) {
+    const { course } = payload;
+    console.log(`Course published: ${course.name} (ID: ${course.id})`);
+    // Add your course publication handling logic here
+}
+
+    function handleUserCreated(payload) {
+    const { user } = payload;
+    console.log(`New user: ${user.name} (Email: ${user.email})`);
+    // Add your user creation handling logic here
+}
+
+    function handleCourseProgress(payload) {
+    const { user, course, progressValue } = payload;
+    console.log(`Progress update: User ${user.name} - ${progressValue}% in ${course.name}`);
+    // Add your progress handling logic here
+}
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+    console.log(`Webhook server running on port ${PORT}`);
+});
+    ```
+
+    ```php PHP
+    <?php
+
+    // Webhook handling endpoint
+    function handleWebhook() {
+        // Get webhook data
+        $eventData = json_decode(file_get_contents('php://input'), true);
+
+        // Extract common properties
+        $eventType = $eventData['type'];
+        $occurredAt = $eventData['occuredAt'];
+        $payload = $eventData['body'];
+
+        // Handle different event types
+        try {
+            switch ($eventType) {
+                case 'Course/Published':
+                    handleCoursePublished($payload);
+                    break;
+                case 'User/Created':
+                    handleUserCreated($payload);
+                    break;
+                case 'Course/Progress':
+                    handleCourseProgress($payload);
+                    break;
+                default:
+                    error_log("Unhandled event type: $eventType");
+            }
+
+            // Return success quickly
+            http_response_code(200);
+            echo json_encode(['status' => 'success']);
+        } catch (Exception $e) {
+            error_log("Error processing webhook: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Internal server error']);
+        }
+    }
+
+    function handleCoursePublished($payload) {
+        $course = $payload['course'];
+        error_log("Course published: {$course['name']} (ID: {$course['id']})");
+        // Add your course publication handling logic here
+    }
+
+    function handleUserCreated($payload) {
+        $user = $payload['user'];
+        error_log("New user: {$user['name']} (Email: {$user['email']})");
+        // Add your user creation handling logic here
+    }
+
+    function handleCourseProgress($payload) {
+        $user = $payload['user'];
+        $course = $payload['course'];
+        $progress = $payload['progressValue'];
+        error_log("Progress update: User {$user['name']} - {$progress}% in {$course['name']}");
+        // Add your progress handling logic here
+    }
+
+    // Handle the webhook
+    handleWebhook();
+
+    ?>
+    ```
+</RequestExample>

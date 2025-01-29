@@ -1,0 +1,186 @@
+---
+title: 'Get Users'
+api: 'GET /users'
+description: 'Get a list of users (sorted by name, 20 entries per page)'
+---
+
+Retrieve a paginated list of users from your platform. The list is sorted by name and includes 20 entries per page.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="query" type="string">
+    Get user info by email
+
+    Example: user@example.com
+</ParamField>
+
+<ParamField query="offset" type="integer">
+    Entry number to start listing from
+
+    Example: 20
+</ParamField>
+
+## Response
+
+<ResponseField name="users" type="array" required>
+    Array of user objects
+    <Expandable title="User object properties">
+        <ResponseField name="id" type="string" required>User ID, alphanumeric unique identifier</ResponseField>
+        <ResponseField name="name" type="string" required>Full name of the user</ResponseField>
+        <ResponseField name="language" type="string" required>Interface and notification language (one of: de, en, es, fr, pl, pt, ru)</ResponseField>
+        <ResponseField name="occupation" type="string">Optional job title</ResponseField>
+        <ResponseField name="location" type="string">Optional location</ResponseField>
+        <ResponseField name="timezone" type="string" required>Timezone in TZ format</ResponseField>
+        <ResponseField name="email" type="string" required>User email (unique across platform)</ResponseField>
+        <ResponseField name="isBanned" type="boolean" required>Whether user is banned from login</ResponseField>
+        <ResponseField name="role" type="string" required>User role alias/identifier</ResponseField>
+        <ResponseField name="fromApi" type="boolean" required>Whether user is managed via API only</ResponseField>
+        <ResponseField name="image" type="object">
+            User avatar details
+            <Expandable title="Image object properties">
+                <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+                <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+                <ResponseField name="mini" type="string" required>URL to 36x36px image</ResponseField>
+                <ResponseField name="xSmall" type="string" required>URL to 58x58px image</ResponseField>
+                <ResponseField name="small" type="string" required>URL to 128x128px image</ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="attributes" type="object">Custom user attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    The total number of users
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users?offset=20' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def get_users(api_key: str, offset: int = None, query: str = None) -> dict:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/users"
+    headers = {
+    "X-API-KEY": api_key
+}
+    params = {}
+
+    if offset is not None:
+    params["offset"] = offset
+    if query is not None:
+    params["query"] = query
+
+    try:
+    response = requests.get(url, headers=headers, params=params)
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error fetching users: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    users_data = get_users(
+    api_key="1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    offset=20
+    )
+
+    print(f"Total users: {users_data['totalCount']}")
+    print("\nUsers:")
+    for user in users_data['users']:
+    print(f"- {user['name']} ({user['email']})")
+
+    except Exception as e:
+    print(f"Failed to fetch users: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class UsersAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async getUsers(params = {}) {
+    try {
+    const response = await this.client.get('/users', { params });
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    throw new Error(`Failed to fetch users: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const usersApi = new UsersAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const usersData = await usersApi.getUsers({ offset: 20 });
+
+    console.log(`Total users: ${usersData.totalCount}`);
+    console.log('\nUsers:');
+    usersData.users.forEach(user => {
+    console.log(`- ${user.name} (${user.email})`);
+});
+
+} catch (error) {
+    console.error('Failed to fetch users:', error.message);
+}
+}
+
+    main();
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "users": [
+    {
+        "id": "1234567890",
+        "name": "John Doe",
+        "language": "en",
+        "occupation": "Salesman",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "john.doe@example.com",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": false,
+        "image": null,
+        "attributes": {}
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+</ResponseExample>

@@ -1,0 +1,277 @@
+---
+title: 'Get Invitation'
+api: 'GET /invites/{inviteId}'
+description: 'Get invitation by ID'
+---
+
+Retrieve information about a specific invitation using its unique identifier.
+
+## Path Parameters
+
+<ParamField path="inviteId" type="integer" required>
+    The unique identifier of the invitation to retrieve
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="invite" type="object" required>
+    Invitation details
+    <Expandable title="Invite object properties">
+        <ResponseField name="id" type="integer" required>Invitation ID</ResponseField>
+        <ResponseField name="email" type="string" required>Email invitation was sent to</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Timestamp when invitation was sent</ResponseField>
+        <ResponseField name="inviteUrl" type="string" required>URL to signup</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the invitation is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/invites/123' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from dataclasses import dataclass
+    from typing import Optional
+    from datetime import datetime
+
+    @dataclass
+    class Invite:
+    id: int
+    email: str
+    created_at: int
+    invite_url: str
+
+    @property
+    def created_date(self) -> datetime:
+    return datetime.fromtimestamp(self.created_at)
+
+    def get_invitation(api_key: str, invite_id: int) -> Invite:
+    """
+    Fetch a specific invitation by ID
+
+    Args:
+    api_key: Your API key
+    invite_id: Invitation ID to retrieve
+
+    Returns:
+    Invite object
+
+    Raises:
+    requests.exceptions.RequestException: If API request fails
+    ValueError: If invitation not found
+    """
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/invites/{invite_id}"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Invitation {invite_id} not found")
+
+    response.raise_for_status()
+    data = response.json()["invite"]
+
+    return Invite(
+    id=data["id"],
+    email=data["email"],
+    created_at=data["createdAt"],
+    invite_url=data["inviteUrl"]
+    )
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error fetching invitation: {str(e)}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    invite = get_invitation("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+
+    print("Invitation Details:")
+    print(f"ID: {invite.id}")
+    print(f"Email: {invite.email}")
+    print(f"Created: {invite.created_date}")
+    print(f"URL: {invite.invite_url}")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to fetch invitation: {str(e)}")
+    ```
+
+    ```php PHP
+    <?php
+
+    class InvitationsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+        public function __construct($apiKey) {
+            $this->apiKey = $apiKey;
+            $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+        }
+
+        /**
+         * Get invitation by ID
+         *
+         * @param integer $inviteId Invitation ID to retrieve
+         * @return array Invitation details
+         * @throws Exception If the API request fails
+         */
+        public function getInvitation(int $inviteId): array {
+            $ch = curl_init();
+
+            $url = "{$this->baseUrl}/invites/{$inviteId}";
+
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'X-API-KEY: ' . $this->apiKey
+                ]
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception('Error: ' . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            if ($httpCode === 404) {
+                throw new Exception("Invitation {$inviteId} not found");
+            }
+
+            if ($httpCode !== 200) {
+                throw new Exception("Request failed with status: {$httpCode}");
+            }
+
+            return json_decode($response, true)['invite'];
+        }
+    }
+
+    // Example usage
+    try {
+        $api = new InvitationsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        $invite = $api->getInvitation(123);
+
+        echo "Invitation Details:\n";
+        echo "ID: {$invite['id']}\n";
+        echo "Email: {$invite['email']}\n";
+        echo "Created: " . date('Y-m-d H:i:s', $invite['createdAt']) . "\n";
+        echo "URL: {$invite['inviteUrl']}\n";
+
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class InvitationsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    /**
+     * Get invitation by ID
+     * @param {number} inviteId Invitation ID to retrieve
+     * @returns {Promise<Object>} Invitation details
+     */
+    async getInvitation(inviteId) {
+    try {
+    const response = await this.client.get(`/invites/${inviteId}`);
+    return response.data.invite;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`Invitation ${inviteId} not found`);
+}
+    throw new Error(`Failed to fetch invitation: ${error.message}`);
+}
+}
+
+    /**
+     * Format date from timestamp
+     * @param {number} timestamp Unix timestamp
+     * @returns {string} Formatted date
+     */
+    formatDate(timestamp) {
+    return new Date(timestamp * 1000).toLocaleString();
+}
+}
+
+    // Example usage
+    async function main() {
+    const api = new InvitationsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const invite = await api.getInvitation(123);
+
+    console.log('Invitation Details:');
+    console.log(`ID: ${invite.id}`);
+    console.log(`Email: ${invite.email}`);
+    console.log(`Created: ${api.formatDate(invite.createdAt)}`);
+    console.log(`URL: ${invite.inviteUrl}`);
+
+} catch (error) {
+    console.error('Error:', error.message);
+}
+}
+
+    main();
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "invite": {
+        "id": 123,
+        "email": "john.doe@example.com",
+        "createdAt": 1234567890,
+        "inviteUrl": "http://YOURSITE.konstant.ly/signup/1qaz2wsx3edc4rfv"
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Invitation not found"
+    }
+    ```
+</ResponseExample>

@@ -1,0 +1,190 @@
+---
+title: 'List Courses'
+api: 'GET /courses'
+description: 'Get a list of courses (20 per page)'
+---
+
+Retrieve a paginated list of all courses on your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="offset" type="integer">
+    Entry number to start listing from. Use this for pagination.
+
+    Example: `20` to get the second page of results
+</ParamField>
+
+## Response
+
+<ResponseField name="courses" type="array" required>
+    Array of course objects
+
+    <Expandable title="Course object properties">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course annotation</ResponseField>
+        <ResponseField name="isDraft" type="boolean" required>Indicates whether the course is a draft</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+        <ResponseField name="image" type="object">
+            Course cover image details
+            <Expandable title="Image object properties">
+                <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+                <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+                <ResponseField name="mini" type="string" required>URL to image 36x36 px</ResponseField>
+                <ResponseField name="small" type="string" required>URL to image 330x130 px</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    The total number of courses
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/courses?offset=0' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    url = "https://YOURSITE.konstant.ly/openapi/v1/courses"
+    headers = {
+    "X-API-KEY": "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv"
+}
+    params = {
+    "offset": 0  # Optional: for pagination
+}
+
+    response = requests.get(url, headers=headers, params=params)
+    courses = response.json()
+
+    for course in courses['courses']:
+    print(f"Course: {course['name']}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function listCourses(offset = 0) {
+    try {
+    const response = await axios.get('https://YOURSITE.konstant.ly/openapi/v1/courses', {
+    headers: {
+    'X-API-KEY': '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+},
+    params: {
+    offset: offset
+}
+});
+
+    return response.data;
+} catch (error) {
+    console.error('Error fetching courses:', error.message);
+    throw error;
+}
+}
+
+    // Example usage
+    listCourses()
+    .then(data => {
+    console.log(`Found ${data.totalCount} courses`);
+    data.courses.forEach(course => {
+    console.log(`- ${course.name}`);
+});
+})
+    .catch(error => {
+    console.error('Failed to list courses:', error);
+});
+    ```
+
+    ```php PHP
+    <?php
+
+    $ch = curl_init();
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => 'https://YOURSITE.konstant.ly/openapi/v1/courses',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $courses = json_decode($response, true);
+
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
+
+    foreach ($courses['courses'] as $course) {
+        echo "Course: " . $course['name'] . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+
+    public class ListCourses {
+    public static void main(String[] args) {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://YOURSITE.konstant.ly/openapi/v1/courses"))
+    .header("X-API-KEY", "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+    .GET()
+    .build();
+
+    try {
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+    System.out.println(response.body());
+} catch (Exception e) {
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "courses": [
+    {
+        "id": 123,
+        "name": "Course name",
+        "annotation": "Course annotation",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229,
+        "image": {
+        "id": 1234,
+        "original": "http://example.com/images/original/1234.jpg",
+        "mini": "http://example.com/images/mini/1234.jpg",
+        "small": "http://example.com/images/small/1234.jpg"
+    }
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+</ResponseExample>

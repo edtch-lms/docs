@@ -1,0 +1,412 @@
+---
+title: 'Add Users to Group'
+api: 'POST /groups/{groupId}/users'
+description: 'Add users to a group'
+---
+
+Add one or more users to a specified group.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+<ParamField body="users" type="array" required>
+    Array of user IDs to add to the group
+</ParamField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the group is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="400" type="object">
+    Returned when there's a validation error (e.g., users already in group)
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Validation errors by field</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123/users' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "users": ["user1", "user2"]
+}'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List
+
+    def add_users_to_group(api_key: str, group_id: int, user_ids: List[str]):
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}/users"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+    data = {
+    "users": user_ids
+}
+
+    try:
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 404:
+    raise ValueError(f"Group {group_id} not found")
+
+    if response.status_code == 400:
+    error_data = response.json()
+    raise ValueError(f"Validation error: {error_data.get('message', '')}")
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error adding users to group: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    # Add multiple users to group
+    result = add_users_to_group(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    123,
+    ["user1", "user2"]
+    )
+    print(f"Added {len(result['users'])} users successfully")
+
+    # Optional: Verify additions
+    users = get_group_users("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+    print(f"Group now has {users['totalCount']} total users")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to add users to group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+});
+}
+
+    async addUsersToGroup(groupId, userIds) {
+    try {
+    const response = await this.client.post(`/groups/${groupId}/users`, {
+    users: userIds
+});
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`Group ${groupId} not found`);
+}
+    if (error.response?.status === 400) {
+    const errorData = error.response.data;
+    throw new Error(`Validation error: ${errorData.message || 'Invalid request'}`);
+}
+    throw error;
+}
+}
+
+    // Helper method to safely add users and verify
+    async safeAddUsersToGroup(groupId, userIds) {
+    const result = await this.addUsersToGroup(groupId, userIds);
+
+    // Verify the additions
+    const updatedGroup = await this.getGroupUsers(groupId);
+    const addedUsers = result.users.map(u => u.id);
+    const currentUsers = updatedGroup.users.map(u => u.id);
+
+    const allAdded = addedUsers.every(id => currentUsers.includes(id));
+    return {
+    success: allAdded,
+    addedCount: result.users.length,
+    totalUsers: updatedGroup.totalCount
+};
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    // Option 1: Simple add
+    const result = await groupsApi.addUsersToGroup(123, ['user1', 'user2']);
+    console.log(`Added ${result.users.length} users successfully`);
+
+    // Option 2: Safe add with verification
+    const safeResult = await groupsApi.safeAddUsersToGroup(123, ['user3', 'user4']);
+    console.log(`Added ${safeResult.addedCount} users, group now has ${safeResult.totalUsers} users`);
+
+} catch (error) {
+    console.error('Failed to add users to group:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function addUsersToGroup($groupId, array $userIds) {
+        $ch = curl_init();
+
+    $url = "{$this->baseUrl}/groups/{$groupId}/users";
+    $data = json_encode([
+        'users' => $userIds
+    ]);
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $data,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'X-API-KEY: ' . $this->apiKey,
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($data)
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch)) {
+        throw new Exception('Error: ' . curl_error($ch));
+    }
+
+    curl_close($ch);
+
+    if ($httpCode === 404) {
+        throw new Exception("Group $groupId not found");
+    }
+
+    if ($httpCode === 400) {
+        $errorData = json_decode($response, true);
+        throw new Exception("Validation error: " .
+            ($errorData['message'] ?? 'Invalid request'));
+    }
+
+    if ($httpCode !== 200) {
+        throw new Exception("Failed to add users. Status code: $httpCode");
+    }
+
+    return json_decode($response, true);
+}
+
+    // Helper method to safely add users and verify
+    public function safeAddUsersToGroup($groupId, array $userIds) {
+        $result = $this->addUsersToGroup($groupId, $userIds);
+
+        // Verify the additions
+        $updatedGroup = $this->getGroupUsers($groupId);
+        $addedUsers = array_map(function($user) {
+            return $user['id'];
+        }, $result['users']);
+        $currentUsers = array_map(function($user) {
+            return $user['id'];
+        }, $updatedGroup['users']);
+
+        $allAdded = empty(array_diff($addedUsers, $currentUsers));
+        return [
+            'success' => $allAdded,
+            'addedCount' => count($result['users']),
+            'totalUsers' => $updatedGroup['totalCount']
+        ];
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    // Option 1: Simple add
+    $result = $groupsApi->addUsersToGroup(123, ['user1', 'user2']);
+    echo "Added " . count($result['users']) . " users successfully\n";
+
+    // Option 2: Safe add with verification
+    $safeResult = $groupsApi->safeAddUsersToGroup(123, ['user3', 'user4']);
+    echo "Added {$safeResult['addedCount']} users, group now has {$safeResult['totalUsers']} users\n";
+
+    } catch (Exception $e) {
+        echo "Failed to add users to group: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.*;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public Map<String, Object> addUsersToGroup(int groupId, List<String> userIds) throws Exception {
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put("users", userIds);
+    String jsonBody = mapper.writeValueAsString(requestBody);
+
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups/" + groupId + "/users"))
+    .header("X-API-KEY", API_KEY)
+    .header("Content-Type", "application/json")
+    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Group " + groupId + " not found");
+}
+
+    if (response.statusCode() == 400) {
+    Map<String, Object> errorData = mapper.readValue(response.body(), Map.class);
+    throw new Exception("Validation error: " +
+    errorData.getOrDefault("message", "Invalid request"));
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to add users. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Map.class);
+}
+
+    // Helper method to safely add users and verify
+    public Map<String, Object> safeAddUsersToGroup(int groupId, List<String> userIds) throws Exception {
+    Map<String, Object> result = addUsersToGroup(groupId, userIds);
+
+    // Verify the additions
+    Map<String, Object> updatedGroup = getGroupUsers(groupId, 0);
+    List<Map<String, Object>> addedUsers = (List<Map<String, Object>>) result.get("users");
+    List<Map<String, Object>> currentUsers = (List<Map<String, Object>>) updatedGroup.get("users");
+
+    Set<String> addedIds = addedUsers.stream()
+    .map(u -> (String)u.get("id"))
+    .collect(Collectors.toSet());
+    Set<String> currentIds = currentUsers.stream()
+    .map(u -> (String)u.get("id"))
+    .collect(Collectors.toSet());
+
+    boolean allAdded = addedIds.stream().allMatch(currentIds::contains);
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", allAdded);
+    response.put("addedCount", addedUsers.size());
+    response.put("totalUsers", updatedGroup.get("totalCount"));
+    return response;
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    // Option 1: Simple add
+    List<String> usersToAdd = Arrays.asList("user1", "user2");
+    Map<String, Object> result = api.addUsersToGroup(123, usersToAdd);
+    List<Map<String, Object>> addedUsers = (List<Map<String, Object>>) result.get("users");
+    System.out.println("Added " + addedUsers.size() + " users successfully");
+
+    // Option 2: Safe add with verification
+    List<String> moreUsers = Arrays.asList("user3", "user4");
+    Map<String, Object> safeResult = api.safeAddUsersToGroup(123, moreUsers);
+    System.out.println(String.format("Added %d users, group now has %d users",
+    safeResult.get("addedCount"),
+    safeResult.get("totalUsers")));
+
+} catch (Exception e) {
+    System.err.println("Failed to add users to group: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "users": [
+    {
+        "id": "user1",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+        ]
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Group not found"
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation error",
+        "errors": {
+        "users": [
+        "You cannot add users already consisting in the group: user1",
+        "Unknown users: user2"
+        ]
+    }
+    }
+    ```
+</ResponseExample>

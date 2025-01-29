@@ -1,0 +1,167 @@
+---
+title: 'Get User Assignments'
+api: 'GET /users/{userId}/assignments'
+description: 'Get a list of courses assigned to the user'
+---
+
+Retrieve a list of all courses assigned to a specific user.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Response
+
+<ResponseField name="assignments" type="array" required>
+    Array of course assignments
+    <Expandable title="Assignment properties">
+        <ResponseField name="assignedAt" type="integer" required>Timestamp when course was assigned</ResponseField>
+        <ResponseField name="startedAt" type="integer" required>Timestamp when user started the course</ResponseField>
+        <ResponseField name="deadlineAt" type="integer" required>Timestamp when assignment expires</ResponseField>
+        <ResponseField name="finishedAt" type="integer" required>Timestamp when user finished the course</ResponseField>
+        <ResponseField name="progressValue" type="integer" required>Current progress (0-100)</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Course result (0-100)</ResponseField>
+        <ResponseField name="isCourseStarted" type="boolean" required>Whether user has started the course</ResponseField>
+        <ResponseField name="isCourseFinished" type="boolean" required>Whether user has finished the course</ResponseField>
+        <ResponseField name="isExpired" type="boolean" required>Whether assignment has expired</ResponseField>
+        <ResponseField name="course" type="object" required>
+            Course details
+            <Expandable title="Course properties">
+                <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+                <ResponseField name="name" type="string" required>Course name</ResponseField>
+                <ResponseField name="annotation" type="string" required>Course annotation</ResponseField>
+                <ResponseField name="isDraft" type="boolean" required>Draft status</ResponseField>
+                <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+                <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+                <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+                <ResponseField name="image" type="object">Course cover image</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/assignments' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def get_user_assignments(api_key: str, user_id: str) -> dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/assignments"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    assignments = get_user_assignments("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890")
+    for assignment in assignments['assignments']:
+    course = assignment['course']
+    print(f"Course: {course['name']}")
+    print(f"Progress: {assignment['progressValue']}%")
+    print(f"Status: {'Completed' if assignment['isCourseFinished'] else 'In Progress'}")
+    print("---")
+    except Exception as e:
+    print(f"Error: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getUserAssignments(apiKey, userId) {
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/assignments`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    getUserAssignments('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+    .then(data => {
+    data.assignments.forEach(assignment => {
+        console.log(`Course: ${assignment.course.name}`);
+        console.log(`Progress: ${assignment.progressValue}%`);
+        console.log(`Status: ${assignment.isCourseFinished ? 'Completed' : 'In Progress'}`);
+        console.log('---');
+    });
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "assignments": [
+    {
+        "assignedAt": 1443183322,
+        "startedAt": 1443188932,
+        "deadlineAt": 1444188932,
+        "finishedAt": 1443188946,
+        "progressValue": 100,
+        "resultValue": 50,
+        "isCourseStarted": true,
+        "isCourseFinished": true,
+        "isExpired": false,
+        "course": {
+        "id": 123,
+        "name": "Introduction to Sales",
+        "annotation": "Learn the basics of sales",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229,
+        "image": null
+    }
+    }
+        ]
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

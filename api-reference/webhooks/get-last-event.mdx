@@ -1,0 +1,201 @@
+---
+title: 'Get Last Event'
+api: 'GET /webhook/:event/last'
+description: 'Get data of last webhook event of a specific type'
+---
+
+Retrieve the most recent occurrence of a specified webhook event type. This endpoint is useful for testing webhook integrations and verifying event data structures.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="event" type="string" required>
+    Type of webhook event to retrieve
+    Example: `user.created`
+</ParamField>
+
+## Response
+
+Returns the full webhook event data structure for the most recent event of the specified type.
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Usage Notes
+
+1. Event Types:
+- Use dot notation for event types (e.g., `user.created`, `course.published`)
+- Case sensitive matching
+- Only returns events from the last 30 days
+
+2. Common Uses:
+- Testing webhook handlers
+- Debugging integration issues
+- Verifying event structures
+- Recreating missed events
+
+3. Best Practices:
+- Cache responses when appropriate
+- Handle "no events" cases gracefully
+- Use for testing, not production monitoring
+- Verify event data matches expectations
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/webhook/user.created/last' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Dict, Any
+
+    def get_last_event(api_key: str, event_type: str) -> Dict[str, Any]:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/webhook/{event_type}/last"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"No recent events found for type: {event_type}")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    # Get last user creation event
+    last_user_event = get_last_event(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    "user.created"
+    )
+
+    # Extract user information
+    user = last_user_event['body']['user']
+    print(f"Last created user: {user['name']} ({user['email']})")
+    print(f"Created at: {last_user_event['occuredAt']}")
+
+    # Get last course completion event
+    last_completion = get_last_event(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    "course.finished"
+    )
+
+    # Extract completion details
+    completion = last_completion['body']
+    print(f"\nLast completion:")
+    print(f"User: {completion['user']['name']}")
+    print(f"Course: {completion['course']['name']}")
+    print(f"Result: {completion['resultValue']}%")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Error fetching event: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getLastEvent(apiKey, eventType) {
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/webhook/${eventType}/last`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`No recent events found for type: ${eventType}`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    async function checkRecentEvents() {
+    try {
+    // Get last user creation event
+    const lastUserEvent = await getLastEvent(
+    '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv',
+    'user.created'
+    );
+
+    const user = lastUserEvent.body.user;
+    console.log(`Last created user: ${user.name} (${user.email})`);
+    console.log(`Created at: ${lastUserEvent.occuredAt}`);
+
+    // Get last course completion event
+    const lastCompletion = await getLastEvent(
+    '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv',
+    'course.finished'
+    );
+
+    const completion = lastCompletion.body;
+    console.log('\nLast completion:');
+    console.log(`User: ${completion.user.name}`);
+    console.log(`Course: ${completion.course.name}`);
+    console.log(`Result: ${completion.resultValue}%`);
+
+} catch (error) {
+    console.error('Error:', error.message);
+}
+}
+
+    checkRecentEvents();
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json User Created Event
+    {
+        "occuredAt": 1673531200,
+        "type": "User/Created",
+        "body": {
+        "user": {
+        "id": "user123",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "language": "en",
+        "timezone": "Europe/London",
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": true,
+        "userAttributes": [
+    {
+        "apiId": "department",
+        "name": "Department",
+        "type": 1,
+        "value": "Sales"
+    }
+        ]
+    }
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

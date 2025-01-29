@@ -1,0 +1,204 @@
+---
+title: 'Update User'
+api: 'PATCH /users/{userId}'
+description: "Edit user's personal information"
+---
+
+Update an existing user's information.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Request Body
+
+<ParamField body="email" type="string" required>
+    User's email address (must be unique)
+</ParamField>
+
+<ParamField body="name" type="string">
+    Full name of the user (only if changing)
+</ParamField>
+
+<ParamField body="password" type="string">
+    User password (only if changing)
+</ParamField>
+
+<ParamField body="roleAlias" type="string">
+    Role alias or identifier (only if changing)
+</ParamField>
+
+<ParamField body="bio" type="string">
+    Optional bio description
+</ParamField>
+
+<ParamField body="occupation" type="string">
+    Optional job title (only if changing)
+</ParamField>
+
+<ParamField body="location" type="string">
+    Optional location (only if changing)
+</ParamField>
+
+<ParamField body="timezone" type="string">
+    Timezone in TZ format (only if changing)
+</ParamField>
+
+<ParamField body="fromApi" type="boolean">
+    API management flag (only if changing)
+</ParamField>
+
+<ParamField body="attributes" type="object">
+    Complete set of custom user attributes (overwrites current values)
+</ParamField>
+
+## Response
+
+On success, returns HTTP 200 status code.
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Validation error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Field-specific validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request PATCH \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "email": "j.wunderliebb@mycompany.tld",
+    "bio": "An updated information about me: I'\''ve transferred to London!",
+    "occupation": "Associate",
+    "location": "London",
+    "timezone": "Europe/London"
+}'
+    ```
+
+    ```python Python
+    import requests
+
+    def update_user(api_key: str, user_id: str, update_data: dict) -> None:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    response = requests.patch(url, headers=headers, json=update_data)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+
+    # Example usage
+    update_data = {
+    "email": "j.wunderliebb@mycompany.tld",
+    "bio": "An updated information about me: I've transferred to London!",
+    "occupation": "Associate",
+    "location": "London",
+    "timezone": "Europe/London"
+}
+
+    try:
+    update_user("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890", update_data)
+    print("User updated successfully")
+    except Exception as e:
+    print(f"Failed to update user: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function updateUser(apiKey, userId, updateData) {
+    try {
+    await axios.patch(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}`,
+    updateData,
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+} catch (error) {
+    if (error.response?.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    const updateData = {
+    email: "j.wunderliebb@mycompany.tld",
+    bio: "An updated information about me: I've transferred to London!",
+    occupation: "Associate",
+    location: "London",
+    timezone: "Europe/London"
+};
+
+    updateUser('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890', updateData)
+    .then(() => console.log('User updated successfully'))
+    .catch(error => console.error('Failed to update user:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "email": ["Invalid email format"]
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

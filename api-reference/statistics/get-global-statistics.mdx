@@ -1,0 +1,252 @@
+---
+title: 'Get Global Statistics'
+api: 'GET /statistics'
+description: 'Get the global statistics of Konstantly site'
+---
+
+Retrieve comprehensive statistics about your platform's usage, including course metrics, user activity, and performance data.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="statistics" type="object" required>
+    General platform statistics
+    <Expandable title="Statistics properties">
+        <ResponseField name="coursesCount" type="integer" required>Total number of courses</ResponseField>
+        <ResponseField name="assignedCoursesCount" type="integer" required>Number of course assignments</ResponseField>
+        <ResponseField name="groupsCount" type="integer" required>Total number of groups</ResponseField>
+        <ResponseField name="usersCount" type="integer" required>Total number of users</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="usersWithoutActivity" type="array" required>
+    Array of users without any activity
+    <Expandable title="User properties">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>User's full name</ResponseField>
+        <ResponseField name="language" type="string" required>Interface language</ResponseField>
+        <ResponseField name="occupation" type="string">Job title</ResponseField>
+        <ResponseField name="location" type="string">User location</ResponseField>
+        <ResponseField name="timezone" type="string" required>User timezone</ResponseField>
+        <ResponseField name="email" type="string" required>User's email</ResponseField>
+        <ResponseField name="isBanned" type="boolean" required>User ban status</ResponseField>
+        <ResponseField name="role" type="string" required>User role</ResponseField>
+        <ResponseField name="fromApi" type="boolean" required>Whether user was created via API</ResponseField>
+        <ResponseField name="image" type="object">User's avatar</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="usersWithoutResults" type="array" required>
+    Array of users who haven't completed any courses
+    <Expandable title="User properties">
+        Same structure as usersWithoutActivity
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="leaders" type="array" required>
+    Platform's top performers
+    <Expandable title="Leader properties">
+        <ResponseField name="coursesCount" type="integer" required>Number of completed courses</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Average result (0-100)</ResponseField>
+        <ResponseField name="user" type="object" required>User details</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="unassignedCourses" type="array" required>
+    Courses not assigned to any users
+    <Expandable title="Course properties">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course description</ResponseField>
+        <ResponseField name="isDraft" type="boolean" required>Draft status</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+        <ResponseField name="image" type="object">Course cover image</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Usage Notes
+
+1. Activity Tracking:
+- Users are considered "without activity" if they haven't started any courses
+- Users are considered "without results" if they haven't completed any courses
+- Leaders are ranked by combination of completion count and average score
+
+2. Timestamps:
+- All timestamps are in Unix epoch format (seconds since 1970)
+- Timezone conversions should be handled client-side
+
+3. Performance:
+- This endpoint aggregates data across the entire platform
+- Response times may increase with platform size
+- Consider caching results if frequent polling is needed
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/statistics' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Dict, Any
+
+    def get_global_statistics(api_key: str) -> Dict[str, Any]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/statistics"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    stats = get_global_statistics("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+
+    # Print general statistics
+    print("Platform Statistics:")
+    print(f"Total Courses: {stats['statistics']['coursesCount']}")
+    print(f"Total Users: {stats['statistics']['usersCount']}")
+    print(f"Total Groups: {stats['statistics']['groupsCount']}")
+
+    # Print inactive users
+    print(f"\nUsers without activity: {len(stats['usersWithoutActivity'])}")
+
+    # Print top performers
+    print("\nTop Performers:")
+    for leader in stats['leaders']:
+    print(f"User: {leader['user']['name']}")
+    print(f"Completed Courses: {leader['coursesCount']}")
+    print(f"Average Score: {leader['resultValue']}%")
+    print("---")
+
+    # Print unassigned courses
+    print(f"\nUnassigned Courses: {len(stats['unassignedCourses'])}")
+
+    except Exception as e:
+    print(f"Error fetching statistics: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getGlobalStatistics(apiKey) {
+    try {
+    const response = await axios.get(
+    'https://YOURSITE.konstant.ly/openapi/v1/statistics',
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    console.error('Error fetching statistics:', error.message);
+    throw error;
+}
+}
+
+    // Example usage
+    getGlobalStatistics('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv')
+    .then(stats => {
+    // Print general statistics
+    console.log('Platform Statistics:');
+    console.log(`Total Courses: ${stats.statistics.coursesCount}`);
+    console.log(`Total Users: ${stats.statistics.usersCount}`);
+    console.log(`Total Groups: ${stats.statistics.groupsCount}`);
+
+    // Print inactive users
+    console.log(`\nUsers without activity: ${stats.usersWithoutActivity.length}`);
+
+    // Print top performers
+    console.log('\nTop Performers:');
+    stats.leaders.forEach(leader => {
+    console.log(`User: ${leader.user.name}`);
+    console.log(`Completed Courses: ${leader.coursesCount}`);
+    console.log(`Average Score: ${leader.resultValue}%`);
+    console.log('---');
+});
+
+    // Print unassigned courses
+    console.log(`\nUnassigned Courses: ${stats.unassignedCourses.length}`);
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "statistics": {
+        "coursesCount": 25,
+        "assignedCoursesCount": 150,
+        "groupsCount": 10,
+        "usersCount": 100
+    },
+        "usersWithoutActivity": [
+    {
+        "id": "user123",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "language": "en",
+        "timezone": "Europe/London",
+        "role": {
+        "alias": "learner"
+    },
+        "isBanned": false,
+        "fromApi": false,
+        "image": null
+    }
+        ],
+        "usersWithoutResults": [
+    {
+        "id": "user456",
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "language": "en",
+        "timezone": "America/New_York",
+        "role": {
+        "alias": "learner"
+    },
+        "isBanned": false,
+        "fromApi": false,
+        "image": null
+    }
+        ],
+        "leaders": [
+    {
+        "coursesCount": 15,
+        "resultValue": 95,
+        "user": {
+        "id": "user789",
+        "name": "Alice Johnson",
+        "email": "alice@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+    }
+        ],
+        "unassignedCourses": [
+    {
+        "id": 123,
+        "name": "Introduction Course",
+        "annotation": "Basic introduction",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229,
+        "image": null
+    }
+        ]
+    }
+    ```
+</ResponseExample>

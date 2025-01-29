@@ -1,0 +1,168 @@
+---
+title: 'Cancel Invitation'
+api: 'DELETE /invites/{inviteId}'
+description: 'Cancel invitation'
+---
+
+Cancel an existing invitation, invalidating its signup URL.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="inviteId" type="integer" required>
+    Invitation ID
+</ParamField>
+
+## Response
+
+On success, returns HTTP 200 status code.
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Important Notes
+
+1. Effects of Cancellation:
+- The signup URL becomes immediately invalid
+- Cannot be undone - must create new invitation if needed
+- Does not affect users who have already accepted
+
+2. Use Cases:
+- Correcting mistakenly sent invitations
+- Revoking access before acceptance
+- Managing invitation expiry
+
+3. Security Considerations:
+- Consider canceling invitations for departed employees
+- Review pending invitations periodically
+- Track cancellations for audit purposes
+
+<RequestExample>
+    ```bash cURL
+    curl --request DELETE \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/invites/1234' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def delete_invitation(api_key: str, invite_id: int) -> None:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/invites/{invite_id}"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.delete(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Invitation {invite_id} not found")
+
+    response.raise_for_status()
+
+    # Example usage
+    try:
+    delete_invitation("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 1234)
+    print("Invitation cancelled successfully")
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Error canceling invitation: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function deleteInvitation(apiKey, inviteId) {
+    try {
+    await axios.delete(
+    `https://YOURSITE.konstant.ly/openapi/v1/invites/${inviteId}`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    console.log('Invitation cancelled successfully');
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`Invitation ${inviteId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    deleteInvitation('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', 1234)
+    .then(() => {
+    console.log('Successfully cancelled the invitation');
+})
+    .catch(error => {
+    console.error('Failed to cancel invitation:', error.message);
+});
+    ```
+
+    ```php PHP
+    <?php
+
+    function deleteInvitation($apiKey, $inviteId) {
+        $url = "https://YOURSITE.konstant.ly/openapi/v1/invites/{$inviteId}";
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_CUSTOMREQUEST => "DELETE",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                "X-API-KEY: {$apiKey}"
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpCode === 404) {
+            throw new Exception("Invitation {$inviteId} not found");
+        }
+
+        if (curl_errno($ch)) {
+            throw new Exception(curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to cancel invitation. Status code: {$httpCode}");
+        }
+    }
+
+    // Example usage
+    try {
+        deleteInvitation("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 1234);
+        echo "Invitation cancelled successfully\n";
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage() . "\n";
+    }
+
+    ?>
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

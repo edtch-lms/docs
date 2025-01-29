@@ -1,0 +1,650 @@
+---
+title: 'List Group Assignments'
+api: 'GET /groups/{groupId}/assignments'
+description: 'Get a list of the courses assigned to the group'
+---
+
+Retrieve a list of all courses that are assigned to a specific group.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+  The unique identifier of the group
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+  API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="assignments" type="array" required>
+  Array of assignment objects
+  <Expandable title="Assignment object properties">
+    <ResponseField name="assignedAt" type="integer" required>
+      Timestamp when the course was assigned to the group
+    </ResponseField>
+    <ResponseField name="deadlineAt" type="integer">
+      Exact timestamp when the assignment expires
+    </ResponseField>
+    <ResponseField name="deadlinePeriod" type="object">
+      The group member has to complete the course within this period
+      <Expandable title="Period properties">
+        <ResponseField name="measure" type="string" required>
+          Name of the time unit (hours, days, weeks, months)
+        </ResponseField>
+        <ResponseField name="value" type="integer" required>
+          Number of time units
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="course" type="object" required>
+      Course information
+      <Expandable title="Course properties">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course annotation</ResponseField>
+        <ResponseField name="isDraft" type="boolean" required>Whether the course is a draft</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+  Total number of assignments
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+  Returned when the group is not found
+  <Expandable title="Error object properties">
+    <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+    <ResponseField name="message" type="string" required>Error message</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+```python Python
+from typing import List, Optional, Dict
+from dataclasses import dataclass
+from datetime import datetime
+import requests
+
+@dataclass
+class DeadlinePeriod:
+    measure: str  # "hours", "days", "weeks", "months"
+    value: int
+
+@dataclass
+class Course:
+    id: int
+    name: str
+    annotation: str
+    is_draft: bool
+    created_at: datetime
+    updated_at: datetime
+    published_at: datetime
+
+@dataclass
+class Assignment:
+    assigned_at: datetime
+    deadline_at: Optional[datetime]
+    deadline_period: Optional[DeadlinePeriod]
+    course: Course
+
+def get_group_assignments(api_key: str, group_id: int) -> List[Assignment]:
+    """
+    Fetch all assignments for a specific group.
+
+    Args:
+        api_key: Your API key
+        group_id: The ID of the group to fetch assignments for
+
+    Returns:
+        List of Assignment objects containing course and deadline information
+
+    Raises:
+        ValueError: If the group is not found
+        requests.exceptions.RequestException: For API communication errors
+    """
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}/assignments"
+    headers = {"X-API-KEY": api_key}
+
+    try:
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 404:
+            raise ValueError(f"Group {group_id} not found")
+
+        response.raise_for_status()
+        data = response.json()
+
+        assignments = []
+        for item in data["assignments"]:
+            # Parse deadline information
+            deadline_at = None
+            if "deadlineAt" in item:
+                deadline_at = datetime.fromtimestamp(item["deadlineAt"])
+
+            deadline_period = None
+            if "deadlinePeriod" in item:
+                deadline_period = DeadlinePeriod(
+                    measure=item["deadlinePeriod"]["measure"],
+                    value=item["deadlinePeriod"]["value"]
+                )
+
+            # Parse course information
+            course = Course(
+                id=item["course"]["id"],
+                name=item["course"]["name"],
+                annotation=item["course"]["annotation"],
+                is_draft=item["course"]["isDraft"],
+                created_at=datetime.fromtimestamp(item["course"]["createdAt"]),
+                updated_at=datetime.fromtimestamp(item["course"]["updatedAt"]),
+                published_at=datetime.fromtimestamp(item["course"]["publishedAt"])
+            )
+
+            assignment = Assignment(
+                assigned_at=datetime.fromtimestamp(item["assignedAt"]),
+                deadline_at=deadline_at,
+                deadline_period=deadline_period,
+                course=course
+            )
+            assignments.append(assignment)
+
+        return assignments
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching assignments: {str(e)}")
+        if hasattr(e, "response") and e.response is not None:
+            print(f"Response: {e.response.text}")
+        raise
+
+if __name__ == "__main__":
+    try:
+        assignments = get_group_assignments("YOUR_API_KEY", 123)
+
+        print(f"Found {len(assignments)} assignments\n")
+
+        for assignment in assignments:
+            print(f"Course: {assignment.course.name}")
+            print(f"Status: {'Draft' if assignment.course.is_draft else 'Published'}")
+            print(f"Assigned: {assignment.assigned_at.strftime('%Y-%m-%d %H:%M:%S')}")
+
+            if assignment.deadline_at:
+                print(f"Deadline: {assignment.deadline_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            elif assignment.deadline_period:
+                print(f"Deadline: {assignment.deadline_period.value} {assignment.deadline_period.measure}")
+
+            print(f"Description: {assignment.course.annotation}")
+            print()
+
+    except ValueError as e:
+        print(f"Error: {str(e)}")
+    except Exception as e:
+        print(f"Failed to get assignments: {str(e)}")
+```
+
+```javascript Node.js
+const axios = require('axios');
+
+class GroupAssignments {
+  constructor(apiKey) {
+    this.client = axios.create({
+      baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+      headers: {
+        'X-API-KEY': apiKey
+      }
+    });
+  }
+
+  /**
+   * Fetch all assignments for a specific group.
+   * @param {number} groupId - The ID of the group to fetch assignments for
+   * @returns {Promise<Object>} The assignments data
+   * @throws {Error} If the API request fails
+   */
+  async getAssignments(groupId) {
+    try {
+      const response = await this.client.get(`/groups/${groupId}/assignments`);
+      return this.formatAssignments(response.data);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error(`Group ${groupId} not found`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Format timestamps and organize assignment data.
+   * @private
+   */
+  formatAssignments(data) {
+    return {
+      assignments: data.assignments.map(assignment => ({
+        course: {
+          id: assignment.course.id,
+          name: assignment.course.name,
+          annotation: assignment.course.annotation,
+          isDraft: assignment.course.isDraft,
+          createdAt: new Date(assignment.course.createdAt * 1000),
+          updatedAt: new Date(assignment.course.updatedAt * 1000),
+          publishedAt: new Date(assignment.course.publishedAt * 1000)
+        },
+        assignedAt: new Date(assignment.assignedAt * 1000),
+        deadlineAt: assignment.deadlineAt ?
+          new Date(assignment.deadlineAt * 1000) : null,
+        deadlinePeriod: assignment.deadlinePeriod || null
+      })),
+      totalCount: data.totalCount
+    };
+  }
+
+  /**
+   * Format deadline information for display.
+   * @private
+   */
+  formatDeadline(assignment) {
+    if (assignment.deadlineAt) {
+      return assignment.deadlineAt.toLocaleString();
+    }
+    if (assignment.deadlinePeriod) {
+      return `${assignment.deadlinePeriod.value} ${assignment.deadlinePeriod.measure}`;
+    }
+    return 'No deadline';
+  }
+}
+
+// Example usage
+async function main() {
+  const api = new GroupAssignments('YOUR_API_KEY');
+
+  try {
+    const { assignments, totalCount } = await api.getAssignments(123);
+
+    console.log(`Found ${totalCount} total assignments\n`);
+
+    assignments.forEach(assignment => {
+      console.log(`Course: ${assignment.course.name}`);
+      console.log(`Status: ${assignment.course.isDraft ? 'Draft' : 'Published'}`);
+      console.log(`Assigned: ${assignment.assignedAt.toLocaleString()}`);
+      console.log(`Deadline: ${api.formatDeadline(assignment)}`);
+      console.log(`Description: ${assignment.course.annotation}`);
+      console.log();
+    });
+
+  } catch (error) {
+    console.error('Failed to fetch assignments:', error.message);
+  }
+}
+
+main();
+```
+
+```php PHP
+<?php
+
+class GroupAssignments {
+    private $apiKey;
+    private $baseUrl;
+
+    public function __construct(string $apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    /**
+     * Fetch all assignments for a specific group.
+     *
+     * @param int $groupId The ID of the group to fetch assignments for
+     * @return array The assignments data
+     * @throws Exception If the API request fails
+     */
+    public function getAssignments(int $groupId): array {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups/{$groupId}/assignments";
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('API request failed: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($statusCode === 404) {
+            throw new Exception("Group {$groupId} not found");
+        }
+
+        if ($statusCode !== 200) {
+            throw new Exception("API request failed with status: {$statusCode}");
+        }
+
+        $data = json_decode($response, true);
+        return $this->formatAssignments($data);
+    }
+
+    /**
+     * Format timestamps and organize assignment data.
+     * @private
+     */
+    private function formatAssignments(array $data): array {
+        return array_map(function($assignment) {
+            return [
+                'course' => [
+                    'id' => $assignment['course']['id'],
+                    'name' => $assignment['course']['name'],
+                    'annotation' => $assignment['course']['annotation'],
+                    'isDraft' => $assignment['course']['isDraft'],
+                    'createdAt' => date('Y-m-d H:i:s', $assignment['course']['createdAt']),
+                    'updatedAt' => date('Y-m-d H:i:s', $assignment['course']['updatedAt']),
+                    'publishedAt' => date('Y-m-d H:i:s', $assignment['course']['publishedAt'])
+                ],
+                'assignedAt' => date('Y-m-d H:i:s', $assignment['assignedAt']),
+                'deadlineAt' => isset($assignment['deadlineAt']) ?
+                    date('Y-m-d H:i:s', $assignment['deadlineAt']) : null,
+                'deadlinePeriod' => $assignment['deadlinePeriod'] ?? null
+            ];
+        }, $data['assignments']);
+    }
+
+    /**
+     * Format deadline information for display.
+     * @private
+     */
+    private function formatDeadline(array $assignment): string {
+        if (isset($assignment['deadlineAt'])) {
+            return $assignment['deadlineAt'];
+        }
+        if (isset($assignment['deadlinePeriod'])) {
+            return "{$assignment['deadlinePeriod']['value']} " .
+                   "{$assignment['deadlinePeriod']['measure']}";
+        }
+        return 'No deadline';
+    }
+}
+
+// Example usage
+try {
+    $api = new GroupAssignments('YOUR_API_KEY');
+    $assignments = $api->getAssignments(123);
+
+    echo "Found " . count($assignments) . " assignments\n\n";
+
+    foreach ($assignments as $assignment) {
+        echo "Course: {$assignment['course']['name']}\n";
+        echo "Status: " . ($assignment['course']['isDraft'] ? 'Draft' : 'Published') . "\n";
+        echo "Assigned: {$assignment['assignedAt']}\n";
+        echo "Deadline: " . $api->formatDeadline($assignment) . "\n";
+        echo "Description: {$assignment['course']['annotation']}\n\n";
+    }
+
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+?>
+```
+
+```java Java
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+public class GroupAssignments {
+    private final String apiKey;
+    private final String baseUrl;
+    private final HttpClient client;
+    private final ObjectMapper mapper;
+    private final DateTimeFormatter formatter;
+
+    // Data Classes
+    public static class Course {
+        @JsonProperty("id")
+        public int id;
+
+        @JsonProperty("name")
+```java
+        @JsonProperty("name")
+        public String name;
+
+        @JsonProperty("annotation")
+        public String annotation;
+
+        @JsonProperty("isDraft")
+        public boolean isDraft;
+
+        @JsonProperty("createdAt")
+        public long createdAt;
+
+        @JsonProperty("updatedAt")
+        public long updatedAt;
+
+        @JsonProperty("publishedAt")
+        public long publishedAt;
+
+        public LocalDateTime getCreatedDateTime() {
+            return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(createdAt),
+                ZoneId.systemDefault()
+            );
+        }
+
+        public LocalDateTime getUpdatedDateTime() {
+            return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(updatedAt),
+                ZoneId.systemDefault()
+            );
+        }
+
+        public LocalDateTime getPublishedDateTime() {
+            return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(publishedAt),
+                ZoneId.systemDefault()
+            );
+        }
+    }
+
+    public static class DeadlinePeriod {
+        @JsonProperty("measure")
+        public String measure;  // hours, days, weeks, months
+
+        @JsonProperty("value")
+        public int value;
+
+        @Override
+        public String toString() {
+            return value + " " + measure;
+        }
+    }
+
+    public static class Assignment {
+        @JsonProperty("assignedAt")
+        public long assignedAt;
+
+        @JsonProperty("deadlineAt")
+        public Long deadlineAt;
+
+        @JsonProperty("deadlinePeriod")
+        public DeadlinePeriod deadlinePeriod;
+
+        @JsonProperty("course")
+        public Course course;
+
+        public LocalDateTime getAssignedDateTime() {
+            return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(assignedAt),
+                ZoneId.systemDefault()
+            );
+        }
+
+        public LocalDateTime getDeadlineDateTime() {
+            return deadlineAt != null ? LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(deadlineAt),
+                ZoneId.systemDefault()
+            ) : null;
+        }
+
+        public String getFormattedDeadline() {
+            if (deadlineAt != null) {
+                return getDeadlineDateTime().format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                );
+            } else if (deadlinePeriod != null) {
+                return deadlinePeriod.toString();
+            }
+            return "No deadline";
+        }
+    }
+
+    public static class AssignmentResponse {
+        @JsonProperty("assignments")
+        public List<Assignment> assignments;
+
+        @JsonProperty("totalCount")
+        public int totalCount;
+    }
+
+    public GroupAssignments(String apiKey) {
+        this.apiKey = apiKey;
+        this.baseUrl = "https://YOURSITE.konstant.ly/openapi/v1";
+        this.client = HttpClient.newHttpClient();
+        this.mapper = new ObjectMapper();
+        this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    }
+
+    /**
+     * Fetch all assignments for a specific group.
+     *
+     * @param groupId The ID of the group to fetch assignments for
+     * @return AssignmentResponse containing assignments and total count
+     * @throws Exception if the API request fails
+     */
+    public AssignmentResponse getAssignments(int groupId) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + "/groups/" + groupId + "/assignments"))
+            .header("X-API-KEY", apiKey)
+            .GET()
+            .build();
+
+        HttpResponse<String> response = client.send(
+            request,
+            HttpResponse.BodyHandlers.ofString()
+        );
+
+        if (response.statusCode() == 404) {
+            throw new Exception("Group " + groupId + " not found");
+        }
+
+        if (response.statusCode() != 200) {
+            throw new Exception(
+                "API request failed with status: " + response.statusCode()
+            );
+        }
+
+        return mapper.readValue(response.body(), AssignmentResponse.class);
+    }
+
+    public static void main(String[] args) {
+        GroupAssignments api = new GroupAssignments("YOUR_API_KEY");
+
+        try {
+            AssignmentResponse response = api.getAssignments(123);
+
+            System.out.println("Found " + response.totalCount + " total assignments\n");
+
+            for (Assignment assignment : response.assignments) {
+                System.out.println("Course: " + assignment.course.name);
+                System.out.println("Status: " +
+                    (assignment.course.isDraft ? "Draft" : "Published"));
+                System.out.println("Assigned: " +
+                    assignment.getAssignedDateTime().format(api.formatter));
+                System.out.println("Deadline: " +
+                    assignment.getFormattedDeadline());
+                System.out.println("Description: " +
+                    assignment.course.annotation);
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error fetching assignments: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        "assignments": [
+    {
+        "assignedAt": 1443183322,
+        "deadlineAt": 1444188932,
+        "course": {
+        "id": 123,
+        "name": "Sales Strategy Fundamentals",
+        "annotation": "Learn essential sales strategies and techniques",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229
+    }
+    },
+    {
+        "assignedAt": 1443183400,
+        "deadlinePeriod": {
+        "measure": "months",
+        "value": 2
+    },
+        "course": {
+        "id": 124,
+        "name": "Customer Relationship Management",
+        "annotation": "Master modern CRM principles and practices",
+        "isDraft": false,
+        "createdAt": 1507807800,
+        "updatedAt": 1507808400,
+        "publishedAt": 1508225300
+    }
+    }
+        ],
+        "totalCount": 2
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Group not found"
+    }
+    ```
+
+</ResponseExample>

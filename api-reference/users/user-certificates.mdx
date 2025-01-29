@@ -1,0 +1,179 @@
+---
+title: 'Get User Certificates'
+api: 'GET /users/{userId}/certificates'
+description: 'Get a list of user certificates (20 per page)'
+---
+
+Retrieve a paginated list of certificates earned by a specific user.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="offset" type="integer">
+    Entry number to start listing from
+
+    Example: `20`
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+    Number of entries to return
+</ParamField>
+
+## Response
+
+<ResponseField name="certificates" type="array" required>
+    Array of certificates
+    <Expandable title="Certificate properties">
+        <ResponseField name="id" type="integer" required>Certificate ID</ResponseField>
+        <ResponseField name="name" type="string" required>Certificate name</ResponseField>
+        <ResponseField name="description" type="string" required>Certificate description</ResponseField>
+        <ResponseField name="courseId" type="integer" required>Associated course ID</ResponseField>
+        <ResponseField name="courseName" type="string" required>Associated course name</ResponseField>
+        <ResponseField name="imageUrl" type="string" required>URL to certificate image</ResponseField>
+        <ResponseField name="achievedAt" type="integer" required>Achievement timestamp</ResponseField>
+        <ResponseField name="expiresAt" type="integer">Expiration timestamp (if applicable)</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    Total number of certificates
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/certificates?offset=0&limit=20' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Optional
+
+    def get_user_certificates(api_key: str, user_id: str,
+    offset: Optional[int] = None,
+    limit: Optional[int] = None) -> dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/certificates"
+    headers = {"X-API-KEY": api_key}
+
+    params = {}
+    if offset is not None:
+    params["offset"] = offset
+    if limit is not None:
+    params["limit"] = limit
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    result = get_user_certificates(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    "1234567890",
+    offset=0,
+    limit=20
+    )
+    print(f"Total certificates: {result['totalCount']}")
+    for cert in result['certificates']:
+    print(f"Certificate: {cert['name']}")
+    print(f"Course: {cert['courseName']}")
+    print(f"Achieved: {cert['achievedAt']}")
+    print("---")
+    except Exception as e:
+    print(f"Error: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getUserCertificates(apiKey, userId, offset = null, limit = null) {
+    const params = {};
+    if (offset !== null) params.offset = offset;
+    if (limit !== null) params.limit = limit;
+
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/certificates`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+},
+    params
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    getUserCertificates('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890', 0, 20)
+    .then(result => {
+    console.log(`Total certificates: ${result.totalCount}`);
+    result.certificates.forEach(cert => {
+    console.log(`Certificate: ${cert.name}`);
+    console.log(`Course: ${cert.courseName}`);
+    console.log(`Achieved: ${cert.achievedAt}`);
+    console.log('---');
+});
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "certificates": [
+    {
+        "id": 123,
+        "name": "Sales Professional Certificate",
+        "description": "Advanced Sales Training Completion",
+        "courseId": 110,
+        "courseName": "Advanced Sales Techniques",
+        "imageUrl": "http://s3.amazonaws.com/certificates/cert123.png",
+        "achievedAt": 1443188946,
+        "expiresAt": 1474724946
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

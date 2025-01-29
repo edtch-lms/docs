@@ -1,0 +1,379 @@
+---
+title: 'Get Certificate'
+api: 'GET /certificates/{certificateId}'
+description: 'Get a certificate by ID'
+---
+
+Retrieve detailed information about a specific certificate.
+
+## Path Parameters
+
+<ParamField path="certificateId" type="integer" required>
+    The unique identifier of the certificate
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="integer" required>Certificate ID</ResponseField>
+<ResponseField name="name" type="string" required>Certificate name</ResponseField>
+<ResponseField name="description" type="string" required>Certificate description</ResponseField>
+<ResponseField name="courseId" type="integer" required>Course ID</ResponseField>
+<ResponseField name="courseName" type="string" required>Course name</ResponseField>
+<ResponseField name="imageUrl" type="string" required>URL to the certificate image</ResponseField>
+<ResponseField name="achievedAt" type="integer" required>Timestamp of certificate issue</ResponseField>
+<ResponseField name="expiresAt" type="integer">Timestamp when the certificate expires</ResponseField>
+<ResponseField name="user" type="object" required>
+    User who has got the certificate
+    <Expandable title="User Object">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>Full name</ResponseField>
+        <ResponseField name="language" type="string" required>Interface language (de, en, es, fr, pl, pt, ru)</ResponseField>
+        <ResponseField name="occupation" type="string">Job title (optional)</ResponseField>
+        <ResponseField name="location" type="string">User location (optional)</ResponseField>
+        <ResponseField name="timezone" type="string" required>User timezone in TZ format</ResponseField>
+        <ResponseField name="email" type="string" required>Email address</ResponseField>
+        <ResponseField name="isBanned" type="boolean" required>User ban status</ResponseField>
+        <ResponseField name="role" type="object" required>User role information</ResponseField>
+        <ResponseField name="fromApi" type="boolean" required>Whether created via API</ResponseField>
+        <ResponseField name="image" type="object">User avatar information</ResponseField>
+        <ResponseField name="attributes" type="object">Custom user attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the certificate is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/certificates/123' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Dict
+
+    def get_certificate(api_key: str, certificate_id: int) -> Dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/certificates/{certificate_id}"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Certificate {certificate_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error getting certificate: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    certificate = get_certificate("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+    print(f"Certificate: {certificate['name']}")
+    print(f"Course: {certificate['courseName']}")
+    print(f"Issued to: {certificate['user']['name']}")
+    print(f"Achieved at: {certificate['achievedAt']}")
+
+    if certificate.get('expiresAt'):
+    print(f"Expires at: {certificate['expiresAt']}")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to get certificate: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class CertificatesAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async getCertificate(certificateId) {
+    try {
+    const response = await this.client.get(`/certificates/${certificateId}`);
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`Certificate ${certificateId} not found`);
+}
+    throw new Error(`Failed to get certificate: ${error.response?.data?.message || error.message}`);
+}
+}
+
+    // Helper method to format certificate details
+    formatCertificateInfo(certificate) {
+    return {
+    certificateName: certificate.name,
+    courseName: certificate.courseName,
+    issuedTo: certificate.user.name,
+    achievedAt: new Date(certificate.achievedAt * 1000).toLocaleString(),
+    expiresAt: certificate.expiresAt ?
+    new Date(certificate.expiresAt * 1000).toLocaleString() :
+    'Never'
+};
+}
+}
+
+    // Example usage
+    async function main() {
+    const certificatesApi = new CertificatesAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const certificate = await certificatesApi.getCertificate(123);
+    const info = certificatesApi.formatCertificateInfo(certificate);
+
+    console.log('Certificate Details:');
+    console.log(`Name: ${info.certificateName}`);
+    console.log(`Course: ${info.courseName}`);
+    console.log(`Issued to: ${info.issuedTo}`);
+    console.log(`Achieved at: ${info.achievedAt}`);
+    console.log(`Expires at: ${info.expiresAt}`);
+
+} catch (error) {
+    console.error('Failed to get certificate:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class CertificatesAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function getCertificate($certificateId) {
+        $ch = curl_init();
+
+    $url = "{$this->baseUrl}/certificates/{$certificateId}";
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'X-API-KEY: ' . $this->apiKey
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch)) {
+        throw new Exception('Error: ' . curl_error($ch));
+    }
+
+    curl_close($ch);
+
+    if ($httpCode === 404) {
+        throw new Exception("Certificate $certificateId not found");
+    }
+
+    if ($httpCode !== 200) {
+        throw new Exception("Failed to get certificate. Status code: $httpCode");
+    }
+
+    return json_decode($response, true);
+}
+
+    // Helper method to format certificate details
+    public function formatCertificateInfo($certificate) {
+        return [
+            'certificateName' => $certificate['name'],
+            'courseName' => $certificate['courseName'],
+            'issuedTo' => $certificate['user']['name'],
+            'achievedAt' => date('Y-m-d H:i:s', $certificate['achievedAt']),
+            'expiresAt' => isset($certificate['expiresAt']) ?
+                date('Y-m-d H:i:s', $certificate['expiresAt']) :
+                'Never'
+        ];
+    }
+}
+
+    // Example usage
+    try {
+        $certificatesApi = new CertificatesAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    $certificate = $certificatesApi->getCertificate(123);
+    $info = $certificatesApi->formatCertificateInfo($certificate);
+
+    echo "Certificate Details:\n";
+    echo "Name: {$info['certificateName']}\n";
+    echo "Course: {$info['courseName']}\n";
+    echo "Issued to: {$info['issuedTo']}\n";
+    echo "Achieved at: {$info['achievedAt']}\n";
+    echo "Expires at: {$info['expiresAt']}\n";
+
+    } catch (Exception $e) {
+        echo "Failed to get certificate: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.time.Instant;
+    import java.time.LocalDateTime;
+    import java.time.ZoneId;
+    import java.util.Map;
+
+    public class CertificatesAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public Map<String, Object> getCertificate(int certificateId) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/certificates/" + certificateId))
+    .header("X-API-KEY", API_KEY)
+    .GET()
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Certificate " + certificateId + " not found");
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to get certificate. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Map.class);
+}
+
+    // Helper method to format certificate details
+    public static class CertificateInfo {
+    public final String certificateName;
+    public final String courseName;
+    public final String issuedTo;
+    public final LocalDateTime achievedAt;
+    public final LocalDateTime expiresAt;
+
+    public CertificateInfo(Map<String, Object> certificate) {
+    this.certificateName = (String) certificate.get("name");
+    this.courseName = (String) certificate.get("courseName");
+
+    Map<String, Object> user = (Map<String, Object>) certificate.get("user");
+    this.issuedTo = (String) user.get("name");
+
+    this.achievedAt = LocalDateTime.ofInstant(
+    Instant.ofEpochSecond(((Number) certificate.get("achievedAt")).longValue()),
+    ZoneId.systemDefault()
+    );
+
+    if (certificate.get("expiresAt") != null) {
+    this.expiresAt = LocalDateTime.ofInstant(
+    Instant.ofEpochSecond(((Number) certificate.get("expiresAt")).longValue()),
+    ZoneId.systemDefault()
+    );
+} else {
+    this.expiresAt = null;
+}
+}
+}
+
+    public static void main(String[] args) {
+    CertificatesAPI api = new CertificatesAPI();
+
+    try {
+    Map<String, Object> certificate = api.getCertificate(123);
+    CertificateInfo info = new CertificateInfo(certificate);
+
+    System.out.println("Certificate Details:");
+    System.out.println("Name: " + info.certificateName);
+    System.out.println("Course: " + info.courseName);
+    System.out.println("Issued to: " + info.issuedTo);
+    System.out.println("Achieved at: " + info.achievedAt);
+    System.out.println("Expires at: " +
+    (info.expiresAt != null ? info.expiresAt : "Never"));
+
+} catch (Exception e) {
+    System.err.println("Failed to get certificate: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "id": 123,
+        "name": "Course Completion Certificate",
+        "description": "Certificate of completion for Advanced Marketing Course",
+        "courseId": 2,
+        "courseName": "Advanced Marketing",
+        "imageUrl": "http://s3.amazonaws.com/qwerty/certificate.png",
+        "achievedAt": 1234567890,
+        "expiresAt": 1334567890,
+        "user": {
+        "id": "1234567890",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "language": "en",
+        "timezone": "Europe/London",
+        "occupation": "Marketing Manager",
+        "location": "London",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": false,
+        "image": null,
+        "attributes": {}
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

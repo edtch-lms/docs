@@ -1,0 +1,488 @@
+---
+title: 'Update Group'
+api: 'PATCH /groups/{groupId}'
+description: 'Update the group information'
+---
+
+Update information for an existing group.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group to update
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+<ParamField body="name" type="string" required>
+    Group name
+</ParamField>
+
+<ParamField body="parentId" type="string">
+    Parent group ID
+</ParamField>
+
+<ParamField body="description" type="string">
+    Group description
+</ParamField>
+
+<ParamField body="attributes" type="object">
+    Custom group attributes mapped by attribute name
+</ParamField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Returned when the request is invalid
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Validation errors by field</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="404" type="object">
+    Returned when the group is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request PATCH \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "name": "Updated Sales Team",
+    "description": "Updated description",
+    "attributes": {
+    "region": "North",
+    "department": "Sales"
+}
+}'
+    ```
+
+    ```python Python
+    import requests
+    from dataclasses import dataclass
+    from typing import Optional, Dict, Any
+
+    @dataclass
+    class GroupUpdate:
+    name: str
+    parent_id: Optional[int] = None
+    description: Optional[str] = None
+    attributes: Optional[Dict[str, Any]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+    data = {
+    "name": self.name
+}
+    if self.parent_id is not None:
+    data["parentId"] = self.parent_id
+    if self.description is not None:
+    data["description"] = self.description
+    if self.attributes is not None:
+    data["attributes"] = self.attributes
+    return data
+
+    def update_group(api_key: str, group_id: int, update: GroupUpdate) -> Dict[str, Any]:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    try:
+    response = requests.patch(url, headers=headers, json=update.to_dict())
+
+    if response.status_code == 404:
+    raise ValueError(f"Group {group_id} not found")
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    response.raise_for_status()
+    return response.json()
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error updating group: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    update = GroupUpdate(
+    name="Updated Sales Team",
+    description="Updated description",
+    attributes={
+    "region": "North",
+    "department": "Sales"
+}
+    )
+
+    group = update_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123, update)
+
+    print("Group updated successfully!")
+    print(f"ID: {group['id']}")
+    print(f"Name: {group['name']}")
+    print(f"Description: {group.get('description', 'N/A')}")
+    print("Attributes:")
+    for key, value in group.get('attributes', {}).items():
+    print(f"  {key}: {value}")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to update group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+});
+}
+
+    async updateGroup(groupId, { name, parentId, description, attributes }) {
+    try {
+    // Build update payload with only defined values
+    const updateData = { name };
+    if (parentId !== undefined) updateData.parentId = parentId;
+    if (description !== undefined) updateData.description = description;
+    if (attributes !== undefined) updateData.attributes = attributes;
+
+    const response = await this.client.patch(`/groups/${groupId}`, updateData);
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 404) {
+    throw new Error(`Group ${groupId} not found`);
+}
+    if (error.response.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    throw new Error(`Failed to update group: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    const group = await groupsApi.updateGroup(123, {
+    name: 'Updated Sales Team',
+    description: 'Updated description',
+    attributes: {
+    region: 'North',
+    department: 'Sales'
+}
+});
+
+    console.log('Group updated successfully!');
+    console.log(`ID: ${group.id}`);
+    console.log(`Name: ${group.name}`);
+    console.log(`Description: ${group.description || 'N/A'}`);
+    console.log('Attributes:');
+    if (group.attributes) {
+    Object.entries(group.attributes).forEach(([key, value]) => {
+    console.log(`  ${key}: ${value}`);
+});
+}
+
+} catch (error) {
+    console.error('Failed to update group:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function updateGroup($groupId, $updateData) {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups/{$groupId}";
+        $jsonData = json_encode($updateData);
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'PATCH',
+            CURLOPT_POSTFIELDS => $jsonData,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey,
+                'Content-Type: application/json'
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        $responseData = json_decode($response, true);
+
+        if ($httpCode === 404) {
+            throw new Exception("Group $groupId not found");
+        }
+
+        if ($httpCode === 400) {
+            echo "Validation errors:\n";
+            if (isset($responseData['errors'])) {
+                foreach ($responseData['errors'] as $field => $errors) {
+                    echo "$field: " . implode(', ', $errors) . "\n";
+                }
+            }
+            throw new Exception($responseData['message'] ?? 'Invalid request');
+        }
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to update group. Status code: $httpCode");
+        }
+
+        return $responseData;
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        $updateData = [
+            'name' => 'Updated Sales Team',
+            'description' => 'Updated description',
+            'attributes' => [
+                'region' => 'North',
+                'department' => 'Sales'
+            ]
+        ];
+
+        $group = $groupsApi->updateGroup(123, $updateData);
+
+        echo "Group updated successfully!\n";
+        echo "ID: {$group['id']}\n";
+        echo "Name: {$group['name']}\n";
+        echo "Description: " . ($group['description'] ?? 'N/A') . "\n";
+        echo "Attributes:\n";
+        if (isset($group['attributes'])) {
+            foreach ($group['attributes'] as $key => $value) {
+                echo "  $key: $value\n";
+            }
+        }
+
+    } catch (Exception $e) {
+        echo "Failed to update group: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.Map;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // Update Request class
+    public static class GroupUpdate {
+    @JsonProperty("name")
+    public String name;
+
+    @JsonProperty("parentId")
+    public Integer parentId;
+
+    @JsonProperty("description")
+    public String description;
+
+    @JsonProperty("attributes")
+    public Map<String, Object> attributes;
+
+    public GroupUpdate(String name) {
+    this.name = name;
+}
+
+    public GroupUpdate setParentId(Integer parentId) {
+    this.parentId = parentId;
+    return this;
+}
+
+    public GroupUpdate setDescription(String description) {
+    this.description = description;
+    return this;
+}
+
+    public GroupUpdate setAttributes(Map<String, Object> attributes) {
+    this.attributes = attributes;
+    return this;
+}
+}
+
+    public Group updateGroup(int groupId, GroupUpdate update) throws Exception {
+    String jsonBody = mapper.writeValueAsString(update);
+
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups/" + groupId))
+    .header("X-API-KEY", API_KEY)
+    .header("Content-Type", "application/json")
+    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody))
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Group " + groupId + " not found");
+}
+
+    if (response.statusCode() == 400) {
+    Map<String, Object> errorResponse = mapper.readValue(response.body(), Map.class);
+    System.out.println("Validation errors:");
+    if (errorResponse.containsKey("errors")) {
+    Map<String, Object> errors = (Map<String, Object>) errorResponse.get("errors");
+    errors.forEach((field, messages) -> {
+    System.out.println(field + ": " + messages);
+});
+}
+    throw new Exception(errorResponse.getOrDefault("message", "Invalid request").toString());
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to update group. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Group.class);
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("region", "North");
+    attributes.put("department", "Sales");
+
+    GroupUpdate update = new GroupUpdate("Updated Sales Team")
+    .setDescription("Updated description")
+    .setAttributes(attributes);
+
+    Group group = api.updateGroup(123, update);
+
+    System.out.println("Group updated successfully!");
+    System.out.println("ID: " + group.id);
+    System.out.println("Name: " + group.name);
+    System.out.println("Description: " +
+    (group.description != null ? group.description : "N/A"));
+
+    System.out.println("Attributes:");
+    if (group.attributes != null) {
+    group.attributes.forEach((key, value) ->
+    System.out.println("  " + key + ": " + value));
+}
+
+} catch (Exception e) {
+    System.err.println("Failed to update group: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        "id": 123,
+        "parentId": 1,
+        "name": "Updated Sales Team",
+        "usersCount": 10,
+        "coursesCount": 5,
+        "description": "Updated description",
+        "attributes": {
+        "region": "North",
+        "department": "Sales"
+    },
+        "image": {
+        "id": 1234,
+        "original": "http://example.com/images/original/1234.jpg",
+        "mini": "http://example.com/images/mini/1234.jpg",
+        "small": "http://example.com/images/small/1234.jpg"
+    }
+    }
+    ```
+
+    ```json 400 Error - Validation Failed
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "name": ["Name cannot be empty"],
+        "attributes.region": ["Invalid region specified"]
+    }
+    }
+    ```
+
+    ```json 404 Error - Not Found
+    {
+        "status": 404,
+        "message": "Group not found"
+    }
+    ```
+</ResponseExample>

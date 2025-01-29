@@ -1,0 +1,314 @@
+---
+title: 'Update User Custom Attributes'
+api: 'POST /custom/attributes/users'
+description: 'Update custom user attributes with new configurations'
+---
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+The request body should contain an array of attribute configuration objects. Each attribute object has these properties:
+
+<ParamField body="id" type="integer">
+    ID of an existing attribute if updating (omit for new attributes)
+</ParamField>
+
+<ParamField body="name" type="string" required>
+    Display name of the attribute
+</ParamField>
+
+<ParamField body="type" type="integer" required>
+    Type of attribute:
+    - 1: text
+    - 2: date
+    - 3: single choice
+    - 4: multiple choice
+    - 5: user choice
+    - 6: yes/no
+    - 7: external link
+    - 8: number
+</ParamField>
+
+<ParamField body="apiId" type="string">
+    API identifier for the attribute. Generated automatically if not provided.
+</ParamField>
+
+<ParamField body="position" type="integer" required>
+    Display order position of the attribute
+</ParamField>
+
+<ParamField body="isRequired" type="boolean" required>
+    Whether this attribute is mandatory
+</ParamField>
+
+<ParamField body="isVisible" type="boolean" required>
+    Whether this attribute is visible in the interface
+</ParamField>
+
+<ParamField body="isEditable" type="boolean" required>
+    Whether this attribute can be modified
+</ParamField>
+
+<ParamField body="extraData" type="array">
+    Required for choice-type attributes (types 3 and 4). Array of options, each containing:
+    <Expandable title="Option properties">
+        <ParamField name="position" type="integer" required>Display order of the option</ParamField>
+        <ParamField name="value" type="string" required>Display value of the option</ParamField>
+    </Expandable>
+</ParamField>
+
+## Response
+
+Returns an array of the updated attribute configurations with IDs assigned.
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Validation error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Validation errors by field</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Usage Notes
+
+1. Type-specific requirements:
+- Text (type 1): Limited to 255 characters
+- Date (type 2): Must be valid ISO format dates
+- Single/Multiple Choice (types 3, 4): Must include extraData options
+- Number (type 8): Must be valid numeric values
+
+2. Updating existing attributes:
+- Include the ID to update rather than create new
+- Cannot change type of existing attributes
+- Can modify options for choice attributes
+- Position numbers should be unique
+
+3. Validation:
+- All required fields must be provided
+- Type must be valid (1-8)
+- Position must be a positive integer
+- Choice types require at least one option
+- apiId must be unique if provided
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/users' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '[
+    {
+        "name": "Division",
+        "type": 3,
+        "apiId": "division",
+        "position": 1,
+        "isRequired": true,
+        "isVisible": true,
+        "isEditable": true,
+        "extraData": [
+    {
+        "position": 1,
+        "value": "Sales"
+    },
+    {
+        "position": 2,
+        "value": "Marketing"
+    }
+        ]
+    },
+    {
+        "name": "Start Date",
+        "type": 2,
+        "apiId": "start_date",
+        "position": 2,
+        "isRequired": true,
+        "isVisible": true,
+        "isEditable": true
+    }
+    ]'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Dict, Any
+
+    def update_user_attributes(api_key: str, attributes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/users"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    response = requests.post(url, headers=headers, json=attributes)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    attributes = [
+    {
+        "name": "Division",
+        "type": 3,  # single choice
+        "apiId": "division",
+        "position": 1,
+        "isRequired": True,
+        "isVisible": True,
+        "isEditable": True,
+        "extraData": [
+    {"position": 1, "value": "Sales"},
+    {"position": 2, "value": "Marketing"}
+        ]
+    },
+    {
+        "name": "Start Date",
+        "type": 2,  # date
+        "apiId": "start_date",
+        "position": 2,
+        "isRequired": True,
+        "isVisible": True,
+        "isEditable": True
+    }
+    ]
+
+    try:
+    updated_attributes = update_user_attributes(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    attributes
+    )
+    print("Attributes updated successfully")
+    for attr in updated_attributes:
+    print(f"Updated: {attr['name']} (ID: {attr['id']})")
+    except Exception as e:
+    print(f"Failed to update attributes: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function updateUserAttributes(apiKey, attributes) {
+    try {
+    const response = await axios.post(
+    'https://YOURSITE.konstant.ly/openapi/v1/custom/attributes/users',
+    attributes,
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    throw error;
+}
+}
+
+    // Example usage
+    const attributes = [
+    {
+        name: "Division",
+        type: 3,  // single choice
+        apiId: "division",
+        position: 1,
+        isRequired: true,
+        isVisible: true,
+        isEditable: true,
+        extraData: [
+    { position: 1, value: "Sales" },
+    { position: 2, value: "Marketing" }
+        ]
+    },
+    {
+        name: "Start Date",
+        type: 2,  // date
+        apiId: "start_date",
+        position: 2,
+        isRequired: true,
+        isVisible: true,
+        isEditable: true
+    }
+    ];
+
+    updateUserAttributes('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', attributes)
+    .then(updatedAttributes => {
+    console.log('Attributes updated successfully');
+    updatedAttributes.forEach(attr => {
+    console.log(`Updated: ${attr.name} (ID: ${attr.id})`);
+});
+})
+    .catch(error => console.error('Failed to update attributes:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    [
+    {
+        "id": 1,
+        "name": "Division",
+        "type": 3,
+        "apiId": "division",
+        "position": 1,
+        "isRequired": true,
+        "isEditable": true,
+        "extraData": [
+    {
+        "id": 1,
+        "position": 1,
+        "value": "Sales"
+    },
+    {
+        "id": 2,
+        "position": 2,
+        "value": "Marketing"
+    }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Start Date",
+        "type": 2,
+        "apiId": "start_date",
+        "position": 2,
+        "isRequired": true,
+        "isEditable": true,
+        "extraData": null
+    }
+    ]
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "attributes[0].name": ["Name is required"],
+        "attributes[0].type": ["Invalid attribute type"],
+        "attributes[0].extraData": ["Options required for choice type attributes"]
+    }
+    }
+    ```
+</ResponseExample>

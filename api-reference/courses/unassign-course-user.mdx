@@ -1,0 +1,60 @@
+---
+title: 'Unassign User from Course'
+api: 'DELETE /courses/{courseId}/assignments/users/{userId}'
+description: 'Unassign a specific user from a course'
+---
+
+Remove a course assignment from a specific user.
+
+## Path Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+<ParamField path="userId" type="string" required>
+    The unique identifier of the user to unassign
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+On successful unassignment, returns an empty response with HTTP status code 200.
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when either the course or user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash
+    curl --request DELETE \
+    --url https://YOURSITE.konstant.ly/openapi/v1/courses/123/assignments/users/1234567890 \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json
+    {
+        // Empty response on success
+    }
+    ```
+
+    ```json 404 Not Found
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

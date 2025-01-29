@@ -1,0 +1,183 @@
+---
+title: 'Course Webhook Events'
+description: 'Course-related webhook events and payloads'
+---
+
+Course webhooks provide real-time notifications about course-related activities and state changes.
+
+## Course/Published
+
+Triggered when a course is published and becomes available to users.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Published course information
+    <Expandable title="Course properties">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course description</ResponseField>
+        <ResponseField name="isDraft" type="boolean" required>Always false for published</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+        <ResponseField name="image" type="object">Course cover image</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Course/Assigned
+
+Triggered when a course is assigned to a user.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Course information (same structure as Course/Published)
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+    User the course was assigned to
+    <Expandable title="User properties">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>User's name</ResponseField>
+        <ResponseField name="email" type="string" required>User's email</ResponseField>
+        <ResponseField name="role" type="object" required>User's role</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="assignedAt" type="integer" required>
+    Assignment timestamp
+</ResponseField>
+
+<ResponseField name="deadlineAt" type="integer" required>
+    Deadline timestamp
+</ResponseField>
+
+## Course/Progress
+
+Triggered when a user makes progress in a course.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Course information
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+    User information
+</ResponseField>
+
+<ResponseField name="progressValue" type="integer" required>
+    Current progress (0-100)
+</ResponseField>
+
+<ResponseField name="courseElement" type="object" required>
+    Current course element
+    <Expandable title="Element properties">
+        <ResponseField name="id" type="integer" required>Element ID</ResponseField>
+        <ResponseField name="name" type="string" required>Element name</ResponseField>
+        <ResponseField name="type" type="string" required>Element type</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Course/Finished
+
+Triggered when a user completes a course.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Course information
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+    User information
+</ResponseField>
+
+<ResponseField name="resultValue" type="integer" required>
+    Final result value (0-100)
+</ResponseField>
+
+<RequestExample>
+    ```json Course/Published
+    {
+        "occuredAt": 1673531200,
+        "type": "Course/Published",
+        "body": {
+        "course": {
+        "id": 123,
+        "name": "Sales Training",
+        "annotation": "Comprehensive sales course",
+        "isDraft": false,
+        "createdAt": 1673444800,
+        "updatedAt": 1673531100,
+        "publishedAt": 1673531200
+    }
+    }
+    }
+    ```
+
+    ```json Course/Assigned
+    {
+        "occuredAt": 1673531300,
+        "type": "Course/Assigned",
+        "body": {
+        "course": {
+        "id": 123,
+        "name": "Sales Training"
+    },
+        "user": {
+        "id": "user123",
+        "name": "John Smith",
+        "email": "john@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    },
+        "assignedAt": 1673531300,
+        "deadlineAt": 1674736000
+    }
+    }
+    ```
+
+    ```json Course/Progress
+    {
+        "occuredAt": 1673535000,
+        "type": "Course/Progress",
+        "body": {
+        "course": {
+        "id": 123,
+        "name": "Sales Training"
+    },
+        "user": {
+        "id": "user123",
+        "name": "John Smith"
+    },
+        "progressValue": 45,
+        "courseElement": {
+        "id": 456,
+        "name": "Module 3: Advanced Techniques",
+        "type": "page"
+    }
+    }
+    }
+    ```
+
+    ```json Course/Finished
+    {
+        "occuredAt": 1673628000,
+        "type": "Course/Finished",
+        "body": {
+        "course": {
+        "id": 123,
+        "name": "Sales Training"
+    },
+        "user": {
+        "id": "user123",
+        "name": "John Smith"
+    },
+        "resultValue": 95
+    }
+    }
+    ```
+</RequestExample>

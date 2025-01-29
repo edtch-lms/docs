@@ -1,0 +1,435 @@
+---
+title: 'List Groups'
+api: 'GET /groups'
+description: 'Get a list of groups (20 per page)'
+---
+
+Retrieve a paginated list of all groups on your platform.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="offset" type="integer">
+    Entry number to start listing from. Use this for pagination.
+
+    Example: `20` to get the second page of results
+</ParamField>
+
+## Response
+
+<ResponseField name="groups" type="array" required>
+    Array of group objects
+    <Expandable title="Group object properties">
+        <ResponseField name="id" type="integer" required>Group ID</ResponseField>
+        <ResponseField name="parentId" type="integer">Parent group ID (optional)</ResponseField>
+        <ResponseField name="name" type="string" required>Name of the group</ResponseField>
+        <ResponseField name="usersCount" type="integer" required>Number of users in the group</ResponseField>
+        <ResponseField name="coursesCount" type="integer" required>Number of courses assigned to the group</ResponseField>
+        <ResponseField name="image" type="object">
+            Group cover image details
+            <Expandable title="Image object properties">
+                <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+                <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+                <ResponseField name="mini" type="string" required>URL to image 36x36 px</ResponseField>
+                <ResponseField name="small" type="string" required>URL to image 330x130 px</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    The total number of groups
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups?offset=0' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Optional
+    from dataclasses import dataclass
+
+    @dataclass
+    class GroupImage:
+    id: int
+    original: str
+    mini: str
+    small: str
+
+    @dataclass
+    class Group:
+    id: int
+    name: str
+    parent_id: Optional[int]
+    users_count: int
+    courses_count: int
+    image: Optional[GroupImage]
+
+    def list_groups(api_key: str, offset: int = 0) -> tuple[List[Group], int]:
+    url = "https://YOURSITE.konstant.ly/openapi/v1/groups"
+    headers = {
+    "X-API-KEY": api_key
+}
+    params = {"offset": offset}
+
+    try:
+    response = requests.get(url, headers=headers, params=params)
+    response.raise_for_status()
+    data = response.json()
+
+    groups = []
+    for group_data in data["groups"]:
+    image = None
+    if group_data.get("image"):
+    image = GroupImage(**group_data["image"])
+
+    group = Group(
+    id=group_data["id"],
+    name=group_data["name"],
+    parent_id=group_data.get("parentId"),
+    users_count=group_data["usersCount"],
+    courses_count=group_data["coursesCount"],
+    image=image
+    )
+    groups.append(group)
+
+    return groups, data["totalCount"]
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error fetching groups: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    groups, total = list_groups("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv")
+    print(f"Found {total} total groups")
+
+    for group in groups:
+    print(f"\nGroup: {group.name}")
+    print(f"Users: {group.users_count}")
+    print(f"Courses: {group.courses_count}")
+    if group.parent_id:
+    print(f"Parent Group ID: {group.parent_id}")
+
+    except Exception as e:
+    print(f"Failed to list groups: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async listGroups(offset = 0) {
+    try {
+    const response = await this.client.get('/groups', {
+    params: { offset }
+});
+
+    return {
+    groups: response.data.groups,
+    totalCount: response.data.totalCount
+};
+} catch (error) {
+    if (error.response) {
+    console.error('Error response:', error.response.data);
+    throw new Error(`Failed to fetch groups: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+
+    // Helper method to fetch all groups (handles pagination)
+    async getAllGroups() {
+    const groups = [];
+    let offset = 0;
+    let totalCount = 0;
+
+    do {
+    const response = await this.listGroups(offset);
+    groups.push(...response.groups);
+    totalCount = response.totalCount;
+    offset += 20; // Page size
+} while (groups.length < totalCount);
+
+    return groups;
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    // Get first page of groups
+    const { groups, totalCount } = await groupsApi.listGroups();
+    console.log(`Found ${totalCount} total groups`);
+
+    groups.forEach(group => {
+    console.log('\nGroup Details:');
+    console.log(`Name: ${group.name}`);
+    console.log(`Users: ${group.usersCount}`);
+    console.log(`Courses: ${group.coursesCount}`);
+    if (group.parentId) {
+    console.log(`Parent Group ID: ${group.parentId}`);
+}
+});
+
+    // Optional: Get all groups
+    console.log('\nFetching all groups...');
+    const allGroups = await groupsApi.getAllGroups();
+    console.log(`Retrieved all ${allGroups.length} groups`);
+
+} catch (error) {
+    console.error('Failed to list groups:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function listGroups($offset = 0) {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups?offset={$offset}";
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to fetch groups. Status code: $httpCode");
+        }
+
+        return json_decode($response, true);
+    }
+
+    // Helper method to get all groups
+    public function getAllGroups() {
+        $allGroups = [];
+        $offset = 0;
+
+        do {
+            $response = $this->listGroups($offset);
+            $allGroups = array_merge($allGroups, $response['groups']);
+            $offset += 20; // Page size
+        } while (count($allGroups) < $response['totalCount']);
+
+        return $allGroups;
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        // Get first page of groups
+        $result = $groupsApi->listGroups();
+        echo "Found {$result['totalCount']} total groups\n";
+
+        foreach ($result['groups'] as $group) {
+            echo "\nGroup Details:\n";
+            echo "Name: {$group['name']}\n";
+            echo "Users: {$group['usersCount']}\n";
+            echo "Courses: {$group['coursesCount']}\n";
+
+            if (isset($group['parentId'])) {
+                echo "Parent Group ID: {$group['parentId']}\n";
+            }
+        }
+
+        // Optional: Get all groups
+        echo "\nFetching all groups...\n";
+        $allGroups = $groupsApi->getAllGroups();
+        echo "Retrieved all " . count($allGroups) . " groups\n";
+
+    } catch (Exception $e) {
+        echo "Failed to list groups: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // Data classes
+    public static class GroupImage {
+    @JsonProperty("id")
+    public int id;
+    @JsonProperty("original")
+    public String original;
+    @JsonProperty("mini")
+    public String mini;
+    @JsonProperty("small")
+    public String small;
+}
+
+    public static class Group {
+    @JsonProperty("id")
+    public int id;
+    @JsonProperty("parentId")
+    public Integer parentId;
+    @JsonProperty("name")
+    public String name;
+    @JsonProperty("usersCount")
+    public int usersCount;
+    @JsonProperty("coursesCount")
+    public int coursesCount;
+    @JsonProperty("image")
+    public GroupImage image;
+}
+
+    public static class GroupsResponse {
+    @JsonProperty("groups")
+    public List<Group> groups;
+    @JsonProperty("totalCount")
+    public int totalCount;
+}
+
+    public GroupsResponse listGroups(int offset) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups?offset=" + offset))
+    .header("X-API-KEY", API_KEY)
+    .GET()
+    .build();
+
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to fetch groups. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), GroupsResponse.class);
+}
+
+    // Helper method to get all groups
+    public List<Group> getAllGroups() throws Exception {
+    List<Group> allGroups = new ArrayList<>();
+    int offset = 0;
+    GroupsResponse response;
+
+    do {
+    response = listGroups(offset);
+    allGroups.addAll(response.groups);
+    offset += 20; // Page size
+} while (allGroups.size() < response.totalCount);
+
+    return allGroups;
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    // Get first page of groups
+    GroupsResponse response = api.listGroups(0);
+    System.out.println("Found " + response.totalCount + " total groups");
+
+    for (Group group : response.groups) {
+    System.out.println("\nGroup Details:");
+    System.out.println("Name: " + group.name);
+    System.out.println("Users: " + group.usersCount);
+    System.out.println("Courses: " + group.coursesCount);
+    if (group.parentId != null) {
+    System.out.println("Parent Group ID: " + group.parentId);
+}
+}
+
+    // Optional: Get all groups
+    System.out.println("\nFetching all groups...");
+    List<Group> allGroups = api.getAllGroups();
+    System.out.println("Retrieved all " + allGroups.size() + " groups");
+
+} catch (Exception e) {
+    System.err.println("Failed to list groups: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        "groups": [
+    {
+        "id": 1,
+        "parentId": null,
+        "name": "Sales Team",
+        "usersCount": 10,
+        "coursesCount": 5,
+        "image": {
+        "id": 1234,
+        "original": "http://example.com/images/original/1234.jpg",
+        "mini": "http://example.com/images/mini/1234.jpg",
+        "small": "http://example.com/images/small/1234.jpg"
+    }
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+
+</ResponseExample>

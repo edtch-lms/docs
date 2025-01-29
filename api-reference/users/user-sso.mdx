@@ -1,0 +1,111 @@
+---
+title: 'Get SSO URL'
+api: 'GET /users/{userId}/sso'
+description: 'Get SSO (Single Sign-On) URL for a user. Link expires in 30 seconds.'
+---
+
+Generate a temporary SSO URL that allows direct login for a specific user.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Response
+
+<ResponseField name="url" type="string" required>
+    SSO URL that can be used for direct login. The URL expires in 30 seconds.
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/sso' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def get_sso_url(api_key: str, user_id: str) -> str:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/sso"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()['url']
+
+    # Example usage
+    try:
+    sso_url = get_sso_url("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890")
+    print(f"SSO URL (valid for 30 seconds): {sso_url}")
+    except Exception as e:
+    print(f"Failed to get SSO URL: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getSsoUrl(apiKey, userId) {
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/sso`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data.url;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    getSsoUrl('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+    .then(url => {
+    console.log('SSO URL (valid for 30 seconds):', url);
+})
+    .catch(error => console.error('Failed to get SSO URL:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "url": "https://YOURSITE.konstant.ly/sso/login/abcdef123456789"
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

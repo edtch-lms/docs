@@ -1,0 +1,276 @@
+---
+title: 'Get User Statistics'
+api: 'GET /users/{userId}/statistics'
+description: 'Get detailed statistics for a specific user'
+---
+
+Retrieve comprehensive statistics about a user's learning activities, including course progress, test results, and performance metrics.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Response
+
+<ResponseField name="courses" type="object" required>
+    General course statistics
+    <Expandable title="Course statistics properties">
+        <ResponseField name="createdCoursesCount" type="integer" required>Number of courses created by user</ResponseField>
+        <ResponseField name="publishedCoursesCount" type="integer" required>Number of courses published by user</ResponseField>
+        <ResponseField name="sharedCoursesCount" type="integer" required>Number of courses shared with user</ResponseField>
+        <ResponseField name="assignedCoursesCount" type="integer" required>Number of courses assigned to user</ResponseField>
+        <ResponseField name="startedCoursesCount" type="integer" required>Number of courses started by user</ResponseField>
+        <ResponseField name="finishedCoursesCount" type="integer" required>Number of courses completed by user</ResponseField>
+        <ResponseField name="averageResultValue" type="integer" required>Average progress across all courses</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="virgin" type="array" required>
+    Array of not started courses
+    <Expandable title="Course item properties">
+        <ResponseField name="course" type="object" required>Course information</ResponseField>
+        <ResponseField name="deadlineAt" type="integer" required>Assignment deadline timestamp</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="started" type="array" required>
+    Array of started courses
+    <Expandable title="Started course properties">
+        <ResponseField name="course" type="object" required>Course information</ResponseField>
+        <ResponseField name="progressValue" type="integer" required>Current progress (0-100)</ResponseField>
+        <ResponseField name="courseElement" type="object" required>
+            Current course element
+            <Expandable title="Element properties">
+                <ResponseField name="id" type="integer" required>Element ID</ResponseField>
+                <ResponseField name="name" type="string" required>Element name</ResponseField>
+                <ResponseField name="type" type="string" required>Element type</ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last progress update timestamp</ResponseField>
+        <ResponseField name="deadlineAt" type="integer" required>Assignment deadline timestamp</ResponseField>
+        <ResponseField name="isCourseStarted" type="boolean" required>Course start status</ResponseField>
+        <ResponseField name="isCourseFinished" type="boolean" required>Course completion status</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="results" type="object" required>
+    Distribution of course results
+    <Expandable title="Results properties">
+        <ResponseField name="0" type="integer">Number of courses with 0% result</ResponseField>
+        <ResponseField name="1-10" type="integer">Courses with 1-10% result</ResponseField>
+        <ResponseField name="11-20" type="integer">Courses with 11-20% result</ResponseField>
+        <ResponseField name="21-30" type="integer">Courses with 21-30% result</ResponseField>
+        <ResponseField name="31-40" type="integer">Courses with 31-40% result</ResponseField>
+        <ResponseField name="41-50" type="integer">Courses with 41-50% result</ResponseField>
+        <ResponseField name="51-60" type="integer">Courses with 51-60% result</ResponseField>
+        <ResponseField name="61-70" type="integer">Courses with 61-70% result</ResponseField>
+        <ResponseField name="71-80" type="integer">Courses with 71-80% result</ResponseField>
+        <ResponseField name="81-90" type="integer">Courses with 81-90% result</ResponseField>
+        <ResponseField name="91-99" type="integer">Courses with 91-99% result</ResponseField>
+        <ResponseField name="100" type="integer">Number of courses with 100% result</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="tags" type="array" required>
+    Performance statistics by tag
+    <Expandable title="Tag statistics properties">
+        <ResponseField name="tagId" type="integer" required>Tag identifier</ResponseField>
+        <ResponseField name="tag" type="string" required>Tag name</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Average result for this tag (0-100)</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/statistics' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def get_user_statistics(api_key: str, user_id: str) -> dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/statistics"
+    headers = {"X-API-KEY": api_key}
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    stats = get_user_statistics("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890")
+
+    # Print general statistics
+    print("Course Statistics:")
+    print(f"Started: {stats['courses']['startedCoursesCount']}")
+    print(f"Finished: {stats['courses']['finishedCoursesCount']}")
+    print(f"Average Result: {stats['courses']['averageResultValue']}%")
+
+    # Print in-progress courses
+    print("\nIn Progress Courses:")
+    for course in stats['started']:
+    print(f"Course: {course['course']['name']}")
+    print(f"Progress: {course['progressValue']}%")
+    print(f"Current Element: {course['courseElement']['name']}")
+    print("---")
+
+    # Print tag performance
+    print("\nPerformance by Tag:")
+    for tag in stats['tags']:
+    print(f"{tag['tag']}: {tag['resultValue']}%")
+
+    except Exception as e:
+    print(f"Error: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getUserStatistics(apiKey, userId) {
+    try {
+    const response = await axios.get(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/statistics`,
+{
+    headers: {
+    'X-API-KEY': apiKey
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    getUserStatistics('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+    .then(stats => {
+    // Print general statistics
+    console.log('Course Statistics:');
+    console.log(`Started: ${stats.courses.startedCoursesCount}`);
+    console.log(`Finished: ${stats.courses.finishedCoursesCount}`);
+    console.log(`Average Result: ${stats.courses.averageResultValue}%`);
+
+    // Print in-progress courses
+    console.log('\nIn Progress Courses:');
+    stats.started.forEach(course => {
+    console.log(`Course: ${course.course.name}`);
+    console.log(`Progress: ${course.progressValue}%`);
+    console.log(`Current Element: ${course.courseElement.name}`);
+    console.log('---');
+});
+
+    // Print tag performance
+    console.log('\nPerformance by Tag:');
+    stats.tags.forEach(tag => {
+    console.log(`${tag.tag}: ${tag.resultValue}%`);
+});
+})
+    .catch(error => console.error('Error:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "courses": {
+        "sharedCoursesCount": 5,
+        "assignedCoursesCount": 10,
+        "startedCoursesCount": 8,
+        "finishedCoursesCount": 6,
+        "averageResultValue": 85
+    },
+        "virgin": [
+    {
+        "course": {
+        "id": 123,
+        "name": "Introduction to Sales",
+        "annotation": "Basic sales concepts",
+        "isDraft": false
+    },
+        "deadlineAt": 1704067200
+    }
+        ],
+        "started": [
+    {
+        "course": {
+        "id": 124,
+        "name": "Advanced Sales Techniques",
+        "annotation": "Advanced sales strategies",
+        "isDraft": false
+    },
+        "progressValue": 75,
+        "courseElement": {
+        "id": 456,
+        "name": "Customer Psychology",
+        "type": "page"
+    },
+        "updatedAt": 1673531200,
+        "deadlineAt": 1704067200,
+        "isCourseStarted": true,
+        "isCourseFinished": false
+    }
+        ],
+        "results": {
+        "0": 2,
+        "1-10": 0,
+        "11-20": 1,
+        "21-30": 0,
+        "31-40": 1,
+        "41-50": 0,
+        "51-60": 1,
+        "61-70": 2,
+        "71-80": 1,
+        "81-90": 1,
+        "91-99": 0,
+        "100": 1
+    },
+        "tags": [
+    {
+        "tagId": 1,
+        "tag": "Sales",
+        "resultValue": 85
+    },
+    {
+        "tagId": 2,
+        "tag": "Communication",
+        "resultValue": 90
+    }
+        ]
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

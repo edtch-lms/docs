@@ -1,0 +1,96 @@
+---
+title: 'List Course Users'
+api: 'GET /courses/{courseId}/assignments/users'
+description: 'Get the list of users assigned to the course'
+---
+
+Retrieve a list of all users who have been assigned to a specific course.
+
+## Path Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="assignments" type="array" required>
+    Array of user assignment objects
+    <Expandable title="Assignment object properties">
+        <ResponseField name="assignedAt" type="integer" required>Timestamp when the course was assigned</ResponseField>
+        <ResponseField name="startedAt" type="integer" required>Timestamp when user started the course</ResponseField>
+        <ResponseField name="deadlineAt" type="integer" required>Assignment deadline timestamp</ResponseField>
+        <ResponseField name="finishedAt" type="integer" required>Timestamp when user finished the course</ResponseField>
+        <ResponseField name="progressValue" type="integer" required>Current progress (0-100)</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Result value (0-100)</ResponseField>
+        <ResponseField name="isCourseStarted" type="boolean" required>Whether user has started the course</ResponseField>
+        <ResponseField name="isCourseFinished" type="boolean" required>Whether user has finished the course</ResponseField>
+        <ResponseField name="isExpired" type="boolean" required>Whether the assignment has expired</ResponseField>
+        <ResponseField name="user" type="object" required>
+            User details
+            <Expandable title="User object properties">
+                <ResponseField name="id" type="string" required>User ID</ResponseField>
+                <ResponseField name="name" type="string" required>Full name</ResponseField>
+                <ResponseField name="email" type="string" required>Email address</ResponseField>
+                <ResponseField name="role" type="string" required>User role</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    Total number of assignments
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the course is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash
+    curl --request GET \
+    --url https://YOURSITE.konstant.ly/openapi/v1/courses/123/assignments/users \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json
+    {
+        "assignments": [
+    {
+        "assignedAt": 1443183322,
+        "startedAt": 1443188932,
+        "deadlineAt": 1444188932,
+        "finishedAt": 1443188946,
+        "progressValue": 100,
+        "resultValue": 50,
+        "isCourseStarted": true,
+        "isCourseFinished": true,
+        "isExpired": false,
+        "user": {
+        "id": "1234567890",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "role": {
+        "alias": "learner"
+    }
+    }
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+</ResponseExample>

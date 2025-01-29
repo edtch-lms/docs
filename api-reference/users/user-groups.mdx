@@ -1,0 +1,206 @@
+---
+title: 'User Groups'
+api: 'POST /users/{userId}/groups'
+description: 'Add user to groups'
+---
+
+Add a user to one or more groups.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Request Body
+
+<ParamField body="groups" type="array" required>
+    Array of group IDs to add the user to
+</ParamField>
+
+## Response
+
+<ResponseField name="groups" type="array" required>
+    Array of groups the user was added to
+    <Expandable title="Group properties">
+        <ResponseField name="id" type="integer" required>Group ID</ResponseField>
+        <ResponseField name="parentId" type="integer">Parent group ID</ResponseField>
+        <ResponseField name="name" type="string" required>Group name</ResponseField>
+        <ResponseField name="usersCount" type="integer" required>Number of users in group</ResponseField>
+        <ResponseField name="coursesCount" type="integer" required>Number of assigned courses</ResponseField>
+        <ResponseField name="image" type="object">
+            Group image details
+            <Expandable title="Image properties">
+                <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+                <ResponseField name="original" type="string" required>Original image URL</ResponseField>
+                <ResponseField name="mini" type="string" required>36x36px thumbnail URL</ResponseField>
+                <ResponseField name="small" type="string" required>330x130px image URL</ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="attributes" type="object">Custom group attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Validation error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/groups' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "groups": [1, 2, 3]
+}'
+    ```
+
+    ```python Python
+    import requests
+
+    def add_user_to_groups(api_key: str, user_id: str, group_ids: list) -> dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/groups"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+    data = {"groups": group_ids}
+
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    result = add_user_to_groups(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    "1234567890",
+    [1, 2, 3]
+    )
+    print(f"Added user to {len(result['groups'])} groups")
+    for group in result['groups']:
+    print(f"Group: {group['name']}")
+    except Exception as e:
+    print(f"Failed to add user to groups: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function addUserToGroups(apiKey, userId, groupIds) {
+    try {
+    const response = await axios.post(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/groups`,
+{ groups: groupIds },
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    addUserToGroups('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890', [1, 2, 3])
+    .then(result => {
+    console.log(`Added user to ${result.groups.length} groups`);
+    result.groups.forEach(group => {
+    console.log(`Group: ${group.name}`);
+});
+})
+    .catch(error => console.error('Failed to add user to groups:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "groups": [
+    {
+        "id": 1,
+        "parentId": null,
+        "name": "Sales Team",
+        "usersCount": 15,
+        "coursesCount": 5,
+        "image": null,
+        "attributes": {}
+    },
+    {
+        "id": 2,
+        "parentId": 1,
+        "name": "Regional Sales",
+        "usersCount": 8,
+        "coursesCount": 3,
+        "image": null,
+        "attributes": {}
+    }
+        ]
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "groups": ["Groups array cannot be empty"]
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

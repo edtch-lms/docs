@@ -1,0 +1,424 @@
+---
+title: 'Get Group'
+api: 'GET /groups/{groupId}'
+description: 'Get detailed information about a specific group'
+---
+
+Retrieve detailed information about a specific group by its ID.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group to retrieve
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="integer" required>Group ID</ResponseField>
+<ResponseField name="parentId" type="integer">Parent group ID</ResponseField>
+<ResponseField name="name" type="string" required>Name of the group</ResponseField>
+<ResponseField name="usersCount" type="integer" required>Number of users in the group</ResponseField>
+<ResponseField name="coursesCount" type="integer" required>Number of courses assigned to the group</ResponseField>
+<ResponseField name="image" type="object">
+    Group cover image details
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>URL to full-size image</ResponseField>
+        <ResponseField name="mini" type="string" required>URL to image 36x36 px</ResponseField>
+        <ResponseField name="small" type="string" required>URL to image 330x130 px</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the group is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from dataclasses import dataclass
+    from typing import Optional, Dict, Any
+
+    @dataclass
+    class GroupImage:
+    id: int
+    original: str
+    mini: str
+    small: str
+
+    @dataclass
+    class Group:
+    id: int
+    name: str
+    parent_id: Optional[int]
+    users_count: int
+    courses_count: int
+    image: Optional[GroupImage]
+
+    def get_group(api_key: str, group_id: int) -> Group:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Group {group_id} not found")
+
+    response.raise_for_status()
+    data = response.json()
+
+    # Parse image data if present
+    image = None
+    if data.get("image"):
+    image = GroupImage(
+    id=data["image"]["id"],
+    original=data["image"]["original"],
+    mini=data["image"]["mini"],
+    small=data["image"]["small"]
+    )
+
+    return Group(
+    id=data["id"],
+    name=data["name"],
+    parent_id=data.get("parentId"),
+    users_count=data["usersCount"],
+    courses_count=data["coursesCount"],
+    image=image
+    )
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error fetching group: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    group = get_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+
+    print(f"Group Details:")
+    print(f"ID: {group.id}")
+    print(f"Name: {group.name}")
+    print(f"Users: {group.users_count}")
+    print(f"Courses: {group.courses_count}")
+
+    if group.parent_id:
+    print(f"Parent Group ID: {group.parent_id}")
+
+    if group.image:
+    print(f"Image URL: {group.image.original}")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to get group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async getGroup(groupId) {
+    try {
+    const response = await this.client.get(`/groups/${groupId}`);
+    return response.data;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 404) {
+    throw new Error(`Group ${groupId} not found`);
+}
+    throw new Error(`Failed to fetch group: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+
+    // Helper method to check if a group exists
+    async groupExists(groupId) {
+    try {
+    await this.getGroup(groupId);
+    return true;
+} catch (error) {
+    if (error.message.includes('not found')) {
+    return false;
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    // Check if group exists first (optional)
+    const exists = await groupsApi.groupExists(123);
+    if (!exists) {
+    console.log('Group does not exist');
+    return;
+}
+
+    // Get group details
+    const group = await groupsApi.getGroup(123);
+
+    console.log('Group Details:');
+    console.log(`ID: ${group.id}`);
+    console.log(`Name: ${group.name}`);
+    console.log(`Users: ${group.usersCount}`);
+    console.log(`Courses: ${group.coursesCount}`);
+
+    if (group.parentId) {
+    console.log(`Parent Group ID: ${group.parentId}`);
+}
+
+    if (group.image) {
+    console.log(`Image URL: ${group.image.original}`);
+}
+
+} catch (error) {
+    console.error('Failed to get group:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function getGroup($groupId) {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups/{$groupId}";
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode === 404) {
+            throw new Exception("Group $groupId not found");
+        }
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to fetch group. Status code: $httpCode");
+        }
+
+        return json_decode($response, true);
+    }
+
+    // Helper method to check if a group exists
+    public function groupExists($groupId) {
+        try {
+            $this->getGroup($groupId);
+            return true;
+        } catch (Exception $e) {
+            if (strpos($e->getMessage(), 'not found') !== false) {
+                return false;
+            }
+            throw $e;
+        }
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        // Check if group exists first (optional)
+        if (!$groupsApi->groupExists(123)) {
+            echo "Group does not exist\n";
+            exit;
+        }
+
+        // Get group details
+        $group = $groupsApi->getGroup(123);
+
+        echo "Group Details:\n";
+        echo "ID: {$group['id']}\n";
+        echo "Name: {$group['name']}\n";
+        echo "Users: {$group['usersCount']}\n";
+        echo "Courses: {$group['coursesCount']}\n";
+
+        if (isset($group['parentId'])) {
+            echo "Parent Group ID: {$group['parentId']}\n";
+        }
+
+        if (isset($group['image'])) {
+            echo "Image URL: {$group['image']['original']}\n";
+        }
+
+    } catch (Exception $e) {
+        echo "Failed to get group: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // Using previously defined Group and GroupImage classes
+
+    public Group getGroup(int groupId) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups/" + groupId))
+    .header("X-API-KEY", API_KEY)
+    .GET()
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Group " + groupId + " not found");
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to fetch group. Status: " + response.statusCode());
+}
+
+    return mapper.readValue(response.body(), Group.class);
+}
+
+    // Helper method to check if a group exists
+    public boolean groupExists(int groupId) {
+    try {
+    getGroup(groupId);
+    return true;
+} catch (Exception e) {
+    if (e.getMessage().contains("not found")) {
+    return false;
+}
+    // Rethrow other exceptions
+    throw new RuntimeException(e);
+}
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    // Check if group exists first (optional)
+    if (!api.groupExists(123)) {
+    System.out.println("Group does not exist");
+    return;
+}
+
+    // Get group details
+    Group group = api.getGroup(123);
+
+    System.out.println("Group Details:");
+    System.out.println("ID: " + group.id);
+    System.out.println("Name: " + group.name);
+    System.out.println("Users: " + group.usersCount);
+    System.out.println("Courses: " + group.coursesCount);
+
+    if (group.parentId != null) {
+    System.out.println("Parent Group ID: " + group.parentId);
+}
+
+    if (group.image != null) {
+    System.out.println("Image URL: " + group.image.original);
+}
+
+} catch (Exception e) {
+    System.err.println("Failed to get group: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        "id": 123,
+        "parentId": 1,
+        "name": "Sales Team",
+        "usersCount": 10,
+        "coursesCount": 5,
+        "image": {
+        "id": 1234,
+        "original": "http://example.com/images/original/1234.jpg",
+        "mini": "http://example.com/images/mini/1234.jpg",
+        "small": "http://example.com/images/small/1234.jpg"
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+
+</ResponseExample>

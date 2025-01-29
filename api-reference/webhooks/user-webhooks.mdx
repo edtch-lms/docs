@@ -1,0 +1,106 @@
+---
+title: 'User Webhook Events'
+description: 'User-related webhook events and payloads'
+---
+
+User webhooks provide real-time notifications about user-related activities and changes.
+
+## User/Created
+
+Triggered when a new user is created in the system.
+
+### Payload
+
+<ResponseField name="user" type="object" required>
+    New user information
+    <Expandable title="User properties">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>Full name</ResponseField>
+        <ResponseField name="language" type="string" required>Interface language</ResponseField>
+        <ResponseField name="occupation" type="string">Job title</ResponseField>
+        <ResponseField name="location" type="string">Location</ResponseField>
+        <ResponseField name="timezone" type="string" required>Timezone</ResponseField>
+        <ResponseField name="email" type="string" required>Email address</ResponseField>
+        <ResponseField name="isBanned" type="boolean" required>Ban status</ResponseField>
+        <ResponseField name="role" type="string" required>User role</ResponseField>
+        <ResponseField name="fromApi" type="boolean" required>API creation flag</ResponseField>
+        <ResponseField name="image" type="object">User avatar</ResponseField>
+        <ResponseField name="userAttributes" type="array">Custom attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## User/Edited
+
+Triggered when user information is updated.
+
+### Payload
+
+<ResponseField name="user" type="object" required>
+    Updated user information (same structure as User/Created)
+</ResponseField>
+
+<RequestExample>
+    ```json User/Created
+    {
+        "occuredAt": 1673531200,
+        "type": "User/Created",
+        "body": {
+        "user": {
+        "id": "user123",
+        "name": "John Smith",
+        "language": "en",
+        "occupation": "Sales Manager",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "john@example.com",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": true,
+        "image": null,
+        "userAttributes": [
+    {
+        "apiId": "department",
+        "name": "Department",
+        "type": 1,
+        "value": "Sales"
+    }
+        ]
+    }
+    }
+    }
+    ```
+
+    ```json User/Edited
+    {
+        "occuredAt": 1673531300,
+        "type": "User/Edited",
+        "body": {
+        "user": {
+        "id": "user123",
+        "name": "John Smith",
+        "language": "en",
+        "occupation": "Senior Sales Manager",
+        "location": "Manchester",
+        "timezone": "Europe/London",
+        "email": "john@example.com",
+        "isBanned": false,
+        "role": {
+        "alias": "learner"
+    },
+        "fromApi": true,
+        "image": null,
+        "userAttributes": [
+    {
+        "apiId": "department",
+        "name": "Department",
+        "type": 1,
+        "value": "Sales"
+    }
+        ]
+    }
+    }
+    }
+    ```
+</RequestExample>

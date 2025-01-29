@@ -1,0 +1,339 @@
+---
+title: 'Delete Group'
+api: 'DELETE /groups/{groupId}'
+description: 'Delete a group'
+---
+
+Delete an existing group. Note that this operation cannot be undone.
+
+## Path Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group to delete
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the group is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request DELETE \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+    from typing import Optional
+
+    def delete_group(api_key: str, group_id: int) -> bool:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}"
+    headers = {
+    "X-API-KEY": api_key
+}
+
+    try:
+    response = requests.delete(url, headers=headers)
+
+    if response.status_code == 404:
+    raise ValueError(f"Group {group_id} not found")
+
+    response.raise_for_status()
+    return True
+
+    except requests.exceptions.RequestException as e:
+    print(f"Error deleting group: {str(e)}")
+    if hasattr(e, 'response') and e.response is not None:
+    print(f"Response: {e.response.text}")
+    raise
+
+    # Example usage
+    if __name__ == "__main__":
+    try:
+    # Optional: Check if group exists first
+    try:
+    # Assuming get_group function from previous example
+    group = get_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+    print(f"Found group: {group.name}")
+    except ValueError as e:
+    print("Group not found, no need to delete")
+    exit(0)
+
+    # Delete the group
+    success = delete_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123)
+    if success:
+    print("Group deleted successfully")
+
+    except ValueError as e:
+    print(f"Error: {str(e)}")
+    except Exception as e:
+    print(f"Failed to delete group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    class GroupsAPI {
+    constructor(apiKey) {
+    this.client = axios.create({
+    baseURL: 'https://YOURSITE.konstant.ly/openapi/v1',
+    headers: {
+    'X-API-KEY': apiKey
+}
+});
+}
+
+    async deleteGroup(groupId) {
+    try {
+    await this.client.delete(`/groups/${groupId}`);
+    return true;
+} catch (error) {
+    if (error.response) {
+    if (error.response.status === 404) {
+    throw new Error(`Group ${groupId} not found`);
+}
+    throw new Error(`Failed to delete group: ${error.response.data.message || error.message}`);
+}
+    throw error;
+}
+}
+
+    // Helper method to safely delete a group (checks existence first)
+    async safeDeleteGroup(groupId) {
+    try {
+    // Check if group exists first
+    await this.getGroup(groupId);
+
+    // If group exists, delete it
+    await this.deleteGroup(groupId);
+    return true;
+} catch (error) {
+    if (error.message.includes('not found')) {
+    console.log('Group already does not exist');
+    return false;
+}
+    throw error;
+}
+}
+}
+
+    // Example usage
+    async function main() {
+    const groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+    try {
+    // Option 1: Direct deletion
+    await groupsApi.deleteGroup(123);
+    console.log('Group deleted successfully');
+
+    // Option 2: Safe deletion (checks existence first)
+    const wasDeleted = await groupsApi.safeDeleteGroup(123);
+    if (wasDeleted) {
+    console.log('Group deleted successfully');
+} else {
+    console.log('Group did not exist');
+}
+
+} catch (error) {
+    console.error('Failed to delete group:', error.message);
+}
+}
+
+    main();
+    ```
+
+    ```php PHP
+    <?php
+
+    class GroupsAPI {
+        private $apiKey;
+        private $baseUrl;
+
+    public function __construct($apiKey) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = 'https://YOURSITE.konstant.ly/openapi/v1';
+    }
+
+    public function deleteGroup($groupId) {
+        $ch = curl_init();
+
+        $url = "{$this->baseUrl}/groups/{$groupId}";
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'DELETE',
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $this->apiKey
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode === 404) {
+            throw new Exception("Group $groupId not found");
+        }
+
+        if ($httpCode !== 200) {
+            throw new Exception("Failed to delete group. Status code: $httpCode");
+        }
+
+        return true;
+    }
+
+    // Helper method to safely delete a group (checks existence first)
+    public function safeDeleteGroup($groupId) {
+        try {
+            // Check if group exists first
+            $this->getGroup($groupId);
+
+            // If group exists, delete it
+            $this->deleteGroup($groupId);
+            return true;
+        } catch (Exception $e) {
+            if (strpos($e->getMessage(), 'not found') !== false) {
+                echo "Group already does not exist\n";
+                return false;
+            }
+            throw $e;
+        }
+    }
+}
+
+    // Example usage
+    try {
+        $groupsApi = new GroupsAPI('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv');
+
+        // Option 1: Direct deletion
+        $groupsApi->deleteGroup(123);
+        echo "Group deleted successfully\n";
+
+    // Option 2: Safe deletion (checks existence first)
+    $wasDeleted = $groupsApi->safeDeleteGroup(123);
+    if ($wasDeleted) {
+        echo "Group deleted successfully\n";
+    } else {
+        echo "Group did not exist\n";
+    }
+
+} catch (Exception $e) {
+    echo "Failed to delete group: " . $e->getMessage() . "\n";
+}
+?>
+    ```
+
+    ```java Java
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import java.net.URI;
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+
+    public class GroupsAPI {
+    private static final String API_KEY = "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv";
+    private static final String BASE_URL = "https://YOURSITE.konstant.ly/openapi/v1";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public boolean deleteGroup(int groupId) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(BASE_URL + "/groups/" + groupId))
+    .header("X-API-KEY", API_KEY)
+    .DELETE()
+    .build();
+
+    HttpResponse<String> response = client.send(request,
+    HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+    throw new Exception("Group " + groupId + " not found");
+}
+
+    if (response.statusCode() != 200) {
+    throw new Exception("Failed to delete group. Status: " + response.statusCode());
+}
+
+    return true;
+}
+
+    // Helper method to safely delete a group (checks existence first)
+    public boolean safeDeleteGroup(int groupId) {
+    try {
+    // Check if group exists first
+    getGroup(groupId);
+
+    // If group exists, delete it
+    deleteGroup(groupId);
+    return true;
+} catch (Exception e) {
+    if (e.getMessage().contains("not found")) {
+    System.out.println("Group already does not exist");
+    return false;
+}
+    throw new RuntimeException(e);
+}
+}
+
+    public static void main(String[] args) {
+    GroupsAPI api = new GroupsAPI();
+
+    try {
+    // Option 1: Direct deletion
+    api.deleteGroup(123);
+    System.out.println("Group deleted successfully");
+
+    // Option 2: Safe deletion (checks existence first)
+    boolean wasDeleted = api.safeDeleteGroup(123);
+    if (wasDeleted) {
+    System.out.println("Group deleted successfully");
+} else {
+    System.out.println("Group did not exist");
+}
+
+} catch (Exception e) {
+    System.err.println("Failed to delete group: " + e.getMessage());
+    e.printStackTrace();
+}
+}
+}
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+
+    ```json Response
+    {
+        // Empty response on success
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Group not found"
+    }
+    ```
+
+</ResponseExample>

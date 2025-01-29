@@ -1,0 +1,233 @@
+---
+title: 'Assign Courses to User'
+api: 'POST /users/{userId}/assignments'
+description: 'Assign courses to the user'
+---
+
+Assign one or more courses to a specific user.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID
+</ParamField>
+
+## Request Body
+
+<ParamField body="courses" type="array" required>
+    Array of course IDs to assign to the user
+</ParamField>
+
+<ParamField body="assignAt" type="integer">
+    Timestamp when the courses should be assigned (UTC)
+</ParamField>
+
+<ParamField body="deadlineAt" type="integer">
+    Timestamp for assignment completion deadline (UTC)
+</ParamField>
+
+## Response
+
+<ResponseField name="assignments" type="array" required>
+    Array of created course assignments
+    <Expandable title="Assignment properties">
+        <ResponseField name="assignedAt" type="integer" required>Timestamp when course was assigned</ResponseField>
+        <ResponseField name="startedAt" type="integer" required>Timestamp when user started the course</ResponseField>
+        <ResponseField name="deadlineAt" type="integer" required>Timestamp when assignment expires</ResponseField>
+        <ResponseField name="finishedAt" type="integer" required>Timestamp when user finished the course</ResponseField>
+        <ResponseField name="progressValue" type="integer" required>Current progress (0-100)</ResponseField>
+        <ResponseField name="resultValue" type="integer" required>Course result (0-100)</ResponseField>
+        <ResponseField name="isCourseStarted" type="boolean" required>Whether user has started the course</ResponseField>
+        <ResponseField name="isCourseFinished" type="boolean" required>Whether user has finished the course</ResponseField>
+        <ResponseField name="isExpired" type="boolean" required>Whether assignment has expired</ResponseField>
+        <ResponseField name="course" type="object" required>Course details</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="400" type="object">
+    Validation error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (400)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+        <ResponseField name="errors" type="object">Field-specific validation errors</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="404" type="object">
+    Not Found error response
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890/assignments' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "courses": [110, 150],
+    "deadlineAt": 1704067200
+}'
+    ```
+
+    ```python Python
+    import requests
+    from typing import List, Optional
+
+    def assign_courses(api_key: str, user_id: str,
+    courses: List[int],
+    assign_at: Optional[int] = None,
+    deadline_at: Optional[int] = None) -> dict:
+    url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}/assignments"
+    headers = {
+    "X-API-KEY": api_key,
+    "Content-Type": "application/json"
+}
+
+    data = {"courses": courses}
+    if assign_at:
+    data["assignAt"] = assign_at
+    if deadline_at:
+    data["deadlineAt"] = deadline_at
+
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 400:
+    error_data = response.json()
+    print("Validation errors:")
+    for field, errors in error_data.get('errors', {}).items():
+    print(f"{field}: {', '.join(errors)}")
+    raise ValueError(error_data.get('message', 'Invalid request'))
+
+    if response.status_code == 404:
+    raise ValueError(f"User {user_id} not found")
+
+    response.raise_for_status()
+    return response.json()
+
+    # Example usage
+    try:
+    result = assign_courses(
+    "1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv",
+    "1234567890",
+    courses=[110, 150],
+    deadline_at=1704067200
+    )
+    print(f"Assigned {len(result['assignments'])} courses")
+    for assignment in result['assignments']:
+    print(f"Course: {assignment['course']['name']}")
+    except Exception as e:
+    print(f"Failed to assign courses: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function assignCourses(apiKey, userId, courses, assignAt = null, deadlineAt = null) {
+    const data = { courses };
+    if (assignAt) data.assignAt = assignAt;
+    if (deadlineAt) data.deadlineAt = deadlineAt;
+
+    try {
+    const response = await axios.post(
+    `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}/assignments`,
+    data,
+{
+    headers: {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+}
+}
+    );
+    return response.data;
+} catch (error) {
+    if (error.response?.status === 400) {
+    console.error('Validation errors:');
+    const errors = error.response.data.errors || {};
+    Object.entries(errors).forEach(([field, messages]) => {
+    console.error(`${field}: ${messages.join(', ')}`);
+});
+    throw new Error(error.response.data.message || 'Invalid request');
+}
+    if (error.response?.status === 404) {
+    throw new Error(`User ${userId} not found`);
+}
+    throw error;
+}
+}
+
+    // Example usage
+    assignCourses(
+    '1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv',
+    '1234567890',
+    [110, 150],
+    null,
+    1704067200
+    )
+    .then(result => {
+    console.log(`Assigned ${result.assignments.length} courses`);
+    result.assignments.forEach(assignment => {
+    console.log(`Course: ${assignment.course.name}`);
+});
+})
+    .catch(error => console.error('Failed to assign courses:', error.message));
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "assignments": [
+    {
+        "assignedAt": 1443183322,
+        "startedAt": 0,
+        "deadlineAt": 1704067200,
+        "finishedAt": 0,
+        "progressValue": 0,
+        "resultValue": 0,
+        "isCourseStarted": false,
+        "isCourseFinished": false,
+        "isExpired": false,
+        "course": {
+        "id": 110,
+        "name": "Sales Fundamentals",
+        "annotation": "Core sales concepts and techniques",
+        "isDraft": false,
+        "createdAt": 1507807711,
+        "updatedAt": 1507808372,
+        "publishedAt": 1508225229,
+        "image": null
+    }
+    }
+        ]
+    }
+    ```
+
+    ```json 400 Error
+    {
+        "status": 400,
+        "message": "Validation failed",
+        "errors": {
+        "courses": ["Courses array cannot be empty"]
+    }
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

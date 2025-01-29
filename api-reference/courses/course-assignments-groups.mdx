@@ -1,0 +1,93 @@
+---
+title: 'List Course Groups'
+api: 'GET /courses/{courseId}/assignments/groups'
+description: 'Get the list of groups assigned to the course'
+---
+
+Retrieve a list of all groups that have been assigned to a specific course.
+
+## Path Parameters
+
+<ParamField path="courseId" type="integer" required>
+    The unique identifier of the course
+</ParamField>
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Response
+
+<ResponseField name="assignments" type="array" required>
+    Array of group assignment objects
+    <Expandable title="Assignment object properties">
+        <ResponseField name="assignedAt" type="integer" required>Timestamp when the course was assigned</ResponseField>
+        <ResponseField name="deadlineAt" type="integer">Exact timestamp when the assignment expires</ResponseField>
+        <ResponseField name="deadlinePeriod" type="object">
+            Period within which group members must complete the course
+            <Expandable title="Deadline period properties">
+                <ResponseField name="measure" type="string" required>Time unit (hours, days, weeks, months)</ResponseField>
+                <ResponseField name="value" type="integer" required>Number of units</ResponseField>
+            </Expandable>
+        </ResponseField>
+        <ResponseField name="group" type="object" required>
+            Group details
+            <Expandable title="Group object properties">
+                <ResponseField name="id" type="integer" required>Group ID</ResponseField>
+                <ResponseField name="parentId" type="integer">Parent group ID</ResponseField>
+                <ResponseField name="name" type="string" required>Name of the group</ResponseField>
+                <ResponseField name="usersCount" type="integer" required>Number of users in the group</ResponseField>
+                <ResponseField name="coursesCount" type="integer" required>Number of courses assigned to the group</ResponseField>
+            </Expandable>
+        </ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCount" type="integer" required>
+    Total number of group assignments
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when the course is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+    ```bash
+    curl --request GET \
+    --url https://YOURSITE.konstant.ly/openapi/v1/courses/123/assignments/groups \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+</RequestExample>
+
+<ResponseExample>
+    ```json
+    {
+        "assignments": [
+    {
+        "assignedAt": 1443183322,
+        "deadlineAt": 0,
+        "deadlinePeriod": {
+        "measure": "months",
+        "value": 3
+    },
+        "group": {
+        "id": 1,
+        "parentId": null,
+        "name": "Sales Team",
+        "usersCount": 10,
+        "coursesCount": 5
+    }
+    }
+        ],
+        "totalCount": 1
+    }
+    ```
+</ResponseExample>
