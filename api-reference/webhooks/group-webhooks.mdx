@@ -1,164 +1,173 @@
 ---
-title: 'Group Webhook Events'
-description: 'Group-related webhook events and payloads'
+title: 'Group Webhooks'
+description: 'Understanding Group-related webhook events'
 ---
 
-Group webhooks notify you about changes in group membership and structure. Currently, this includes notifications when users are added to groups.
+Group webhooks notify you about changes related to group membership and updates. These events help you track when users are added to groups and when group information changes.
 
-## Group/User/Created
+## Event Types
 
-Triggered when a user is added to a group.
+<ResponseField name="Group/User/Created" type="event">
+    Triggered when a user is added to a group
+</ResponseField>
 
-### Payload
+## Common Properties
+
+All group webhook events share these common properties:
+
+<ResponseField name="occuredAt" type="integer" required>
+    Timestamp when the event occurred
+</ResponseField>
+
+<ResponseField name="type" type="string" required>
+    Event type identifier
+</ResponseField>
+
+<ResponseField name="body" type="object" required>
+    Event-specific payload data
+</ResponseField>
+
+## Group/User/Created Event
+
+This event is triggered whenever a user is added to a group.
+
+### Payload Structure
 
 <ResponseField name="user" type="object" required>
-    User added to the group
-    <Expandable title="User properties">
+    Details about the user being added
+    <Expandable title="User object properties">
         <ResponseField name="id" type="string" required>User ID</ResponseField>
-        <ResponseField name="name" type="string" required>Full name</ResponseField>
-        <ResponseField name="language" type="string" required>Interface language</ResponseField>
-        <ResponseField name="occupation" type="string">Job title</ResponseField>
-        <ResponseField name="location" type="string">Location</ResponseField>
-        <ResponseField name="timezone" type="string" required>Timezone</ResponseField>
-        <ResponseField name="email" type="string" required>Email address</ResponseField>
-        <ResponseField name="isBanned" type="boolean" required>Ban status</ResponseField>
-        <ResponseField name="role" type="string" required>User role</ResponseField>
-        <ResponseField name="fromApi" type="boolean" required>API creation flag</ResponseField>
-        <ResponseField name="image" type="object">User avatar</ResponseField>
-        <ResponseField name="userAttributes" type="array">Custom attributes</ResponseField>
+        <ResponseField name="name" type="string" required>User's full name</ResponseField>
+        <ResponseField name="email" type="string" required>User's email address</ResponseField>
+        <ResponseField name="language" type="string" required>User's interface language</ResponseField>
+        <ResponseField name="timezone" type="string" required>User's timezone</ResponseField>
+        <ResponseField name="role" type="object" required>User's role information</ResponseField>
+        <ResponseField name="userAttributes" type="array">Custom user attributes</ResponseField>
     </Expandable>
 </ResponseField>
 
 <ResponseField name="group" type="object" required>
-    Group the user was added to
-    <Expandable title="Group properties">
+    Details about the group
+    <Expandable title="Group object properties">
         <ResponseField name="id" type="integer" required>Group ID</ResponseField>
         <ResponseField name="name" type="string" required>Group name</ResponseField>
         <ResponseField name="description" type="string" required>Group description</ResponseField>
-        <ResponseField name="image" type="object">Group cover image</ResponseField>
+        <ResponseField name="image" type="object">Group cover image details</ResponseField>
     </Expandable>
 </ResponseField>
 
-## Usage Notes
-
-1. Common Use Cases:
-- Syncing group memberships with external systems
-- Updating access permissions
-- Tracking organizational changes
-- Auditing group additions
-
-2. Implementation Tips:
-- Process events asynchronously
-- Verify user and group IDs
-- Handle duplicate events gracefully
-- Update caches if needed
-
-3. Best Practices:
-- Store event history for auditing
-- Track group size changes
-- Monitor group additions patterns
-- Log unusual activity
+## Implementation Examples
 
 <RequestExample>
+    ```bash cURL
+    # Test receiving a Group/User/Created webhook
+    curl --location 'https://your-server.com/webhook' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "type": "Group/User/Created",
+    "occuredAt": 1508225229,
+    "body": {
+    "user": {
+    "id": "1234567890",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "language": "en",
+    "timezone": "Europe/London",
+    "role": {
+    "alias": "learner"
+},
+    "userAttributes": {
+    "department": "Sales",
+    "employeeId": "EMP123"
+}
+},
+    "group": {
+    "id": 123,
+    "name": "Sales Team",
+    "description": "Sales department team members"
+}
+}
+}'
+
+    # Retrieve last group webhook event
+    curl --location 'https://YOURSITE.konstant.ly/openapi/v1/webhook/group.user.created/last' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
     ```python Python
-    # Example webhook handler for group events
     from flask import Flask, request, jsonify
-    import logging
 
     app = Flask(__name__)
-    logging.basicConfig(level=logging.INFO)
 
-    @app.route('/webhook/group', methods=['POST'])
-    def handle_group_webhook():
+    @app.route('/webhook', methods=['POST'])
+    def handle_webhook():
+    # Get webhook data
     event_data = request.json
+
+    # Extract common properties
     event_type = event_data['type']
+    occurred_at = event_data['occuredAt']
+    payload = event_data['body']
 
+    # Handle group webhook events
     if event_type == 'Group/User/Created':
-    handle_group_addition(event_data['body'])
+    handle_group_user_created(payload)
 
+    # Return success quickly
     return jsonify({'status': 'success'}), 200
 
-    def handle_group_addition(payload):
+    def handle_group_user_created(payload):
     user = payload['user']
     group = payload['group']
 
-    logging.info(f"User added to group: {user['name']} -> {group['name']}")
+    print(f"User added to group: {user['name']} (ID: {user['id']}) -> {group['name']} (ID: {group['id']})")
 
-    # Example: Sync with external system
-    try:
-    sync_external_group_membership(
-    user_id=user['id'],
-    group_id=group['id'],
-    user_email=user['email'],
-    group_name=group['name']
-    )
-    except Exception as e:
-    logging.error(f"Failed to sync group membership: {str(e)}")
-    # Handle error but don't re-raise to maintain webhook response
-
-    # Example: Update internal permissions
-    try:
-    update_user_permissions(
-    user_id=user['id'],
-    group_id=group['id']
-    )
-    except Exception as e:
-    logging.error(f"Failed to update permissions: {str(e)}")
+    # Add your group membership handling logic here
+    # For example:
+    # - Sync with other systems
+    # - Update internal user records
+    # - Send notifications
+    # - Trigger automated workflows
 
     if __name__ == '__main__':
     app.run(port=5000)
     ```
 
     ```javascript Node.js
-    // Example webhook handler for group events
     const express = require('express');
     const app = express();
-    const logger = require('./logger');  // Your logging setup
 
     app.use(express.json());
 
-    app.post('/webhook/group', (req, res) => {
-    const { type, body } = req.body;
+    app.post('/webhook', (req, res) => {
+    // Get webhook data
+    const { type, occuredAt, body } = req.body;
 
+    // Handle group webhook events
+    try {
     if (type === 'Group/User/Created') {
-    handleGroupAddition(body)
-    .catch(error => {
-    logger.error('Error processing group addition:', error);
-    // Don't reject the webhook, just log the error
-});
+    handleGroupUserCreated(body);
 }
 
     // Return success quickly
     res.status(200).json({ status: 'success' });
+} catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).json({ error: 'Internal server error' });
+}
 });
 
-    async function handleGroupAddition(payload) {
+    function handleGroupUserCreated(payload) {
     const { user, group } = payload;
 
-    logger.info(`User added to group: ${user.name} -> ${group.name}`);
+    console.log(`User added to group: ${user.name} (ID: ${user.id}) -> ${group.name} (ID: ${group.id})`);
 
-    // Example: Sync with external system
-    try {
-    await syncExternalGroupMembership({
-    userId: user.id,
-    groupId: group.id,
-    userEmail: user.email,
-    groupName: group.name
-});
-} catch (error) {
-    logger.error('Failed to sync group membership:', error);
-    // Handle error but continue processing
-}
-
-    // Example: Update internal permissions
-    try {
-    await updateUserPermissions({
-    userId: user.id,
-    groupId: group.id
-});
-} catch (error) {
-    logger.error('Failed to update permissions:', error);
-}
+    // Add your group membership handling logic here
+    // For example:
+    // - Sync with other systems
+    // - Update internal user records
+    // - Send notifications
+    // - Trigger automated workflows
 }
 
     const PORT = process.env.PORT || 5000;
@@ -169,102 +178,72 @@ Triggered when a user is added to a group.
 
     ```php PHP
     <?php
-    // Example webhook handler for group events
 
-    // Get webhook data
-    $eventData = json_decode(file_get_contents('php://input'), true);
+    // Webhook handling endpoint
+    function handleWebhook() {
+        // Get webhook data
+        $eventData = json_decode(file_get_contents('php://input'), true);
+
+    // Extract common properties
     $eventType = $eventData['type'];
+    $occurredAt = $eventData['occuredAt'];
+    $payload = $eventData['body'];
 
-    if ($eventType === 'Group/User/Created') {
-        handleGroupAddition($eventData['body']);
-    }
+    // Handle group webhook events
+    try {
+        if ($eventType === 'Group/User/Created') {
+            handleGroupUserCreated($payload);
+        }
 
     // Return success quickly
     http_response_code(200);
     echo json_encode(['status' => 'success']);
+} catch (Exception $e) {
+    error_log("Error processing webhook: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Internal server error']);
+}
+}
 
-    function handleGroupAddition($payload) {
+    function handleGroupUserCreated($payload) {
         $user = $payload['user'];
         $group = $payload['group'];
 
-        error_log(sprintf(
-            "User added to group: %s -> %s",
-            $user['name'],
-            $group['name']
-        ));
+        error_log("User added to group: {$user['name']} (ID: {$user['id']}) -> {$group['name']} (ID: {$group['id']})");
 
-        // Example: Sync with external system
-        try {
-            syncExternalGroupMembership(
-                $user['id'],
-                $group['id'],
-                $user['email'],
-                $group['name']
-            );
-        } catch (Exception $e) {
-            error_log("Failed to sync group membership: " . $e->getMessage());
-            // Handle error but continue processing
-        }
-
-        // Example: Update internal permissions
-        try {
-            updateUserPermissions(
-                $user['id'],
-                $group['id']
-            );
-        } catch (Exception $e) {
-            error_log("Failed to update permissions: " . $e->getMessage());
-        }
+        // Add your group membership handling logic here
+        // For example:
+        // - Sync with other systems
+        // - Update internal user records
+        // - Send notifications
+        // - Trigger automated workflows
     }
 
-    function syncExternalGroupMembership($userId, $groupId, $userEmail, $groupName) {
-        // Your external system sync logic here
-    }
-
-    function updateUserPermissions($userId, $groupId) {
-        // Your permissions update logic here
-    }
+    // Handle the webhook
+    handleWebhook();
 
     ?>
     ```
 </RequestExample>
 
-<ResponseExample>
-    ```json Group/User/Created
-    {
-        "occuredAt": 1673531200,
-        "type": "Group/User/Created",
-        "body": {
-        "user": {
-        "id": "user123",
-        "name": "John Smith",
-        "language": "en",
-        "occupation": "Sales Manager",
-        "location": "London",
-        "timezone": "Europe/London",
-        "email": "john@example.com",
-        "isBanned": false,
-        "role": {
-        "alias": "learner"
-    },
-        "fromApi": true,
-        "image": null,
-        "userAttributes": [
-    {
-        "apiId": "department",
-        "name": "Department",
-        "type": 1,
-        "value": "Sales"
-    }
-        ]
-    },
-        "group": {
-        "id": 456,
-        "name": "Sales Team",
-        "description": "Global Sales Department",
-        "image": null
-    }
-    }
-    }
-    ```
-</ResponseExample>
+## Best Practices
+
+1. **Event Processing**
+- Process events asynchronously to ensure quick response
+- Implement idempotency to handle potential duplicate events
+- Store raw event data for debugging and auditing
+
+2. **Error Handling**
+- Implement proper error handling and logging
+- Set up monitoring for failed webhook processing
+- Handle network timeouts and retries appropriately
+
+3. **Security**
+- Validate webhook source using API keys or signatures
+- Use HTTPS endpoints for receiving webhooks
+- Implement rate limiting and request validation
+
+4. **Integration Tips**
+- Update related systems when group membership changes
+- Maintain audit logs of group membership changes
+- Consider implementing event queuing for reliable processing

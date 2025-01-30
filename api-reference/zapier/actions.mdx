@@ -1,0 +1,122 @@
+---
+title: 'Zapier Actions'
+description: 'Available Konstantly actions in Zapier'
+---
+
+Actions are operations that your Zap can perform in Konstantly. These actions allow you to create and modify data in your Konstantly account based on triggers from other apps.
+
+## Available Actions
+
+### Create User
+
+Creates a new user in Konstantly.
+
+<ParamField body="name" type="string" required>User's full name</ParamField>
+<ParamField body="email" type="string" required>User's email address</ParamField>
+<ParamField body="roleAlias" type="string" required>User role (e.g., "learner", "manager")</ParamField>
+<ParamField body="language" type="string">User interface language</ParamField>
+<ParamField body="timezone" type="string">User's timezone</ParamField>
+<ParamField body="customAttributes" type="object">Custom user attributes</ParamField>
+
+<RequestExample>
+    ```json
+    {
+        "name": "Jane Smith",
+        "email": "jane@example.com",
+        "roleAlias": "learner",
+        "language": "en",
+        "timezone": "Europe/London",
+        "customAttributes": {
+        "department": "Sales",
+        "employee_id": "EMP123"
+    }
+    }
+    ```
+</RequestExample>
+
+### Update User
+
+Updates an existing user's information.
+
+<ParamField body="id" type="string" required>User ID</ParamField>
+<ParamField body="email" type="string" required>User's email address</ParamField>
+<ParamField body="name" type="string">Updated name</ParamField>
+<ParamField body="customAttributes" type="object">Updated custom attributes</ParamField>
+
+### Create Group
+
+Creates a new group in Konstantly.
+
+<ParamField body="name" type="string" required>Group name</ParamField>
+<ParamField body="parentId" type="integer">Parent group ID</ParamField>
+<ParamField body="description" type="string">Group description</ParamField>
+<ParamField body="customAttributes" type="object">Custom group attributes</ParamField>
+
+### Add User to Group
+
+Adds a user to an existing group.
+
+<ParamField body="userId" type="string" required>User ID</ParamField>
+<ParamField body="groupId" type="integer" required>Group ID</ParamField>
+
+### Assign Course
+
+Assigns a course to users or groups.
+
+<ParamField body="courseId" type="integer" required>Course ID</ParamField>
+<ParamField body="users" type="array">Array of user IDs</ParamField>
+<ParamField body="groups" type="array">Array of group IDs</ParamField>
+<ParamField body="deadlineAt" type="integer">Assignment deadline timestamp</ParamField>
+
+<RequestExample>
+    ```json
+    {
+        "courseId": 123,
+        "users": ["user_123", "user_124"],
+        "groups": [1, 2],
+        "deadlineAt": 1643673600
+    }
+    ```
+</RequestExample>
+
+## Using Actions
+
+### Best Practices
+
+1. **Data Mapping**
+- Map fields from previous steps to action inputs
+- Use Zapier's formatting tools to transform data if needed
+
+2. **Error Handling**
+- Add error handling steps after actions
+- Use Zapier's retry options for failed actions
+
+3. **Testing**
+- Test actions with sample data before activating the Zap
+- Verify the results in your Konstantly account
+
+### Example Workflows
+
+1. **New Employee Onboarding**
+```plaintext
+New employee in HR system →
+Create User in Konstantly →
+Add User to Department Group →
+Assign Onboarding Courses
+```
+
+2. **Course Assignment Automation**
+```plaintext
+New course published →
+Get users from group →
+Assign course to users →
+Send notification email
+```
+
+3. **User Group Management**
+```plaintext
+Department change in HR system →
+Update User in Konstantly →
+Remove from old group →
+Add to new group
+```

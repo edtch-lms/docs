@@ -1,0 +1,110 @@
+---
+title: 'Custom Attributes in Zapier'
+description: 'Learn how custom attributes work in Zapier integration'
+---
+
+Custom attributes in the Konstantly Zapier integration allow you to map and sync custom fields between different systems. The integration supports various attribute types and configurations.
+
+## Supported Attribute Types
+
+### Basic Types
+
+<ResponseField name="unicode" type="string">
+    Single line text field. Used for short text inputs.
+</ResponseField>
+
+<ResponseField name="text" type="string">
+    Multi-line text field. Used for longer text content.
+</ResponseField>
+
+<ResponseField name="float" type="number">
+    Numeric field that supports decimal values.
+</ResponseField>
+
+<ResponseField name="datetime" type="string">
+    Date field in ISO format (YYYY-MM-DDThh:mm:ss+00:00).
+</ResponseField>
+
+<ResponseField name="bool" type="boolean">
+    True/false field.
+</ResponseField>
+
+### Advanced Types
+
+<ResponseField name="choice" type="object">
+    Single-select dropdown field with predefined options.
+    ```json
+    {
+        "type": "unicode",
+        "key": "department",
+        "label": "Department",
+        "choices": ["Sales", "Marketing", "Support"]
+    }
+    ```
+</ResponseField>
+
+<ResponseField name="multichoice" type="object">
+    Multi-select field that allows multiple values.
+    ```json
+    {
+        "type": "unicode",
+        "key": "skills",
+        "label": "Skills",
+        "choices": ["JavaScript", "Python", "Java"],
+        "list": true
+    }
+    ```
+</ResponseField>
+
+## User Attributes
+
+User attributes are available in both triggers and actions related to user operations.
+
+<RequestExample>
+    ```json User Attribute Example
+    {
+        "type": "unicode",
+        "key": "employee_id",
+        "label": "Employee ID",
+        "required": true
+    }
+    ```
+</RequestExample>
+
+## Group Attributes
+
+Group attributes can be used when creating or updating groups.
+
+<RequestExample>
+    ```json Group Attribute Example
+    {
+        "type": "unicode",
+        "key": "department_code",
+        "label": "Department Code",
+        "required": false
+    }
+    ```
+</RequestExample>
+
+## Course Attributes
+
+Course-related custom attributes are available in course triggers and actions.
+
+<RequestExample>
+    ```json Course Attribute Example
+    {
+        "type": "unicode",
+        "key": "course_category",
+        "label": "Course Category",
+        "choices": ["Technical", "Soft Skills", "Compliance"]
+    }
+    ```
+</RequestExample>
+
+## Working with Custom Attributes
+
+When setting up Zaps, custom attributes will appear as dynamic fields based on your Konstantly configuration. You can:
+
+1. Map attributes from other apps to Konstantly fields
+2. Use attribute values in filters and conditions
+3. Transform data between different formats using Zapier's built-in tools

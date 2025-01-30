@@ -1,0 +1,104 @@
+---
+title: 'Zapier Triggers'
+description: 'Available Konstantly triggers in Zapier'
+---
+
+Triggers are events that occur in Konstantly that can start your Zaps. Each trigger provides specific data that can be used in subsequent steps of your Zap.
+
+## Available Triggers
+
+### New Course Published
+
+Triggers when a new course is published in Konstantly.
+
+<ResponseField name="Output data">
+    <Expandable title="Course data">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course description</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+        <ResponseField name="author" type="object" required>Author information</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Course Assigned
+
+Triggers when a course is assigned to a user or group.
+
+<ResponseField name="Output data">
+    <Expandable title="Assignment data">
+        <ResponseField name="courseId" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="courseName" type="string" required>Course name</ResponseField>
+        <ResponseField name="assignedTo" type="object" required>User or group details</ResponseField>
+        <ResponseField name="assignedAt" type="integer" required>Assignment timestamp</ResponseField>
+        <ResponseField name="deadlineAt" type="integer">Assignment deadline</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### Course Completed
+
+Triggers when a user completes a course.
+
+<ResponseField name="Output data">
+    <Expandable title="Completion data">
+        <ResponseField name="courseId" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="courseName" type="string" required>Course name</ResponseField>
+        <ResponseField name="user" type="object" required>User information</ResponseField>
+        <ResponseField name="completedAt" type="integer" required>Completion timestamp</ResponseField>
+        <ResponseField name="score" type="integer">Final score (0-100)</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### New User Created
+
+Triggers when a new user is created in Konstantly.
+
+<ResponseField name="Output data">
+    <Expandable title="User data">
+        <ResponseField name="id" type="string" required>User ID</ResponseField>
+        <ResponseField name="name" type="string" required>User's full name</ResponseField>
+        <ResponseField name="email" type="string" required>User's email</ResponseField>
+        <ResponseField name="role" type="string" required>User's role</ResponseField>
+        <ResponseField name="customAttributes" type="object">Custom user attributes</ResponseField>
+    </Expandable>
+</ResponseField>
+
+### User Added to Group
+
+Triggers when a user is added to a group.
+
+<ResponseField name="Output data">
+    <Expandable title="Group assignment data">
+        <ResponseField name="userId" type="string" required>User ID</ResponseField>
+        <ResponseField name="userName" type="string" required>User's name</ResponseField>
+        <ResponseField name="groupId" type="integer" required>Group ID</ResponseField>
+        <ResponseField name="groupName" type="string" required>Group name</ResponseField>
+        <ResponseField name="addedAt" type="integer" required>Assignment timestamp</ResponseField>
+    </Expandable>
+</ResponseField>
+
+## Using Triggers
+
+Each trigger can be used as the first step in your Zap. You can:
+
+1. Filter trigger events based on specific conditions
+2. Use trigger data in subsequent steps
+3. Test triggers with sample data while setting up your Zap
+
+### Example Usage
+
+<RequestExample>
+    ```json Sample Course Completion Trigger
+    {
+        "courseId": 123,
+        "courseName": "Advanced JavaScript",
+        "user": {
+        "id": "user_123",
+        "name": "John Doe",
+        "email": "john@example.com"
+    },
+        "completedAt": 1643673600,
+        "score": 95
+    }
+    ```
+</RequestExample>

@@ -100,6 +100,31 @@ All webhook events share these common properties:
 - Verify error handling
 
 <RequestExample>
+    ```bash cURL
+    # Test receiving a webhook event
+    curl --location 'https://your-server.com/webhook' \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "type": "Course/Published",
+    "occuredAt": 1508225229,
+    "body": {
+    "course": {
+    "id": 123,
+    "name": "Advanced JavaScript Course",
+    "annotation": "Learn advanced JavaScript concepts",
+    "isDraft": false,
+    "createdAt": 1507807711,
+    "updatedAt": 1507808372,
+    "publishedAt": 1508225229
+}
+}
+}'
+
+    # Retrieve last webhook event
+    curl --location 'https://YOURSITE.konstant.ly/openapi/v1/webhook/course.published/last' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
     ```python Python
     from flask import Flask, request, jsonify
     import hmac
@@ -215,36 +240,36 @@ All webhook events share these common properties:
         // Get webhook data
         $eventData = json_decode(file_get_contents('php://input'), true);
 
-        // Extract common properties
-        $eventType = $eventData['type'];
-        $occurredAt = $eventData['occuredAt'];
-        $payload = $eventData['body'];
+    // Extract common properties
+    $eventType = $eventData['type'];
+    $occurredAt = $eventData['occuredAt'];
+    $payload = $eventData['body'];
 
-        // Handle different event types
-        try {
-            switch ($eventType) {
-                case 'Course/Published':
-                    handleCoursePublished($payload);
-                    break;
-                case 'User/Created':
-                    handleUserCreated($payload);
-                    break;
-                case 'Course/Progress':
-                    handleCourseProgress($payload);
-                    break;
-                default:
-                    error_log("Unhandled event type: $eventType");
-            }
-
-            // Return success quickly
-            http_response_code(200);
-            echo json_encode(['status' => 'success']);
-        } catch (Exception $e) {
-            error_log("Error processing webhook: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['error' => 'Internal server error']);
+    // Handle different event types
+    try {
+        switch ($eventType) {
+            case 'Course/Published':
+                handleCoursePublished($payload);
+                break;
+            case 'User/Created':
+                handleUserCreated($payload);
+                break;
+            case 'Course/Progress':
+                handleCourseProgress($payload);
+                break;
+            default:
+                error_log("Unhandled event type: $eventType");
         }
-    }
+
+    // Return success quickly
+    http_response_code(200);
+    echo json_encode(['status' => 'success']);
+} catch (Exception $e) {
+    error_log("Error processing webhook: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Internal server error']);
+}
+}
 
     function handleCoursePublished($payload) {
         $course = $payload['course'];
