@@ -1,0 +1,99 @@
+---
+title: "Custom Fields"
+description: "Create and manage custom fields for users and groups"
+---
+
+## Overview
+
+Utilize custom fields for users and groups to store, track and search through custom attributes, such as Birth Date, social media profile links, etc.
+
+## Related Topics
+
+- [Role Management](/guides/settings-customization/role-management) - Control who can view and edit custom fields
+- [Managing Users and Groups](/guides/managing-users-groups/overview) - Learn how to manage user and group profiles
+
+## Accessing Custom Fields Settings
+
+To set up the set of custom fields for users and groups common for a Konstantly site, the administrator needs to navigate to **Settings > Custom fields**:
+
+<Frame>
+  <img src="/images/guides/settings-customization/custom-fields.png" alt="Custom fields settings" />
+</Frame>
+
+Switch between **Users** and **Groups** tabs to manage corresponding set of fields.
+
+## Adding Custom Fields
+
+Click **Add new custom field** to insert new custom field to the end of the list:
+
+<Frame>
+  <img src="/images/guides/settings-customization/custom-fields-dropdown.png" alt="Adding a new custom field" />
+</Frame>
+
+Here you will need to specify the following parameters:
+
+- **Custom field type**: The way the custom field will be displayed on user and group profile pages
+- **API ID**: Unique identifier of the field that will be used for manipulating this field via API
+- **Field name**: The way the field will be labelled on user and group profile pages
+
+<Note>
+Make sure to press **Save** to record changes you made to custom fields.
+</Note>
+
+## Custom Field Settings
+
+<Frame>
+  <img src="/images/guides/settings-customization/settings-custom-fields.png" alt="Custom field settings" />
+</Frame>
+
+Each custom field has additional settings:
+
+### Show on Profile Page
+
+When enabled, the value is displayed on user's and group's profile page and is visible by everyone who has permission to view the object.
+
+### Allow Users to Set Field Values
+
+When enabled, the value is editable by a user for their own profile page.
+
+### Make Field Mandatory
+
+When enabled, the field gets mandatory to fill in when editing profile page. It also automatically enables the previous two options.
+
+<Tip>
+Custom fields are displayed on profile page in the exact same order as you specify in site settings. To reorder custom fields, simply drag and drop the set in the way you want.
+</Tip>
+
+## Permissions
+
+A user should have **Manage custom fields** permission in order to be able to create and modify set of custom fields for users and groups:
+
+<Frame>
+  <img src="/images/guides/settings-customization/custom-field-permission.png" alt="Custom field permission" />
+</Frame>
+
+<Note>
+Administrator role has this permission by default. Adjust it for other roles if necessary.
+</Note>
+
+## Use Cases
+
+Custom fields can be used for various purposes:
+
+- **Employee Information**: Department, Manager, Employee ID, Hire Date
+- **Contact Information**: Phone number, LinkedIn profile, Office location
+- **Demographics**: Birth date, Preferred language, Time zone
+- **Training Tracking**: Certification expiry dates, Training level, Specialization
+- **Group Attributes**: Department code, Budget center, Regional office
+- **Social Media**: Twitter handle, GitHub username, Portfolio URL
+
+## Best Practices
+
+- **Use clear field names**: Make field labels descriptive and easy to understand
+- **Leverage API IDs**: Use meaningful API IDs for easier integration and automation
+- **Set mandatory wisely**: Only make fields mandatory when absolutely necessary
+- **Order logically**: Arrange fields in a logical order that makes sense to users
+- **Regular cleanup**: Periodically review and remove unused custom fields
+- **Document purpose**: Keep track of what each custom field is used for
+- **Test before rollout**: Create test custom fields on a test account before deploying to all users
+- **Consider privacy**: Be mindful of what personal information you collect and ensure compliance with data protection regulations

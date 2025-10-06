@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Konstantly API",
+  "name": "Konstantly Documentation",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -13,47 +13,97 @@
   },
   "topbarLinks": [
     {
-      "name": "Support",
+      "name": "Contact us",
       "url": "mailto:support@konstantly.com"
-    },
-    {
-      "name": "Public Roadmap",
-      "url": "https://konstantly.com/roadmap"
     }
   ],
   "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://konstant.ly"
+    "name": "Get started",
+    "url": "https://konstantly.com/pricing"
   },
-  "anchors": [
-    {
-      "name": "API Reference",
-      "icon": "rectangle-terminal",
-      "url": "api-reference"
-    }
-  ],
   "tabs": [
     {
-      "name": "API Reference",
-      "url": "api-reference/introduction"
+      "name": "Guides",
+      "url": "guides"
     },
     {
-      "name": "Changelog",
-      "url": "changelog"
+      "name": "API Reference",
+      "url": "api-reference"
+    },
+    {
+      "name": "Release Notes",
+      "url": "releases"
     }
   ],
   "navigation": [
     {
       "group": "Getting Started",
       "pages": [
+        "introduction",
         "api-reference/introduction",
         "api-reference/authentication"
       ]
     },
     {
-      "group": "Changelog",
+      "group": "Guides",
       "pages": [
-        "changelog/overview"
+        "guides/overview"
+      ]
+    },
+    {
+      "group": "Course Management",
+      "pages": [
+        "guides/course-management/create-new-course",
+        "guides/course-management/course-builder",
+        "guides/course-management/pages-and-lessons",
+        "guides/course-management/importing-content",
+        "guides/course-management/video-audio-lessons"
+      ]
+    },
+    {
+      "group": "Assessment and Tests",
+      "pages": [
+        "guides/assessment-tests/creating-questions",
+        "guides/assessment-tests/creating-tests",
+        "guides/assessment-tests/creating-surveys",
+        "guides/assessment-tests/expert-graded-assessments",
+        "guides/assessment-tests/email-notifications"
+      ]
+    },
+    {
+      "group": "Assignment and Collaboration",
+      "pages": [
+        "guides/assignment-collaboration/overview"
+      ]
+    },
+    {
+      "group": "Settings and Customization",
+      "pages": [
+        "guides/settings-customization/customizing-interface",
+        "guides/settings-customization/role-management",
+        "guides/settings-customization/custom-fields"
+      ]
+    },
+    {
+      "group": "Reporting and Analytics",
+      "pages": [
+        "guides/reporting-analytics/overview",
+        "guides/reporting-analytics/course-statistics",
+        "guides/reporting-analytics/group-statistics",
+        "guides/reporting-analytics/user-statistics",
+        "guides/reporting-analytics/global-statistics"
+      ]
+    },
+    {
+      "group": "Managing Users and Groups",
+      "pages": [
+        "guides/managing-users-groups/overview"
+      ]
+    },
+    {
+      "group": "Releases",
+      "pages": [
+        "releases/overview"
       ]
     },
     {

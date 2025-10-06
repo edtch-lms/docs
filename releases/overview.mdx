@@ -1,0 +1,237 @@
+---
+title: "Releases"
+description: "Latest updates and improvements to Konstantly"
+icon: "rocket"
+---
+
+## <Icon icon="sparkles" /> Konstantly AI 2.0 Beta
+
+We're rebuilding Konstantly into an AI-first course creation suite. These notes chart what's live in the beta and what's coming next.
+
+<Note>
+  **Want early access?** Join the waitlist at [konstantly.ai](https://konstantly.ai)
+</Note>
+
+### What's in Beta Right Now
+
+**<Icon icon="wand-magic-sparkles" iconType="solid" size={16} /> AI-First Course Authoring**
+
+AI is now part of the authoring workflow, helping you create courses instantly. The new AI Canvas Agent lives inside the editor with a chat panel on the right. You can describe what you need, such as a lesson outline, a diagram, or a branching flow, and the agent creates or adjusts it on the canvas in real time. It can also update text, colors, and positions, organize layouts, and even zoom or pan to focus on the right area.
+
+**<Icon icon="paintbrush" iconType="solid" size={16} /> Smarter, Friendlier Course Builder**
+
+We have re-imagined the course editor as a vibrant, flexible space built on the tldraw canvas. You can start with a quick linear flow where AI drafts a clean, ready-to-use structure, or switch to the Visual Pathboard to drag, connect, and design however you like. The new Pathboard 2.0 adds eleven element types, smart auto-routing for cleaner connections, a validation panel to catch issues before publishing, and import nodes with progress tracking. Course building is not just faster, it's more intuitive and even fun.
+
+**<Icon icon="circle-play" iconType="solid" size={16} /> Upgraded Course Player**
+
+The course player has been rebuilt for consistency and speed. It now unifies playback modes, supports screenshot-first loading for quicker previews, and renders content seamlessly. Learners benefit from a smoother experience with nine supported question types and built-in SCORM, PDF, and PPT import.
+
+**<Icon icon="users-gear" iconType="solid" size={16} /> Team Operations and Permissions**
+
+Team management has been modernized with a cleaner UI, global search, and bulk actions for managing users and groups. Role-aware controls remain fully compatible with Konstantly 1.0, ensuring that existing permissions and access levels continue to work without disruption.
+
+**<Icon icon="compass" iconType="solid" size={16} /> What's Next**
+
+We're preparing production-grade authentication and real-time multi-cursor collaboration. Coming soon are embedded learner whiteboards, deeper Zapier automation, and richer analytics. We're also refining the toolbar, expanding media provider integrations, adding certification templates, and completing full reporting parity.
+
+👉 **Keep an eye out for upcoming updates and [subscribe to the waitlist](https://konstantly.ai) to stay in the loop!**
+
+<CardGroup cols={1}>
+  <Update label="October 5, 2025" icon="wand-magic-sparkles">
+    **Konstantly AI Agent Release**
+
+    Konstantly AI Agent turns natural-language prompts and TODO queues into canvas actions with streaming feedback and chat history.
+
+    **AI Agent Capabilities**
+
+    • Creates, edits, and restructures lessons, assessments, and media blocks
+
+    • Redactor 2.0 (built on the TLdraw runtime) with prompt-to-outline generation
+
+    • Context-aware chat with agent-driven manipulation
+
+    • Per-page Redactor storage for seamless reloads and multi-step authoring
+
+    **Media Integration**
+
+    • Image & video drawers integrate Unsplash, Google, and OpenAI generation
+
+    • YouTube and Vimeo search and embedding
+
+    • Uploads and imports flow straight into Pathboard 2.0
+
+    • Video Lesson Studio with timeline editing and sticky playback frame
+
+    **Course Player & Analytics**
+
+    • Redactor-aware course player with screenshot fallback
+
+    • Certificate layouts ready for AI-authored courses
+
+    • ScreenshotService polling keeps thumbnails fresh
+
+    • Instance statistics hooks with activity charts and leaderboards
+  </Update>
+
+  <Update label="September 8, 2025" icon="diagram-project">
+    **Canvas Rewrite & Pathboard 2.0**
+
+    React Flow Pathboard with worker-backed A* routing, keyboard shortcuts, and contextual hints for visual course building.
+
+    **Pathboard Features**
+
+    • Eleven curriculum elements with homework/classwork defaults
+
+    • Import nodes with upload progress tracking
+
+    • Draggable toolbar/zoom with clipboard & position memory
+
+    • Validation panel catching unreachable nodes or missing finals before publish
+
+    **Import & Content Pipelines**
+
+    • SCORM/PPT/PDF import service with progress callbacks
+
+    • Existing course structures load directly into Pathboard 2.0
+
+    • Content pipelines preserved for uploads, screenshots, and exports
+
+    • Analyst-friendly APIs for downstream automation
+  </Update>
+
+  <Update label="August 12, 2025" icon="users-gear">
+    **Team Operations Migration**
+
+    Users, groups, invitations, and imports rebuilt with React Query data flows, modern UI components, and extensive behaviour checks.
+
+    **Team Management**
+
+    • Fast filters and live updates across users, groups, invites, and imports
+
+    • Course chains & journeys with filterable program grid
+
+    • Duplication, assignment status badges, and bulk actions
+
+    • MSW-backed test suites to guarantee behaviour consistency
+
+    **Branding & Certificates**
+
+    • BrandingStyles runtime theming restores customer colors/logos
+
+    • Tailwind-driven components replace older styles
+
+    • Certificate studio foundations with template selector
+
+    • Expiration rules and live preview
+  </Update>
+
+  <Update label="July 18, 2025" icon="rocket">
+    **Konstantly AI 2.0 Beta Kickoff**
+
+    We launched the next generation of Konstantly with an AI-first architecture.
+
+    **Foundation**
+
+    • Modern React 18 + TypeScript core with streamlined build and shared design system
+
+    • Improved performance and reliability through new state management, data fetching, and testing setup
+
+    • Feature-flag framework to stage new experiences safely
+
+    **AI Integration**
+
+    • Konstantly AI Agent blueprint covering model registry, service adapters, and action utilities
+
+    • Canvas workflow powered by the TLdraw runtime for intuitive course building
+
+    • Early work on a screenshot-first course player for faster previews and loading
+
+    [Join the Waitlist](https://konstantly.ai) for early access.
+  </Update>
+</CardGroup>
+
+---
+
+## <Icon icon="archive" /> Konstantly 1.0
+
+<Info>
+  **Legacy Platform** - Konstantly 1.0 remains fully supported for existing courses and users. All updates below represent the stable production platform.
+</Info>
+
+<CardGroup cols={1}>
+  <Update label="March 14, 2025" icon="image">
+    **OpenAI Generate Image Integration**
+
+    Create stunning visuals with OpenAI's technology. Simply choose the model, select the image size, and craft a detailed prompt—like "A fluffy red cat sitting on a windowsill." Watch your ideas turn into reality in seconds!
+  </Update>
+
+  <Update label="March 10, 2025" icon="graduation-cap">
+    **SCORM Improvements**
+
+    Enhanced SCORM compliance with support for all major formats.
+
+    • Now supporting all SCORM formats (2004 and 1.2)
+
+    • Minor bug fixes and improvements
+  </Update>
+
+  <Update label="March 9, 2025" icon="plug">
+    **AppSumo API Integration & Launch Prep**
+
+    Complete integration with AppSumo marketplace enabling automated license management and seamless user onboarding.
+
+    • OAuth authentication, webhook handling, and license sync
+
+    • Automated code redemption and validation
+
+    • End-to-end testing, API optimization, and deployment validation
+  </Update>
+
+  <Update label="March 4, 2025" icon="comments">
+    **Course Discussion Board Launched**
+
+    Enabling real-time engagement and collaboration within courses through integrated discussion threads.
+
+    • User Interaction – Engage and reply within each course
+
+    • Comment Management – Delete comments as needed
+  </Update>
+
+  <Update label="February 28, 2025" icon="sparkles">
+    **Self-service: Simplified Onboarding & Enhanced Flexibility**
+
+    Complete self-service platform enabling users to create, manage, and scale their learning sites independently.
+
+    • Easier Account Creation – Streamlined sign-up with quick email verification
+
+    • Multi-Site Management – Host multiple training sites
+
+    • Custom Branding – Set a permanent custom domain (yourname.konstant.ly)
+
+    • Flexible Plans – Upgrade, downgrade, and manage billing with ease
+
+    • Integrated Support – Built-in ticket system
+  </Update>
+
+  <Update label="February 4, 2025" icon="globe">
+    **Platform Localization Launched**
+
+    We've rolled out localization on our platform! Users can now enjoy a seamless experience in 11 languages.
+
+    **Supported Languages:**
+    English • Deutsch • Français • Italiano • Español • Русский • Polski • Português • 简体中文 • 日本語 • Tiếng Việt
+
+    More languages coming soon!
+  </Update>
+
+</CardGroup>
+
+<Tip>
+  **Konstantly 1.0 Foundation** - All updates prior to May 2025 represent the complete Konstantly 1.0 platform foundation.
+</Tip>
+
+## <Icon icon="bell" /> Stay Updated
+
+<Card title="Subscribe to Updates" icon="envelope" href="https://konstantly.ai">
+  Join our waitlist to get notified about new releases and features
+</Card>

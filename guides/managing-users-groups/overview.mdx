@@ -1,0 +1,162 @@
+---
+title: "Managing Users and Groups"
+description: "Manage users, groups, and permissions in Konstantly"
+---
+
+## Overview
+
+To manage users and groups, go to the **'Team'** tab in the left side menu.
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/team.gif" alt="Team management interface" />
+</Frame>
+
+## Invite New Learners
+
+You need to create a separate Konstantly account for every learner so that you can assign courses to them and track their progress. You can create accounts manually, or you can send invitations to learners that will enable them to create their Konstantly accounts.
+
+### Sending Invitations
+
+To send an invitation, log in to Konstantly, open the Team tab, and click **Invite**.
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/invite-user.gif" alt="Inviting users" />
+</Frame>
+
+Strictly speaking, all you need to send an invitation is to specify the recipient's email address (note that you can specify more than one - very handy to send out multiple invitations at once). You can also:
+
+- **Customize your invitation** with a welcome text. No need to wax poetic, but it is nice to explain what the invitation is for, and why the recipient needs to accept it.
+- **Choose a group** the learner will automatically be assigned to once they accept the invitation.
+- **Choose a course** the learner will automatically be assigned once they accept the invitation, and, optionally, set the due date.
+
+Once you are satisfied with how your invitation looks, hit **Create** to send it on its way.
+
+### Managing Invitations
+
+Once the invitation has been sent, and until it is accepted, you can see it by opening the Team tab and clicking on **Invitations**. For every pending invitation, you can:
+- Resend the email
+- Grab the invitation link
+- Cancel the invitation
+
+<Warning>
+Learners will be unable to create a Konstantly account by following the link in a canceled invitation.
+</Warning>
+
+When a learner accepts the invitation and creates a Konstantly account, you are notified via email. A corresponding message is also displayed in the News tab.
+
+## Editing User Profile Fields
+
+As an administrator, you have access not only to creating users, but also to editing data in user profiles. To make changes or add new information to a user's profile, click on their name or photo in the list of users in the **"Team"** tab.
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/edit-profile.gif" alt="Editing user profile" />
+</Frame>
+
+You can view existing data in the header of the page and in the **"About Me"** field. To make changes, click on the icon in the top right corner of the page, and select **"Edit"**.
+
+### Editable Fields
+
+The following fields will become available for editing:
+- Name
+- Profile photo
+- Position and company
+- City
+- Time zone
+- Role
+- Additional attribute fields if they exist
+- "About Me" field
+
+<Note>
+Don't forget to press the **"Save"** button to make changes to the profile.
+</Note>
+
+### Additional Settings
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/profile-settings.gif" alt="User profile settings" />
+</Frame>
+
+In addition to editing personal profile information, you can also:
+- Change notification settings
+- Change the user's email address
+
+## Group Hierarchy
+
+View, create, and manage groups in the **"Groups"** tab under **"Team"**.
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/groups.gif" alt="Groups management" />
+</Frame>
+
+To finely tune your reporting and course assignment processes, you can recreate the actual company structure using the nested groups feature.
+
+### Creating Groups
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/create-group.gif" alt="Creating a new group" />
+</Frame>
+
+Click the **+** to create a new group.
+
+**Create the parent groups first.** For example: before creating the group "Sales", create the group "The Company". You can later create daughter groups for the group "Sales", or also put "The Company" in a parent group "Group of companies".
+
+<Tip>
+The group hierarchy works like a nesting doll: one large group can contain several smaller groups, each of which may also include some subgroups, and so on.
+</Tip>
+
+## Add Learners to Groups
+
+<Frame>
+  <img src="/images/guides/managing-users-groups/add-users-group.gif" alt="Adding users to a group" />
+</Frame>
+
+To add users to groups, open the group, and click **"Add users"** button.
+
+## Best Practices
+
+### Invitation Management
+- **Use bulk invitations**: Send multiple invitations at once by adding multiple email addresses
+- **Provide context**: Include welcome text explaining why they're receiving the invitation
+- **Pre-assign to groups**: Automatically assign users to appropriate groups upon acceptance
+- **Set deadlines**: Assign courses with due dates directly in the invitation
+- **Monitor pending invitations**: Regularly check and resend invitations that haven't been accepted
+
+### User Profile Management
+- **Keep profiles current**: Regularly update user information to ensure accurate reporting
+- **Use custom fields**: Leverage [custom fields](/guides/settings-customization/custom-fields) to track additional user attributes
+- **Assign appropriate roles**: Use the [role management system](/guides/settings-customization/role-management) to control access
+- **Review time zones**: Ensure time zones are set correctly for accurate deadline tracking
+
+### Group Structure
+- **Mirror organization structure**: Create groups that reflect your actual company hierarchy
+- **Use meaningful names**: Name groups clearly to make course assignment easier
+- **Plan hierarchy first**: Design your group structure before creating groups
+- **Keep it simple**: Don't over-complicate the hierarchy; 2-3 levels is usually sufficient
+- **Document structure**: Maintain documentation of your group hierarchy and purpose
+
+### User and Group Hygiene
+- **Regular audits**: Periodically review users and groups to remove obsolete ones
+- **Consolidate groups**: Merge similar groups to simplify management
+- **Archive inactive users**: Use role changes or deactivation for users who no longer need access
+- **Standardize naming**: Use consistent naming conventions for groups and user fields
+
+## Common Workflows
+
+### Onboarding New Employees
+1. Send invitation with welcome message
+2. Auto-assign to department group
+3. Auto-assign to onboarding course with deadline
+4. Monitor invitation acceptance
+5. Review profile completion
+
+### Department Restructuring
+1. Create new group hierarchy
+2. Move users to new groups
+3. Update course assignments
+4. Archive old groups
+
+### Bulk User Management
+1. Export user list
+2. Make updates in spreadsheet
+3. Use API or bulk tools to update
+4. Verify changes in Team tab
