@@ -169,10 +169,5 @@
     "twitter": "https://twitter.com/konstantly",
     "linkedin": "https://linkedin.com/company/konstantly",
     "website": "https://konstantly.com"
-  },
-  "analytics": {
-    "intercom": {
-      "appId": "lvm1idb9"
-    }
   }
 }
