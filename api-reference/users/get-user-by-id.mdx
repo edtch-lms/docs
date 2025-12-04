@@ -1,0 +1,144 @@
+---
+title: 'Get User by ID'
+api: 'GET /users/{userId}'
+description: 'Get user personal information by user ID'
+---
+
+Retrieve detailed information about a specific user using their unique ID.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID (alphanumeric unique identifier)
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string" required>User ID, alphanumeric unique identifier</ResponseField>
+<ResponseField name="name" type="string" required>Full name of the user</ResponseField>
+<ResponseField name="language" type="string" required>Interface language (de, en, es, fr, pl, pt, ru)</ResponseField>
+<ResponseField name="occupation" type="string">Job title</ResponseField>
+<ResponseField name="location" type="string">Location</ResponseField>
+<ResponseField name="timezone" type="string" required>Timezone in TZ format</ResponseField>
+<ResponseField name="email" type="string" required>Email address</ResponseField>
+<ResponseField name="isBanned" type="boolean" required>Whether user is banned from login</ResponseField>
+<ResponseField name="role" type="string" required>User role alias/identifier</ResponseField>
+<ResponseField name="fromApi" type="boolean" required>Whether user is managed via API only</ResponseField>
+<ResponseField name="image" type="object">
+    User avatar
+    <Expandable title="Image object properties">
+        <ResponseField name="id" type="integer" required>Image ID</ResponseField>
+        <ResponseField name="original" type="string" required>Full-size image URL</ResponseField>
+        <ResponseField name="mini" type="string" required>36x36px image URL</ResponseField>
+        <ResponseField name="xSmall" type="string" required>58x58px image URL</ResponseField>
+        <ResponseField name="small" type="string" required>128x128px image URL</ResponseField>
+    </Expandable>
+</ResponseField>
+<ResponseField name="attributes" type="object">Custom user attributes</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request GET \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/1234567890' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def get_user_by_id(api_key: str, user_id: str) -> dict:
+        url = f"https://YOURSITE.konstant.ly/openapi/v1/users/{user_id}"
+        headers = {"X-API-KEY": api_key}
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 404:
+            raise ValueError(f"User {user_id} not found")
+
+        response.raise_for_status()
+        return response.json()
+
+    # Example usage
+    try:
+        user = get_user_by_id("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890")
+        print(f"User: {user['name']}")
+        print(f"Email: {user['email']}")
+    except Exception as e:
+        print(f"Failed to fetch user: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function getUserById(apiKey, userId) {
+        try {
+            const response = await axios.get(
+                `https://YOURSITE.konstant.ly/openapi/v1/users/${userId}`,
+                {
+                    headers: { 'X-API-KEY': apiKey }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error(`User ${userId} not found`);
+            }
+            throw error;
+        }
+    }
+
+    // Example usage
+    getUserById('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+        .then(user => {
+            console.log(`User: ${user.name}`);
+            console.log(`Email: ${user.email}`);
+        })
+        .catch(error => console.error('Failed:', error.message));
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "id": "1234567890",
+        "name": "John Doe",
+        "language": "en",
+        "occupation": "Salesman",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "john.doe@example.com",
+        "isBanned": false,
+        "role": {
+            "alias": "learner"
+        },
+        "fromApi": false,
+        "image": null,
+        "attributes": {}
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

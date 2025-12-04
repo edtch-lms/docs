@@ -23,10 +23,6 @@
   },
   "tabs": [
     {
-      "name": "Guides",
-      "url": "guides"
-    },
-    {
       "name": "API Reference",
       "url": "api-reference"
     },
@@ -42,62 +38,6 @@
         "introduction",
         "api-reference/introduction",
         "api-reference/authentication"
-      ]
-    },
-    {
-      "group": "Guides",
-      "pages": [
-        "guides/overview"
-      ]
-    },
-    {
-      "group": "Course Management",
-      "pages": [
-        "guides/course-management/create-new-course",
-        "guides/course-management/course-builder",
-        "guides/course-management/pages-and-lessons",
-        "guides/course-management/importing-content",
-        "guides/course-management/video-audio-lessons"
-      ]
-    },
-    {
-      "group": "Assessment and Tests",
-      "pages": [
-        "guides/assessment-tests/creating-questions",
-        "guides/assessment-tests/creating-tests",
-        "guides/assessment-tests/creating-surveys",
-        "guides/assessment-tests/expert-graded-assessments",
-        "guides/assessment-tests/email-notifications"
-      ]
-    },
-    {
-      "group": "Assignment and Collaboration",
-      "pages": [
-        "guides/assignment-collaboration/overview"
-      ]
-    },
-    {
-      "group": "Settings and Customization",
-      "pages": [
-        "guides/settings-customization/customizing-interface",
-        "guides/settings-customization/role-management",
-        "guides/settings-customization/custom-fields"
-      ]
-    },
-    {
-      "group": "Reporting and Analytics",
-      "pages": [
-        "guides/reporting-analytics/overview",
-        "guides/reporting-analytics/course-statistics",
-        "guides/reporting-analytics/group-statistics",
-        "guides/reporting-analytics/user-statistics",
-        "guides/reporting-analytics/global-statistics"
-      ]
-    },
-    {
-      "group": "Managing Users and Groups",
-      "pages": [
-        "guides/managing-users-groups/overview"
       ]
     },
     {
@@ -130,12 +70,16 @@
           "pages": [
             "api-reference/users/get-users",
             "api-reference/users/create-user",
-            "api-reference/users/get-user",
+            "api-reference/users/get-user-by-id",
+            "api-reference/users/get-user-by-email",
             "api-reference/users/update-user",
             "api-reference/users/delete-user",
+            "api-reference/users/block-user",
+            "api-reference/users/unblock-user",
             "api-reference/users/get-user-assignments",
             "api-reference/users/post-user-assignments",
             "api-reference/users/user-certificates",
+            "api-reference/users/get-user-groups",
             "api-reference/users/user-groups",
             "api-reference/users/user-sso",
             "api-reference/users/user-statistics"
@@ -152,6 +96,7 @@
             "api-reference/groups/delete-group",
             "api-reference/groups/group-assignments",
             "api-reference/groups/group-users",
+            "api-reference/groups/remove-user-from-group",
             "api-reference/groups/group-statistics"
           ]
         },
@@ -224,5 +169,10 @@
     "twitter": "https://twitter.com/konstantly",
     "linkedin": "https://linkedin.com/company/konstantly",
     "website": "https://konstantly.com"
+  },
+  "analytics": {
+    "intercom": {
+      "appId": "lvm1idb9"
+    }
   }
 }

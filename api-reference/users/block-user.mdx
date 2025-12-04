@@ -1,0 +1,176 @@
+---
+title: 'Deactivate User'
+api: 'POST /users/blocked'
+description: 'Deactivate (ban) a user account'
+---
+
+Deactivate a user account, preventing them from logging in. Deactivated users are not counted towards your license.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## Request Body
+
+<ParamField body="id" type="string" required>
+    User API ID to deactivate
+</ParamField>
+
+## Response
+
+Returns the user object with `isBanned: true`.
+
+<ResponseField name="id" type="string" required>User ID</ResponseField>
+<ResponseField name="name" type="string" required>Full name</ResponseField>
+<ResponseField name="language" type="string" required>Interface language</ResponseField>
+<ResponseField name="email" type="string" required>Email address</ResponseField>
+<ResponseField name="isBanned" type="boolean" required>Will be `true` after deactivation</ResponseField>
+<ResponseField name="role" type="string" required>User role</ResponseField>
+<ResponseField name="fromApi" type="boolean" required>API management status</ResponseField>
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="422" type="object">
+    Returned when user cannot be banned (e.g., assigned as expert on courses)
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (422)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message explaining why user cannot be banned</ResponseField>
+        <ResponseField name="data" type="object">Additional data about blocking courses</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request POST \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/blocked' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv' \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "id": "1234567890"
+    }'
+    ```
+
+    ```python Python
+    import requests
+
+    def deactivate_user(api_key: str, user_id: str) -> dict:
+        url = "https://YOURSITE.konstant.ly/openapi/v1/users/blocked"
+        headers = {
+            "X-API-KEY": api_key,
+            "Content-Type": "application/json"
+        }
+        data = {"id": user_id}
+
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code == 404:
+            raise ValueError(f"User {user_id} not found")
+
+        if response.status_code == 422:
+            error_data = response.json()
+            raise ValueError(f"Cannot deactivate user: {error_data['message']}")
+
+        response.raise_for_status()
+        return response.json()
+
+    # Example usage
+    try:
+        user = deactivate_user("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890")
+        print(f"User {user['name']} has been deactivated")
+        print(f"isBanned: {user['isBanned']}")
+    except Exception as e:
+        print(f"Failed to deactivate user: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function deactivateUser(apiKey, userId) {
+        try {
+            const response = await axios.post(
+                'https://YOURSITE.konstant.ly/openapi/v1/users/blocked',
+                { id: userId },
+                {
+                    headers: {
+                        'X-API-KEY': apiKey,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error(`User ${userId} not found`);
+            }
+            if (error.response?.status === 422) {
+                throw new Error(`Cannot deactivate: ${error.response.data.message}`);
+            }
+            throw error;
+        }
+    }
+
+    // Example usage
+    deactivateUser('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+        .then(user => {
+            console.log(`User ${user.name} has been deactivated`);
+            console.log(`isBanned: ${user.isBanned}`);
+        })
+        .catch(error => console.error('Failed:', error.message));
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json Response
+    {
+        "id": "1234567890",
+        "name": "John Doe",
+        "language": "en",
+        "occupation": "Salesman",
+        "location": "London",
+        "timezone": "Europe/London",
+        "email": "john.doe@example.com",
+        "isBanned": true,
+        "role": {
+            "alias": "learner"
+        },
+        "fromApi": false,
+        "image": null
+    }
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+
+    ```json 422 Error
+    {
+        "status": 422,
+        "message": "User cannot be banned because he/she is assigned as expert at courses",
+        "data": {
+            "courses": [
+                {
+                    "id": 123,
+                    "name": "Course name",
+                    "expertHomeworks": [...],
+                    "expertClassworks": [...]
+                }
+            ]
+        }
+    }
+    ```
+</ResponseExample>

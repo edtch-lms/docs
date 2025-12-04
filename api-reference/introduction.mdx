@@ -58,20 +58,6 @@ Many endpoints return paginated results. By default, endpoints return 20 items p
   The number of items to skip. Use this for pagination.
 </ParamField>
 
-<ParamField query="limit" type="integer" default="20">
-  The number of items to return per page (where supported).
-</ParamField>
-
-## <Icon icon="gauge-high" /> Rate Limiting
-
-Rate limiting information is provided in the response headers:
-
-```bash
-X-RateLimit-Limit: 100      # Requests per minute allowed
-X-RateLimit-Remaining: 95   # Requests remaining in current time window
-X-RateLimit-Reset: 1538152444  # Time when rate limit resets
-```
-
 ## <Icon icon="headset" /> Support
 
 If you have any questions or need help with API integration, please contact our support team at [support@konstantly.com](mailto:support@konstantly.com).

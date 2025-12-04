@@ -1,0 +1,153 @@
+---
+title: 'Remove User from Group'
+api: 'DELETE /groups/{groupId}/users/{userId}'
+description: 'Remove a user from a group'
+---
+
+Remove a specific user from a group.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="groupId" type="integer" required>
+    The unique identifier of the group
+</ParamField>
+
+<ParamField path="userId" type="string" required>
+    User API ID to remove from the group
+</ParamField>
+
+## Response
+
+Returns an empty response on success.
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when group or user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request DELETE \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/groups/123/users/1234567890' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def remove_user_from_group(api_key: str, group_id: int, user_id: str) -> bool:
+        url = f"https://YOURSITE.konstant.ly/openapi/v1/groups/{group_id}/users/{user_id}"
+        headers = {"X-API-KEY": api_key}
+
+        response = requests.delete(url, headers=headers)
+
+        if response.status_code == 404:
+            raise ValueError("Group or user not found")
+
+        response.raise_for_status()
+        return True
+
+    # Example usage
+    try:
+        if remove_user_from_group("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", 123, "1234567890"):
+            print("User removed from group successfully")
+    except Exception as e:
+        print(f"Failed to remove user from group: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function removeUserFromGroup(apiKey, groupId, userId) {
+        try {
+            await axios.delete(
+                `https://YOURSITE.konstant.ly/openapi/v1/groups/${groupId}/users/${userId}`,
+                {
+                    headers: { 'X-API-KEY': apiKey }
+                }
+            );
+            return true;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error('Group or user not found');
+            }
+            throw error;
+        }
+    }
+
+    // Example usage
+    removeUserFromGroup('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', 123, '1234567890')
+        .then(() => console.log('User removed from group successfully'))
+        .catch(error => console.error('Failed:', error.message));
+    ```
+
+    ```php PHP
+    <?php
+
+    function removeUserFromGroup($apiKey, $groupId, $userId) {
+        $ch = curl_init();
+
+        $url = "https://YOURSITE.konstant.ly/openapi/v1/groups/{$groupId}/users/{$userId}";
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_CUSTOMREQUEST => 'DELETE',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'X-API-KEY: ' . $apiKey
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode === 404) {
+            throw new Exception("Group or user not found");
+        }
+
+        return $httpCode === 200;
+    }
+
+    // Example usage
+    try {
+        if (removeUserFromGroup('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', 123, '1234567890')) {
+            echo "User removed from group successfully\n";
+        }
+    } catch (Exception $e) {
+        echo "Failed to remove user from group: " . $e->getMessage() . "\n";
+    }
+    ?>
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json 200 Response
+    {}
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+</ResponseExample>

@@ -1,0 +1,126 @@
+---
+title: 'Activate User'
+api: 'DELETE /users/blocked/{userId}'
+description: 'Activate (unban) a deactivated user account'
+---
+
+Reactivate a previously deactivated user account, allowing them to log in again.
+
+## Request Headers
+
+<ParamField header="X-API-KEY" type="string" required>
+    API Key. Go to your Konstantly site > Settings > API and copy the value from there.
+</ParamField>
+
+## URL Parameters
+
+<ParamField path="userId" type="string" required>
+    User API ID to activate
+</ParamField>
+
+## Response
+
+Returns an empty response on success.
+
+### Error Responses
+
+<ResponseField name="404" type="object">
+    Returned when user is not found
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (404)</ResponseField>
+        <ResponseField name="message" type="string" required>Error message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<ResponseField name="402" type="object">
+    Returned when license limit is exceeded and user cannot be activated
+    <Expandable title="Error object properties">
+        <ResponseField name="status" type="integer" required>HTTP status code (402)</ResponseField>
+        <ResponseField name="message" type="string" required>Payment required message</ResponseField>
+    </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+    ```bash cURL
+    curl --request DELETE \
+    --url 'https://YOURSITE.konstant.ly/openapi/v1/users/blocked/1234567890' \
+    --header 'X-API-KEY: 1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv'
+    ```
+
+    ```python Python
+    import requests
+
+    def activate_user(api_key: str, user_id: str) -> bool:
+        url = f"https://YOURSITE.konstant.ly/openapi/v1/users/blocked/{user_id}"
+        headers = {"X-API-KEY": api_key}
+
+        response = requests.delete(url, headers=headers)
+
+        if response.status_code == 404:
+            raise ValueError(f"User {user_id} not found")
+
+        if response.status_code == 402:
+            raise ValueError("License limit exceeded. Upgrade your plan to activate more users.")
+
+        response.raise_for_status()
+        return True
+
+    # Example usage
+    try:
+        if activate_user("1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv", "1234567890"):
+            print("User has been activated successfully")
+    except Exception as e:
+        print(f"Failed to activate user: {str(e)}")
+    ```
+
+    ```javascript Node.js
+    const axios = require('axios');
+
+    async function activateUser(apiKey, userId) {
+        try {
+            await axios.delete(
+                `https://YOURSITE.konstant.ly/openapi/v1/users/blocked/${userId}`,
+                {
+                    headers: { 'X-API-KEY': apiKey }
+                }
+            );
+            return true;
+        } catch (error) {
+            if (error.response?.status === 404) {
+                throw new Error(`User ${userId} not found`);
+            }
+            if (error.response?.status === 402) {
+                throw new Error('License limit exceeded. Upgrade your plan.');
+            }
+            throw error;
+        }
+    }
+
+    // Example usage
+    activateUser('1qaz2wsx3edc4rfv1qaz2wsx3edc4rfv', '1234567890')
+        .then(() => console.log('User has been activated successfully'))
+        .catch(error => console.error('Failed:', error.message));
+    ```
+
+</RequestExample>
+
+<ResponseExample>
+    ```json 200 Response
+    {}
+    ```
+
+    ```json 404 Error
+    {
+        "status": 404,
+        "message": "Not found"
+    }
+    ```
+
+    ```json 402 Error
+    {
+        "status": 402,
+        "message": "Payment required"
+    }
+    ```
+</ResponseExample>

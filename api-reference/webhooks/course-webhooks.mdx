@@ -25,6 +25,26 @@ Triggered when a course is published and becomes available to users.
     </Expandable>
 </ResponseField>
 
+## Course/Unpublished
+
+Triggered when a course is unpublished and becomes unavailable to users.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Unpublished course information
+    <Expandable title="Course properties">
+        <ResponseField name="id" type="integer" required>Course ID</ResponseField>
+        <ResponseField name="name" type="string" required>Course name</ResponseField>
+        <ResponseField name="annotation" type="string" required>Course description</ResponseField>
+        <ResponseField name="isDraft" type="boolean" required>Draft status</ResponseField>
+        <ResponseField name="createdAt" type="integer" required>Creation timestamp</ResponseField>
+        <ResponseField name="updatedAt" type="integer" required>Last update timestamp</ResponseField>
+        <ResponseField name="publishedAt" type="integer" required>Publication timestamp</ResponseField>
+        <ResponseField name="image" type="object">Course cover image</ResponseField>
+    </Expandable>
+</ResponseField>
+
 ## Course/Assigned
 
 Triggered when a course is assigned to a user.
@@ -51,6 +71,36 @@ Triggered when a course is assigned to a user.
 
 <ResponseField name="deadlineAt" type="integer" required>
     Deadline timestamp
+</ResponseField>
+
+## Course/Started
+
+Triggered when a user starts a course.
+
+### Payload
+
+<ResponseField name="course" type="object" required>
+    Course information
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+    User information
+</ResponseField>
+
+<ResponseField name="assignedAt" type="integer" required>
+    Assignment timestamp
+</ResponseField>
+
+<ResponseField name="deadlineAt" type="integer" required>
+    Deadline timestamp
+</ResponseField>
+
+<ResponseField name="startedAt" type="integer" required>
+    Timestamp when user started the course
+</ResponseField>
+
+<ResponseField name="finishedAt" type="integer" required>
+    Timestamp when user finished (0 if not finished)
 </ResponseField>
 
 ## Course/Progress
@@ -117,6 +167,24 @@ Triggered when a user completes a course.
     }
     ```
 
+    ```json Course/Unpublished
+    {
+        "occuredAt": 1673531250,
+        "type": "Course/Unpublished",
+        "body": {
+            "course": {
+                "id": 123,
+                "name": "Sales Training",
+                "annotation": "Comprehensive sales course",
+                "isDraft": true,
+                "createdAt": 1673444800,
+                "updatedAt": 1673531250,
+                "publishedAt": 1673531200
+            }
+        }
+    }
+    ```
+
     ```json Course/Assigned
     {
         "occuredAt": 1673531300,
@@ -137,6 +205,28 @@ Triggered when a user completes a course.
         "assignedAt": 1673531300,
         "deadlineAt": 1674736000
     }
+    }
+    ```
+
+    ```json Course/Started
+    {
+        "occuredAt": 1673532000,
+        "type": "Course/Started",
+        "body": {
+            "course": {
+                "id": 123,
+                "name": "Sales Training"
+            },
+            "user": {
+                "id": "user123",
+                "name": "John Smith",
+                "email": "john@example.com"
+            },
+            "assignedAt": 1673531300,
+            "deadlineAt": 1674736000,
+            "startedAt": 1673532000,
+            "finishedAt": 0
+        }
     }
     ```
 
