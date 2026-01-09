@@ -1,53 +1,61 @@
 ---
-title: "Welcome to Konstantly Documentation"
-description: "API documentation and release notes for the Konstantly learning management platform"
-icon: "house"
+title: 'Introduction'
+description: 'Welcome to the Konstantly API documentation'
+icon: 'book'
 ---
 
-## <Icon icon="sparkles" /> What is Konstantly?
+# Konstantly API
 
-Konstantly is an AI-first learning management platform that revolutionizes how you create, deliver, and track online courses. With our AI Canvas Agent, you can build engaging courses in minutes instead of hours—simply describe what you need, and watch it come to life on the canvas.
-
-Whether you're creating compliance training, onboarding programs, or skill development courses, Konstantly provides everything you need from course authoring to analytics.
-
-## <Icon icon="folder-open" /> Documentation
-
-<CardGroup cols={2}>
-  <Card title="API Reference" icon="code" href="/api-reference/introduction">
-    Technical documentation for developers integrating with Konstantly
-  </Card>
-
-  <Card title="Release Notes" icon="rocket" href="/releases/overview">
-    Latest product updates, new features, and improvements
-  </Card>
-</CardGroup>
-
-## <Icon icon="bolt" /> Quick Start
-
-<CardGroup cols={2}>
-  <Card title="API Introduction" icon="book" href="/api-reference/introduction">
-    Learn how the Konstantly API works
-  </Card>
-
-  <Card title="Authentication" icon="key" href="/api-reference/authentication">
-    Get your API key and start making requests
-  </Card>
-</CardGroup>
-
-## <Icon icon="life-ring" /> Need Help?
-
-<CardGroup cols={2}>
-  <Card title="Contact Support" icon="envelope" href="mailto:support@konstantly.com">
-    Get help from our support team
-  </Card>
-
-  <Card title="Get Started" icon="rocket" href="https://konstantly.com/pricing">
-    Choose a plan and start building courses
-  </Card>
-</CardGroup>
-
-## <Icon icon="wand-magic-sparkles" /> What's New?
+Welcome to the Konstantly API documentation. This API allows you to programmatically manage users, courses, groups, certificates, and more in your Konstantly learning management platform.
 
 <Note>
-  **Konstantly AI 2.0 Beta** - We're rebuilding Konstantly with AI-first architecture. [View release notes →](/releases/overview)
+  This is a beta version of the API documentation. Report any errors to [support@konstantly.com](mailto:support@konstantly.com)
 </Note>
+
+## Base URL
+
+All API requests should be made to:
+
+```bash
+https://YOURSITE.konstant.ly/openapi/v1
+```
+
+Replace `YOURSITE` with your Konstantly subdomain.
+
+## Authentication
+
+The Konstantly API uses API keys to authenticate requests. Include your API key in the `X-API-KEY` header:
+
+```bash
+X-API-KEY: your-api-key-here
+```
+
+To get your API key:
+1. Go to your Konstantly site
+2. Navigate to **Settings > API**
+3. Copy your API key
+
+<Warning>
+  Keep your API keys secure. Never share them in publicly accessible areas such as GitHub or client-side code.
+</Warning>
+
+## Request Format
+
+The API accepts JSON-encoded request bodies and returns JSON-encoded responses. Include these headers:
+
+```bash
+Content-Type: application/json
+Accept: application/json
+```
+
+## Pagination
+
+Many endpoints return paginated results. By default, endpoints return 20 items per page. Use the `offset` parameter to paginate:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `offset` | integer | Number of items to skip |
+
+## Support
+
+If you have questions or need help with API integration, contact us at [support@konstantly.com](mailto:support@konstantly.com).

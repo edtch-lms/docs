@@ -1,9 +1,10 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Konstantly Documentation",
+  "name": "Konstantly API",
   "logo": {
     "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "light": "/logo/light.svg",
+    "href": "https://konstantly.com"
   },
   "favicon": "/favicon.png",
   "colors": {
@@ -13,155 +14,126 @@
   },
   "topbarLinks": [
     {
+      "name": "Knowledge Base",
+      "url": "https://konstantly.com/help"
+    },
+    {
       "name": "Contact us",
-      "url": "mailto:support@konstantly.com"
+      "url": "https://konstantly.com?contact=true"
     }
   ],
   "topbarCtaButton": {
     "name": "Get started",
     "url": "https://konstantly.com/pricing"
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    },
-    {
-      "name": "Release Notes",
-      "url": "releases"
-    }
-  ],
   "navigation": [
     {
       "group": "Getting Started",
       "pages": [
-        "introduction",
-        "api-reference/introduction",
-        "api-reference/authentication"
+        "introduction"
       ]
     },
     {
-      "group": "Releases",
+      "group": "Courses",
       "pages": [
-        "releases/overview"
+        "api-reference/courses/get-courses",
+        "api-reference/courses/get-course",
+        "api-reference/courses/course-assignments",
+        "api-reference/courses/course-assignments-users",
+        "api-reference/courses/course-assignments-groups",
+        "api-reference/courses/course-certificates",
+        "api-reference/courses/course-statistics",
+        "api-reference/courses/unassign-course-group",
+        "api-reference/courses/unassign-course-user"
       ]
     },
     {
-      "group": "API Reference",
+      "group": "Users",
       "pages": [
-        {
-          "group": "Courses",
-          "icon": "graduation-cap",
-          "pages": [
-            "api-reference/courses/get-courses",
-            "api-reference/courses/get-course",
-            "api-reference/courses/course-assignments",
-            "api-reference/courses/course-assignments-users",
-            "api-reference/courses/course-assignments-groups",
-            "api-reference/courses/course-certificates",
-            "api-reference/courses/course-statistics",
-            "api-reference/courses/unassign-course-group",
-            "api-reference/courses/unassign-course-user"
-          ]
-        },
-        {
-          "group": "Users",
-          "icon": "person",
-          "pages": [
-            "api-reference/users/get-users",
-            "api-reference/users/create-user",
-            "api-reference/users/get-user-by-id",
-            "api-reference/users/get-user-by-email",
-            "api-reference/users/update-user",
-            "api-reference/users/delete-user",
-            "api-reference/users/block-user",
-            "api-reference/users/unblock-user",
-            "api-reference/users/get-user-assignments",
-            "api-reference/users/post-user-assignments",
-            "api-reference/users/user-certificates",
-            "api-reference/users/get-user-groups",
-            "api-reference/users/user-groups",
-            "api-reference/users/user-sso",
-            "api-reference/users/user-statistics"
-          ]
-        },
-        {
-          "group": "Groups",
-          "icon": "people",
-          "pages": [
-            "api-reference/groups/get-groups",
-            "api-reference/groups/create-group",
-            "api-reference/groups/get-group",
-            "api-reference/groups/update-group",
-            "api-reference/groups/delete-group",
-            "api-reference/groups/group-assignments",
-            "api-reference/groups/group-users",
-            "api-reference/groups/remove-user-from-group",
-            "api-reference/groups/group-statistics"
-          ]
-        },
-        {
-          "group": "Certificates",
-          "icon": "certificate",
-          "pages": [
-            "api-reference/certificates/get-certificate"
-          ]
-        },
-        {
-          "group": "Custom Attributes",
-          "icon": "code",
-          "pages": [
-            "api-reference/custom-attributes/get-user-attributes",
-            "api-reference/custom-attributes/update-user-attributes",
-            "api-reference/custom-attributes/get-group-attributes",
-            "api-reference/custom-attributes/update-group-attributes"
-          ]
-        },
-        {
-          "group": "Statistics",
-          "icon": "chart-bar",
-          "pages": [
-            "api-reference/statistics/get-global-statistics"
-          ]
-        },
-        {
-          "group": "Invitations",
-          "icon": "envelope",
-          "pages": [
-            "api-reference/invitations/get-invites",
-            "api-reference/invitations/create-invite",
-            "api-reference/invitations/get-invite",
-            "api-reference/invitations/delete-invite"
-          ]
-        },
-        {
-          "group": "Roles",
-          "icon": "shield",
-          "pages": [
-            "api-reference/roles/get-roles"
-          ]
-        },
-        {
-          "group": "Webhooks",
-          "icon": "webhook",
-          "pages": [
-            "api-reference/webhooks/overview",
-            "api-reference/webhooks/course-webhooks",
-            "api-reference/webhooks/user-webhooks",
-            "api-reference/webhooks/group-webhooks",
-            "api-reference/webhooks/get-last-event"
-          ]
-        },
-        {
-          "group": "Zapier",
-          "icon": "bolt",
-          "pages": [
-            "api-reference/zapier/overview",
-            "api-reference/zapier/custom-attributes",
-            "api-reference/zapier/triggers",
-            "api-reference/zapier/actions"
-          ]
-        }
+        "api-reference/users/get-users",
+        "api-reference/users/create-user",
+        "api-reference/users/get-user-by-id",
+        "api-reference/users/get-user-by-email",
+        "api-reference/users/update-user",
+        "api-reference/users/delete-user",
+        "api-reference/users/block-user",
+        "api-reference/users/unblock-user",
+        "api-reference/users/get-user-assignments",
+        "api-reference/users/post-user-assignments",
+        "api-reference/users/user-certificates",
+        "api-reference/users/get-user-groups",
+        "api-reference/users/user-groups",
+        "api-reference/users/user-sso",
+        "api-reference/users/user-statistics"
+      ]
+    },
+    {
+      "group": "Groups",
+      "pages": [
+        "api-reference/groups/get-groups",
+        "api-reference/groups/create-group",
+        "api-reference/groups/get-group",
+        "api-reference/groups/update-group",
+        "api-reference/groups/delete-group",
+        "api-reference/groups/group-assignments",
+        "api-reference/groups/group-users",
+        "api-reference/groups/remove-user-from-group",
+        "api-reference/groups/group-statistics"
+      ]
+    },
+    {
+      "group": "Certificates",
+      "pages": [
+        "api-reference/certificates/get-certificate"
+      ]
+    },
+    {
+      "group": "Custom Attributes",
+      "pages": [
+        "api-reference/custom-attributes/get-user-attributes",
+        "api-reference/custom-attributes/update-user-attributes",
+        "api-reference/custom-attributes/get-group-attributes",
+        "api-reference/custom-attributes/update-group-attributes"
+      ]
+    },
+    {
+      "group": "Statistics",
+      "pages": [
+        "api-reference/statistics/get-global-statistics"
+      ]
+    },
+    {
+      "group": "Invitations",
+      "pages": [
+        "api-reference/invitations/get-invites",
+        "api-reference/invitations/create-invite",
+        "api-reference/invitations/get-invite",
+        "api-reference/invitations/delete-invite"
+      ]
+    },
+    {
+      "group": "Roles",
+      "pages": [
+        "api-reference/roles/get-roles"
+      ]
+    },
+    {
+      "group": "Webhooks",
+      "pages": [
+        "api-reference/webhooks/overview",
+        "api-reference/webhooks/course-webhooks",
+        "api-reference/webhooks/user-webhooks",
+        "api-reference/webhooks/group-webhooks",
+        "api-reference/webhooks/get-last-event"
+      ]
+    },
+    {
+      "group": "Zapier",
+      "pages": [
+        "api-reference/zapier/overview",
+        "api-reference/zapier/custom-attributes",
+        "api-reference/zapier/triggers",
+        "api-reference/zapier/actions"
       ]
     }
   ],
