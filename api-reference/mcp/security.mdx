@@ -8,7 +8,7 @@ The MCP server's security posture mirrors the rest of Konstantly's API: bearer-t
 
 ## Rate limits
 
-Two layers, both implemented as Redis sliding windows:
+Three layers, all implemented as Redis sliding windows:
 
 ### Per-key limits
 
@@ -29,6 +29,25 @@ Content-Type: application/json
 ```
 
 The MCP server **automatically retries** up to 3 times with backoff, honoring the `Retry-After` indication. A well-behaved agent won't trip these in normal use.
+
+### AI course-generation limits (separate, stricter)
+
+The AI course-generation tools (`create_course_from_prompt`, `create_course_from_files`) hit a tighter quota on top of the standard per-tier limit, because each call burns real Gemini quota:
+
+| Scope | Limit |
+|---|---|
+| Per key | 5 calls per day |
+| Per tenant | 50 calls per day |
+
+When either limit fires:
+
+```http
+HTTP/1.1 429 Too Many Requests
+
+{"error":"AI course generation per-key daily quota exceeded. Retry after 3600s."}
+```
+
+The error names which scope failed — `per-key` (your own quota) versus `per-tenant` (the workspace-wide quota). The MCP server retries with backoff like any other 429.
 
 ### Per-IP limits on failed auth
 

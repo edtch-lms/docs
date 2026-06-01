@@ -15,7 +15,8 @@ This page maps each MCP tool to the underlying permission alias and shows which 
    - `"none"` → MCP server disabled entirely (401)
    - `"read"` → all write scopes clamped to false; only read tools available
    - `"full"` → both read and write tools available per key scope
-3. **The `mcp_manage` permission gates KEY CREATION/REVOCATION**, not key USAGE. A user without `mcp_manage` cannot create new keys but their existing keys keep working until revoked.
+3. **`restrictions.mcpAiAccess` is a separate, additional gate** for the AI course-generation tools. Requires `mcpAccess: "full"` AND `mcpAiAccess: true`. Default off — Gemini calls cost real money, so this is a deliberate per-tenant unlock.
+4. **The `mcp_manage` permission gates KEY CREATION/REVOCATION**, not key USAGE. A user without `mcp_manage` cannot create new keys but their existing keys keep working until revoked.
 
 ## Tool → permission map
 
@@ -39,6 +40,10 @@ This page maps each MCP tool to the underlying permission alias and shows which 
 | `unban_user` | `user_ban` + role hierarchy | W | **full** |
 | `change_user_email` | `user_edit` + role hierarchy | W | **full** |
 | `clone_course` | `course_edit` | W | **full** |
+| `upload_source_material` | `course_edit` | W | **full** + `mcpAiAccess` |
+| `create_course_from_prompt` | `course_edit` | W | **full** + `mcpAiAccess` |
+| `create_course_from_files` | `course_edit` | W | **full** + `mcpAiAccess` |
+| `get_course_generation_status` | `course_edit` (write-scope only) | W | **full** + `mcpAiAccess` |
 
 ## Role → tool map (built-in roles)
 
@@ -55,6 +60,7 @@ Implicitly has all permissions. Every tool is available.
 | `ban_user`, `unban_user` | `user_ban` |
 | `change_user_email` | `user_edit` |
 | `clone_course` | `course_edit` |
+| AI course generation (`upload_source_material`, `create_course_from_prompt`, `create_course_from_files`, `get_course_generation_status`) | `course_edit` + `mcpAiAccess` license flag |
 | Audit access | `audit_view` |
 | MCP key management | `mcp_manage` (seeded with the MCP feature) |
 
@@ -65,6 +71,7 @@ In practice, an admin's MCP key is functionally equivalent to a super-user key f
 |---|
 | `find_user`, `find_course`, `get_course`, `list_my_assignments`, `list_certificates`, `get_statistics`, `get_leaderboard` (read access) |
 | `clone_course` |
+| AI course generation tools — when the tenant has the `mcpAiAccess` license flag enabled, course-creator roles get these four tools too (`course_edit` is the only required alias) |
 
 Cannot ban users, cannot assign to others.
 

@@ -1,6 +1,6 @@
 ---
 title: 'Tools Reference'
-description: 'All 18 MCP tools — parameters, permissions, example prompts, and what they return'
+description: 'All 22 MCP tools — parameters, permissions, example prompts, and what they return'
 icon: 'wrench'
 ---
 
@@ -382,19 +382,131 @@ Duplicate an existing course (creates an unpublished copy that you can then edit
 
 ---
 
+## AI course generation
+
+Four tools that let an agent build a complete course from a prompt or from uploaded source materials. Available on the **Enterprise AI add-on** (`mcpAccess: "full"` + `mcpAiAccess: true`). Subject to a separate, stricter quota — 5 calls per key per day, 50 per tenant per day.
+
+The typical workflow:
+
+1. `upload_source_material` — once per file. Returns a `sessionId`.
+2. `create_course_from_files` (with the sessionId) or `create_course_from_prompt` (no files). Returns a `jobId`.
+3. `get_course_generation_status` — poll every 3–5 seconds until status is `completed`, then read `result.courseId`.
+
+### upload_source_material
+
+Read a local file off the user's machine and upload it as a course source. Text is extracted and embedded immediately. PDF / DOC / DOCX / PNG / JPG / GIF / WebP, 20 MB max per file.
+
+<ResponseField name="filePath" type="string" required>
+  Absolute path to a local file on the user's machine.
+</ResponseField>
+
+<ResponseField name="sessionId" type="string">
+  Optional. Reuse the same sessionId across multiple uploads to bundle files into one course-generation context. Omit and the tool generates one.
+</ResponseField>
+
+**Permission**: `course_edit` + license `mcpAiAccess`
+
+**Example prompt**: *"Use this OSHA confined-spaces PDF I just shared as the source for a new course."*
+
+**Returns**: `{ sessionId, filename, chunkCount, message }`
+
+**Backend**: `POST /api/v2/chat/source-materials/upload` (multipart) then `POST /api/v2/chat/source-materials/process`
+
+---
+
+### create_course_from_prompt
+
+Generate a complete course (title, modules, lessons, quiz) from a plain-English description. Returns a `jobId` — the actual generation runs in the background and takes 10–30 seconds.
+
+<ResponseField name="prompt" type="string" required>
+  Plain-English description of the course. Be specific: include the topic, audience, scope.
+</ResponseField>
+
+<ResponseField name="chapters" type="integer">
+  Optional. Target number of modules. Default 6.
+</ResponseField>
+
+<ResponseField name="language" type="string">
+  Optional. ISO 639-1 code (`en`, `es`, `fr`, …). If omitted, the model uses the language of the prompt.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Optional. Override the AI-generated title.
+</ResponseField>
+
+**Permission**: `course_edit` + license `mcpAiAccess`
+
+**Example prompt**: *"Build a compliance course on confined-space safety for warehouse staff. 6 lessons + a final quiz."*
+
+**Returns**: `{ jobId, status, message }` — `status` is always `queued` here; poll `get_course_generation_status`.
+
+**Backend**: `POST /api/v2/ai/courses/generate` with `{ prompt, options }`
+
+---
+
+### create_course_from_files
+
+Same as `create_course_from_prompt` but grounded in previously-uploaded source materials. The agent must call `upload_source_material` at least once in this conversation before calling this tool.
+
+<ResponseField name="prompt" type="string" required>
+  Plain-English direction for the course. The uploaded files are the primary source; the prompt sets tone, audience, scope.
+</ResponseField>
+
+<ResponseField name="sessionId" type="string" required>
+  The sessionId returned by `upload_source_material`.
+</ResponseField>
+
+<ResponseField name="chapters" type="integer">
+  Optional. Target number of modules.
+</ResponseField>
+
+<ResponseField name="language" type="string">
+  Optional. ISO 639-1 code.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Optional. Override the title.
+</ResponseField>
+
+**Permission**: `course_edit` + license `mcpAiAccess`
+
+**Example prompt**: *"Build a new-hire safety training based on these PDFs. 6 lessons, plain language, 10-question final quiz."*
+
+**Backend**: `POST /api/v2/ai/courses/generate` with `{ prompt, sessionId, options }`
+
+---
+
+### get_course_generation_status
+
+Poll a queued generation job. Call every 3–5 seconds until `status` is `completed` (success — `result.courseId` is set) or `failed` (read `error.message`).
+
+<ResponseField name="jobId" type="string" required>
+  The `jobId` returned by `create_course_from_prompt` or `create_course_from_files`.
+</ResponseField>
+
+**Permission**: write scope (read-scope keys can't enqueue a job they're allowed to poll)
+
+**Returns**:
+
+```json
+{
+  "jobId": "ai-course-2381",
+  "status": "queued" | "running" | "completed" | "failed" | "unknown",
+  "progress": 0–100,
+  "result": { "courseId": 2419 },        // only when status="completed"
+  "error":  { "message": "...", "attemptsMade": 1 } // only when status="failed"
+}
+```
+
+**Backend**: `GET /api/v2/ai/courses/generate/:jobId`
+
+---
+
 ## Coming soon (not yet shipped)
-
-### create_course *(v1.5 — preview)*
-
-Generate a complete course from a prompt and/or source files (PDFs, docs, slides). Pairs with Konstantly's existing AI course-generation pipeline.
-
-**Example prompt**: *"Build a 12-lesson Forklift Safety course from these manuals — add a quiz every 3 lessons."*
-
-This tool is not in v0.1 because it requires server-side AI orchestration that doesn't exist today (v2's AI is currently browser-side). Planned for v1.5; see the [MCP roadmap](/api-reference/mcp/overview#whats-next) for status.
 
 ### extend_deadline + send_reminder *(v1.1 — preview)*
 
-Push an assignment's deadline back, or nudge overdue learners. Currently not in v0.1 because no corresponding v2 backend endpoint exists. Planned for v1.1 alongside the deadline-management work.
+Push an assignment's deadline back, or nudge overdue learners. Currently not shipped because no corresponding v2 backend endpoint exists. Planned for v1.1 alongside the deadline-management work.
 
 ## Error handling
 

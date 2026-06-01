@@ -81,6 +81,20 @@ The MCP server is a thin adapter. **All business logic, permission checks, licen
   </Card>
 </CardGroup>
 
+### AI course generation (Enterprise + AI add-on)
+
+<CardGroup cols={2}>
+  <Card title="Upload source material" icon="file-arrow-up">
+    `upload_source_material` — read a local PDF / DOC / image and index it for course generation
+  </Card>
+  <Card title="Generate a course" icon="wand-magic-sparkles">
+    `create_course_from_prompt` / `create_course_from_files` — the agent builds the whole course with lessons and a quiz, grounded in your materials
+  </Card>
+  <Card title="Poll job status" icon="hourglass-half">
+    `get_course_generation_status` — generation runs in the background; the agent polls for completion and reads `courseId`
+  </Card>
+</CardGroup>
+
 The complete tool reference lives in the [Tools Reference](/api-reference/mcp/tools-reference) page.
 
 ## When to use MCP vs the REST API
@@ -100,6 +114,7 @@ The two are complementary. MCP is just a different consumption pattern over the 
 | Free / Starter | Not available |
 | **Pro** | Read-only tools (compliance reports, queries, statistics) |
 | **Enterprise** | Full read + write tools (assignments, user management, course cloning) |
+| **Enterprise + AI add-on** | Everything above, plus the four AI course-generation tools. Subject to a separate, stricter quota (5 calls per key per day, 50 per tenant per day) since each call burns Gemini quota. |
 
 If your plan doesn't include MCP, the **MCP Keys** tab in your settings won't appear. Upgrade or contact your administrator.
 
