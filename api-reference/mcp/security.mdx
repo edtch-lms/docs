@@ -143,6 +143,10 @@ If you're rolling MCP out to a team or customer base:
 - [ ] **Wire audit log to your SIEM** — events 86 (`MCP_KEY_CREATE`), 87 (`MCP_KEY_REVOKE`), 88 (`MCP_TOOL_CALL`) are the MCP-relevant ones.
 - [ ] **Train your admins** to revoke keys before offboarding (same workflow as disabling SSO accounts).
 
+## AI Policy
+
+How Konstantly handles AI processing — including which third-party providers receive customer data, how the MCP integration creates a sub-processing relationship with whichever AI agent you install (Claude, Cursor, etc.), and what we contractually disallow (e.g. training providers' models on customer data) — is documented in our published [AI Policy](https://konstantly.com/legal/ai-policy). Required reading for enterprise procurement reviews and EU AI Act compliance.
+
 ## Next steps
 
 <CardGroup cols={2}>
