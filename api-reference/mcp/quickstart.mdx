@@ -1,0 +1,163 @@
+---
+title: 'Quickstart'
+description: 'From zero to your first AI-driven Konstantly query in five minutes'
+icon: 'rocket'
+---
+
+This guide gets you from no setup to asking Claude Desktop *"who's overdue on safety training?"* in about five minutes.
+
+<Note>
+**Prerequisites**
+- A Konstantly tenant on **Pro or Enterprise plan** (the MCP Keys settings tab is hidden on Free/Starter)
+- Admin or super-user role on that tenant (the `mcp_manage` permission)
+- [Claude Desktop](https://claude.ai/download), [Claude Code](https://docs.claude.com/en/docs/claude-code), or [Cursor](https://cursor.sh/) installed
+- [Node.js 18+](https://nodejs.org/) on your machine (required by `npx`)
+</Note>
+
+## 1. Generate an MCP key
+
+In your Konstantly browser tab, navigate to **Settings → MCP Keys**.
+
+If the tab isn't visible, your tenant's license doesn't include MCP access. Talk to your account manager about upgrading.
+
+Click **Generate key**, give it a recognizable name (e.g. *"My laptop"*, *"Production agent"*), and choose scopes:
+
+- **Read** — always available. Queries, reports, lookups.
+- **Write** — Enterprise plan only. Assignments, user management, course operations.
+
+Click **Generate**. The full key is shown **once** — copy it now. You'll see something like:
+
+```
+kmcp_a8f3b2k9X7yZqWpL3mN8RvU2sT5dH6jK4F1gA9oP
+```
+
+<Warning>
+This is the only time the full key appears. If you close the dialog without copying, you'll need to revoke and regenerate. The key acts as you — treat it like a password.
+</Warning>
+
+## 2. Install in your AI tool
+
+Pick the tool you use:
+
+<Tabs>
+  <Tab title="Claude Desktop">
+    Open your Claude Desktop config file:
+
+    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+    Add a `mcpServers` entry:
+
+    ```json
+    {
+      "mcpServers": {
+        "konstantly": {
+          "command": "npx",
+          "args": ["-y", "@konstantly/mcp-server"],
+          "env": {
+            "KONSTANTLY_MCP_KEY": "kmcp_a8f3b2k9X7yZ...",
+            "KONSTANTLY_URL": "https://your-instance.konstantly.com"
+          }
+        }
+      }
+    }
+    ```
+
+    Restart Claude Desktop. The 🔌 menu now shows `konstantly` with its tool list.
+  </Tab>
+
+  <Tab title="Claude Code">
+    One command:
+
+    ```bash
+    claude mcp add konstantly \
+      --env KONSTANTLY_MCP_KEY=kmcp_a8f3b2k9X7yZ... \
+      --env KONSTANTLY_URL=https://your-instance.konstantly.com \
+      -- npx -y @konstantly/mcp-server
+    ```
+
+    That's it — Claude Code picks it up automatically on the next prompt.
+  </Tab>
+
+  <Tab title="Cursor">
+    Open or create `~/.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "konstantly": {
+          "command": "npx",
+          "args": ["-y", "@konstantly/mcp-server"],
+          "env": {
+            "KONSTANTLY_MCP_KEY": "kmcp_a8f3b2k9X7yZ...",
+            "KONSTANTLY_URL": "https://your-instance.konstantly.com"
+          }
+        }
+      }
+    }
+    ```
+
+    Restart Cursor. The Konstantly tools appear in the agent panel.
+  </Tab>
+</Tabs>
+
+Replace both placeholders with your real values:
+- `KONSTANTLY_MCP_KEY` — the `kmcp_...` you copied in step 1
+- `KONSTANTLY_URL` — your Konstantly instance URL, exactly as it appears in your browser (e.g. `https://acme.konstantly.com`)
+
+## 3. Ask your first question
+
+Open your AI tool. Try a few prompts that work with the read-only tools:
+
+> **"Find a user named Sarah."**
+>
+> *(fires `find_user`)*
+
+> **"How many learners have completed the OSHA refresher course?"**
+>
+> *(fires `find_course` + `get_compliance_status`)*
+
+> **"Show me last week's leaderboard."**
+>
+> *(fires `get_leaderboard`)*
+
+> **"What's my own training status?"**
+>
+> *(fires `list_my_assignments`)*
+
+If you have write access, try:
+
+> **"Assign the new-hire bundle to user 42, deadline in 14 days."**
+>
+> *(fires `assign_training` — writes an audit log entry visible in Settings → Action Log)*
+
+## 4. Verify the connection (optional)
+
+If something's not working, switch on debug mode by adding to your env config:
+
+```json
+"env": {
+  "KONSTANTLY_MCP_KEY": "kmcp_...",
+  "KONSTANTLY_URL": "https://your-instance.konstantly.com",
+  "KONSTANTLY_MCP_DEBUG": "1"
+}
+```
+
+Restart your AI tool. The MCP server now logs to stderr — you can see every request, retry, and tool call.
+
+Common issues:
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| "Konstantly rejected the API key" | Key revoked or never existed | Generate a new key |
+| "license does not include MCP access" | Plan doesn't include MCP | Upgrade in **Settings → Billing** |
+| Tool list missing write tools | Your account doesn't have write permission, OR your plan is Pro (read-only) | Check your role's permissions; if Pro, upgrade to Enterprise |
+| "KONSTANTLY_URL must use https://" | You typed `http://` | Fix the URL (must be `https://`) |
+| Nothing happens when you ask | Your AI tool didn't restart after config change | Quit and reopen |
+
+## 5. What's next
+
+- See the full [Tools Reference](/api-reference/mcp/tools-reference) for everything you can do
+- Understand the [Authentication](/api-reference/mcp/authentication) model
+- Review [Security](/api-reference/mcp/security) best practices before sharing keys
+- Read the [Permissions matrix](/api-reference/mcp/permissions) to know which tools your role can use

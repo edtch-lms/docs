@@ -1,0 +1,415 @@
+---
+title: 'Tools Reference'
+description: 'All 18 MCP tools — parameters, permissions, example prompts, and what they return'
+icon: 'wrench'
+---
+
+This page documents every tool the MCP server exposes. Each tool is filtered at registration time against your key's scopes and your user's permissions — so the AI sees only what it can actually invoke.
+
+If your tool list looks shorter than what's documented here, that's intentional: you don't have the permission or license tier required. See the [Permissions matrix](/api-reference/mcp/permissions) for which role unlocks which tool.
+
+---
+
+## Read tools
+
+Available to any key with `read` scope (which is all keys).
+
+### find_user
+
+Search for users by name or email substring. Case-insensitive.
+
+<ResponseField name="query" type="string" required>
+  Name or email substring to search for.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Max results (default 20, max 50).
+</ResponseField>
+
+**Permission**: `user_view`
+
+**Example prompt**: *"Find a user named Sarah."*
+
+**Backend**: `GET /api/v2/users?query=...&limit=...`
+
+---
+
+### get_user
+
+Get full details for one user by ID — name, email, role, group memberships, status.
+
+<ResponseField name="userId" type="integer" required>
+  Internal user ID (from `find_user` or other tool).
+</ResponseField>
+
+**Permission**: `user_view`
+
+**Example prompt**: *"Show me everything about user 42."*
+
+**Backend**: `GET /api/v2/users/:userId`
+
+---
+
+### find_course
+
+Search for courses by name. Returns matching courses (id, name, status, annotation).
+
+<ResponseField name="query" type="string" required>
+  Course name substring.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Max results (default 20, max 50).
+</ResponseField>
+
+**Permission**: `course_view`
+
+**Example prompt**: *"Find the OSHA refresher course."*
+
+**Backend**: `GET /api/v2/courses?query=...&limit=...`
+
+---
+
+### get_course
+
+Full details for one course — name, structure, settings, publish state.
+
+<ResponseField name="courseId" type="integer" required>
+  Internal course ID (from `find_course`).
+</ResponseField>
+
+**Permission**: `course_view`
+
+**Example prompt**: *"Show me the structure of course 17."*
+
+**Backend**: `GET /api/v2/courses/:courseId`
+
+---
+
+### list_assignments
+
+List course assignments for **one user or one group** (exactly one required). No top-level "all assignments" view — too much data; the v2 API scopes by user or group.
+
+<ResponseField name="userId" type="integer">
+  Filter by one user. Mutually exclusive with `groupId`.
+</ResponseField>
+
+<ResponseField name="groupId" type="integer">
+  Filter by one group. Mutually exclusive with `userId`.
+</ResponseField>
+
+**Permission**: `user_assign`
+
+**Example prompts**:
+- *"What is Jamie working on?"* → uses `userId`
+- *"What courses is the Engineering group assigned?"* → uses `groupId`
+
+**Backend**: `GET /api/v2/users/:userId/courses/assignments` or `GET /api/v2/groups/:groupId/courses/assignments`
+
+---
+
+### list_my_assignments
+
+Courses assigned to the current user (the key's owner), with deadlines and completion status. Useful for "what training do I owe?" questions.
+
+No parameters.
+
+**Permission**: any role (learner+)
+
+**Example prompt**: *"What training do I have due this week?"*
+
+**Backend**: `GET /api/v2/courses/assigned/me`
+
+---
+
+### get_compliance_status
+
+The flagship audit tool. Returns compliance breakdown for one course: who's assigned, who's done, who's overdue, completion percentages. Optionally scoped to one group.
+
+<ResponseField name="courseId" type="integer" required>
+  Course to check compliance against (e.g. OSHA refresher).
+</ResponseField>
+
+<ResponseField name="groupId" type="integer">
+  Optional: scope to one group of users.
+</ResponseField>
+
+**Permission**: `common_stat`
+
+**Example prompts**:
+- *"Pull a compliance report for OSHA confined-spaces training across all warehouse staff."*
+- *"Are we ready for the SOC 2 audit on security training?"*
+
+**Backend**: `GET /api/v2/courses/:courseId/statistics/users?groupId=...`
+
+---
+
+### list_certificates
+
+All certificates earned by one user, with issue dates and (when set) expiry dates. Useful for recertification planning.
+
+<ResponseField name="userId" type="integer" required>
+  User whose certificates to list.
+</ResponseField>
+
+**Permission**: `user_view`
+
+**Example prompt**: *"Show Sarah's certifications and what's expiring in the next 90 days."*
+
+**Backend**: `GET /api/v2/users/:userId/certificates`
+
+---
+
+### get_statistics
+
+High-level analytics — overall engagement, publishing rate, course-creation activity, insights, tag breakdowns.
+
+<ResponseField name="scope" type="string" required>
+  Which surface to query. One of: `overview`, `publishing`, `courseCreation`, `activity`, `insights`, `tags`.
+</ResponseField>
+
+**Permission**: `common_stat`
+
+**Example prompt**: *"How are we doing on training engagement this quarter?"*
+
+**Backend**: `GET /api/v2/statistics/{scope}`
+
+For per-course or per-user numbers prefer `get_compliance_status` or `list_assignments`.
+
+---
+
+### get_leaderboard
+
+Top learners by points/completion this period.
+
+<ResponseField name="limit" type="integer">
+  Top N learners (default 10, max 50).
+</ResponseField>
+
+**Permission**: `common_stat`
+
+**Example prompt**: *"Who are our top 5 learners this week? I want to send them a thank-you."*
+
+**Backend**: `GET /api/v2/statistics/leaders?limit=...`
+
+---
+
+### get_audit_log
+
+Read the platform audit log with optional filters. Use for security investigations, compliance questions, and inspecting actions taken by other MCP agents.
+
+<ResponseField name="authorUserId" type="integer">
+  Filter by acting user.
+</ResponseField>
+
+<ResponseField name="fromDate" type="string">
+  ISO date or YYYY-MM-DD — start of window.
+</ResponseField>
+
+<ResponseField name="toDate" type="string">
+  ISO date or YYYY-MM-DD — end of window.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Max results (default 50, max 250).
+</ResponseField>
+
+<ResponseField name="offset" type="integer">
+  Pagination offset.
+</ResponseField>
+
+**Permission**: `audit_view`
+
+**Example prompt**: *"Pull all admin actions taken last Tuesday."*
+
+**Backend**: `GET /api/v2/audit?fields[author]=...&fields[createdAt][from]=...&fields[createdAt][to]=...`
+
+---
+
+## Write tools
+
+Available only when the key has `write` scope AND your license tier is `full` (Enterprise).
+
+### assign_training
+
+Assign one course to one learner. Idempotent — re-assigning the same user is a no-op. For bulk operations use `bulk_assign` instead.
+
+<ResponseField name="courseId" type="integer" required>
+  Course to assign.
+</ResponseField>
+
+<ResponseField name="userId" type="integer" required>
+  Learner to assign to.
+</ResponseField>
+
+<ResponseField name="deadlineAt" type="integer">
+  Unix timestamp (seconds) when the assignment is due. Omit for no deadline.
+</ResponseField>
+
+<ResponseField name="assignAt" type="integer">
+  Unix timestamp for scheduled future assignment. Omit to assign immediately.
+</ResponseField>
+
+**Permission**: `user_assign`
+
+**Example prompts**:
+- *"Assign the new-hire onboarding to user 42, deadline two weeks from now."*
+- *"Schedule the Q1 compliance refresher for the new sales rep, starting next Monday."*
+
+**Backend**: `POST /api/v2/courses/:courseId/assignments/users`
+
+---
+
+### bulk_assign
+
+Assign multiple courses to a whole group at once. Use for onboarding bundles or compliance pushes.
+
+<ResponseField name="groupId" type="integer" required>
+  Group whose members get the assignments.
+</ResponseField>
+
+<ResponseField name="courseIds" type="integer[]" required>
+  One or more courses to assign.
+</ResponseField>
+
+<ResponseField name="deadlineAt" type="integer">
+  Unix-timestamp deadline applied to ALL assignments.
+</ResponseField>
+
+**Permission**: `group_assign`
+
+**Example prompts**:
+- *"Assign all new-hire training to the Engineering group, due in 30 days."*
+- *"Roll out the safety refresher to all warehouse staff."*
+
+**Backend**: per-course `POST /api/v2/courses/:courseId/assignments` with `{groups: [groupId]}`
+
+---
+
+### assign_chain
+
+Assign an entire course chain (an ordered learning path) to users or groups. The caller must own the chain (per-chain ownership rule).
+
+<ResponseField name="chainId" type="integer" required>
+  Course-chain ID.
+</ResponseField>
+
+<ResponseField name="userIds" type="integer[]">
+  Users to assign the chain to.
+</ResponseField>
+
+<ResponseField name="groupIds" type="integer[]">
+  Groups to assign the chain to.
+</ResponseField>
+
+<ResponseField name="deadlineAt" type="integer">
+  Unix-timestamp deadline for the whole chain.
+</ResponseField>
+
+**Permission**: `user_assign` + chain ownership
+
+**Example prompt**: *"Put the new-hire learning path on Marco's plate, due 45 days from start date."*
+
+**Backend**: `POST /api/v2/courseChains/:chainId/assign`
+
+---
+
+### ban_user
+
+Ban a user (revokes their login + course access, preserves history). Use for offboarding. Target must be below the caller's role in the hierarchy.
+
+<ResponseField name="userId" type="integer" required>
+  User to ban.
+</ResponseField>
+
+**Permission**: `user_ban` + role hierarchy
+
+**Example prompt**: *"Sarah left the company last Friday — disable her account."*
+
+**Backend**: `POST /api/v2/users/banned`
+
+---
+
+### unban_user
+
+Restore a previously banned user's access. Used for reinstating offboarded learners (rehires, contractors who returned, etc.).
+
+<ResponseField name="userId" type="integer" required>
+  User to unban.
+</ResponseField>
+
+**Permission**: `user_ban` + role hierarchy
+
+**Example prompt**: *"Marco's back from sabbatical — re-enable his account."*
+
+**Backend**: `DELETE /api/v2/users/banned/:userId`
+
+---
+
+### change_user_email
+
+Update a user's email address (e.g. after a name change or domain migration). Triggers the standard email-change notification.
+
+<ResponseField name="userId" type="integer" required>
+  User whose email is changing.
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  New email address.
+</ResponseField>
+
+**Permission**: `user_edit` + role hierarchy
+
+**Example prompt**: *"Maria changed her name — update her email to maria.gomez@acme.com."*
+
+**Backend**: `POST /api/v2/users/:userId/email/change`
+
+---
+
+### clone_course
+
+Duplicate an existing course (creates an unpublished copy that you can then edit). Useful as the first step when forking a course for a different audience or location.
+
+<ResponseField name="courseId" type="integer" required>
+  Course to clone.
+</ResponseField>
+
+**Permission**: `course_edit`
+
+**Example prompt**: *"Clone the Forklift Safety course for the new Phoenix warehouse — I'll customize it for their layout."*
+
+**Backend**: `POST /api/v2/courses/clone` with `{courseId}` in body
+
+---
+
+## Coming soon (not yet shipped)
+
+### create_course *(v1.5 — preview)*
+
+Generate a complete course from a prompt and/or source files (PDFs, docs, slides). Pairs with Konstantly's existing AI course-generation pipeline.
+
+**Example prompt**: *"Build a 12-lesson Forklift Safety course from these manuals — add a quiz every 3 lessons."*
+
+This tool is not in v0.1 because it requires server-side AI orchestration that doesn't exist today (v2's AI is currently browser-side). Planned for v1.5; see the [MCP roadmap](/api-reference/mcp/overview#whats-next) for status.
+
+### extend_deadline + send_reminder *(v1.1 — preview)*
+
+Push an assignment's deadline back, or nudge overdue learners. Currently not in v0.1 because no corresponding v2 backend endpoint exists. Planned for v1.1 alongside the deadline-management work.
+
+## Error handling
+
+Every tool maps backend errors to LLM-readable strings:
+
+| Backend status | Error shown to LLM |
+|---|---|
+| `403` | *"Permission denied — your user does not have rights for this action."* |
+| `404` | *"Not found — check the ID exists."* |
+| `422` | *"Invalid arguments: {message}"* |
+| `429` | *"Rate limit exceeded. Slow down and retry."* |
+| Other | The original error message |
+
+The MCP server automatically retries 429s up to 3 times with backoff per the `Retry-After` header. Network errors, 5xx, and connection resets are propagated as `Error: ...` for the LLM to surface to you.
+
+## Adding more tools
+
+The tool catalog is intentionally focused — we ship what's used, not what's listable. If you'd find a specific tool valuable (e.g. "add to group", "set custom attribute", "trigger webhook"), the v2 REST API already exposes the endpoint; we just need to add a wrapper. [Get in touch](https://konstantly.com?contact=true).

@@ -1,0 +1,139 @@
+---
+title: 'Permissions Matrix'
+description: 'Which Konstantly role unlocks which MCP tool, and how license tier interacts'
+icon: 'user-shield'
+---
+
+MCP keys do not have their own permission system. They inherit **the permissions of the user who issued them**, exactly as if that user had clicked the equivalent button in the browser UI.
+
+This page maps each MCP tool to the underlying permission alias and shows which built-in roles get it.
+
+## Quick rules
+
+1. **Every tool call re-resolves permissions fresh** against the owning user's current role. Revoke a permission → the next MCP call respects it immediately. No cache to invalidate.
+2. **License tier `restrictions.mcpAccess` is the upper bound**:
+   - `"none"` → MCP server disabled entirely (401)
+   - `"read"` → all write scopes clamped to false; only read tools available
+   - `"full"` → both read and write tools available per key scope
+3. **The `mcp_manage` permission gates KEY CREATION/REVOCATION**, not key USAGE. A user without `mcp_manage` cannot create new keys but their existing keys keep working until revoked.
+
+## Tool → permission map
+
+| Tool | Required permission alias | R/W | License tier needed |
+|------|---|---|---|
+| `find_user` | `user_view` | R | read |
+| `get_user` | `user_view` | R | read |
+| `find_course` | `course_view` | R | read |
+| `get_course` | `course_view` | R | read |
+| `list_assignments` | `user_assign` | R | read |
+| `list_my_assignments` | any role (learner+) | R | read |
+| `get_compliance_status` | `common_stat` | R | read |
+| `list_certificates` | `user_view` | R | read |
+| `get_statistics` | `common_stat` | R | read |
+| `get_leaderboard` | `common_stat` | R | read |
+| `get_audit_log` | `audit_view` | R | read |
+| `assign_training` | `user_assign` | W | **full** |
+| `bulk_assign` | `group_assign` | W | **full** |
+| `assign_chain` | `user_assign` + chain ownership | W | **full** |
+| `ban_user` | `user_ban` + role hierarchy | W | **full** |
+| `unban_user` | `user_ban` + role hierarchy | W | **full** |
+| `change_user_email` | `user_edit` + role hierarchy | W | **full** |
+| `clone_course` | `course_edit` | W | **full** |
+
+## Role → tool map (built-in roles)
+
+These are the default permissions on the stock Konstantly roles. Your tenant may have customized roles; check **Settings → Roles** for what each of yours actually grants.
+
+### `super_user`
+Implicitly has all permissions. Every tool is available.
+
+### `administrator`
+| Available tools | Permission |
+|---|---|
+| All read tools | (has all read perms) |
+| `assign_training`, `bulk_assign`, `assign_chain` | `user_assign`, `group_assign` |
+| `ban_user`, `unban_user` | `user_ban` |
+| `change_user_email` | `user_edit` |
+| `clone_course` | `course_edit` |
+| Audit access | `audit_view` |
+| MCP key management | `mcp_manage` (seeded with the MCP feature) |
+
+In practice, an admin's MCP key is functionally equivalent to a super-user key for tool access (they have all the same aliases).
+
+### `expert` / `instructor` (course creators)
+| Available tools |
+|---|
+| `find_user`, `find_course`, `get_course`, `list_my_assignments`, `list_certificates`, `get_statistics`, `get_leaderboard` (read access) |
+| `clone_course` |
+
+Cannot ban users, cannot assign to others.
+
+### `learner`
+| Available tools |
+|---|
+| `list_my_assignments`, `find_course`, `get_course`, `list_certificates` (own) |
+
+The narrowest tool set. A learner-issued key cannot read other learners' data or take admin actions.
+
+## Permission hierarchy enforcement
+
+Three tools enforce **role-hierarchy** on top of the basic permission check:
+
+- `ban_user`, `unban_user`: caller must outrank the target user
+- `change_user_email`: caller must outrank the target user
+
+Hierarchy is checked exactly as in the web UI (via the same `canAssignRole` / `hasUserAccessToUser` helpers). A manager-level user cannot ban an admin; an admin cannot change a super-user's email.
+
+If the hierarchy check fails, the tool returns:
+
+> *"Permission denied — your user does not have rights for this action."*
+
+## License tier behavior in detail
+
+### Tier downgrade scenario
+
+You issued a key with `scopes = { read: true, write: true }` on Enterprise. Your license is later downgraded to Pro (`mcpAccess: "read"`).
+
+The next MCP call from that key:
+1. Authenticates successfully (key still valid)
+2. License tier is read at request time → `"read"`
+3. Effective scopes after clamp: `{ read: true, write: false }`
+4. Write tool invocations 403; read tool invocations succeed
+
+**No re-issue required.** The clamp is dynamic. If you upgrade back to Enterprise, the same key regains write capability without any action.
+
+The capabilities endpoint reflects the effective scopes at the time it's called, so the MCP server will deregister write tools from the LLM on next startup.
+
+### Tier upgrade scenario
+
+You issued a key on Pro (`scopes = { read: true, write: false }` because `write` was disabled at issuance). You upgrade to Enterprise.
+
+The next MCP call:
+1. Authenticates successfully
+2. License tier is now `"full"` — clamp allows write
+3. But the key's STORED scopes are still `{ read: true, write: false }`
+4. Effective scopes: `{ read: true, write: false }` (stored scopes are the floor)
+
+Result: you need to **revoke + re-issue the key** with `write: true` to gain write capability. Stored scopes are not upgraded automatically.
+
+## Auditing who did what
+
+Every MCP write-tool call writes two entries to the audit log:
+
+1. The **action event** (e.g., `COURSE_ASSIGN`) — same as a UI-driven action would write
+2. An **`MCP_TOOL_CALL` event** (event type 88, target type `MCP_API_KEY`) with `data: {tool, tier, ...args}`
+
+This lets compliance reports filter "actions taken by an agent vs by a human admin". Query the audit log for `eventType=88` to see the MCP-driven action history.
+
+`MCP_TOOL_CALL` is emitted only on **write** tools — read tools are too high-volume to log per-call and are tracked via the `chat_usage` table instead (visible at `/api/v2/chat/usage` with `intentType="mcp_tool"`).
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
+    All 18 tools with parameters
+  </Card>
+  <Card title="Security" icon="lock" href="/api-reference/mcp/security">
+    Rate limits, key hygiene, audit
+  </Card>
+</CardGroup>

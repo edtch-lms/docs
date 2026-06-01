@@ -1,0 +1,121 @@
+---
+title: 'MCP Server Overview'
+description: 'Expose Konstantly to Claude Desktop, Claude Code, Cursor and other AI agents via the Model Context Protocol'
+icon: 'plug'
+---
+
+The **Konstantly MCP server** lets external AI agents — Claude Desktop, Claude Code, Cursor, ChatGPT (when MCP support lands), and any other agent that speaks the [Model Context Protocol](https://modelcontextprotocol.io) — read your Konstantly data and take actions on your behalf, without anyone logging into the browser UI.
+
+> *"Who's overdue on the OSHA refresher?"*
+>
+> *"Assign the safety training to the warehouse crew, deadline Friday."*
+>
+> *"Show me last week's leaderboard for the Sales team."*
+
+Your agent answers from your real data. No tab-switching, no copy-paste, no custom integration code.
+
+## How it works
+
+```
+┌─────────────────────┐
+│ Claude Desktop /    │
+│ Code / Cursor       │   (your AI tool)
+└──────────┬──────────┘
+           │ MCP protocol over stdio
+           ▼
+┌─────────────────────┐
+│ @konstantly/        │   (installed via npx, runs on your machine)
+│ mcp-server          │
+└──────────┬──────────┘
+           │ HTTPS + X-MCP-Key header
+           ▼
+┌─────────────────────┐
+│ Konstantly v2 API   │   (your tenant — same backend as the web UI)
+└─────────────────────┘
+```
+
+Three pieces work together:
+
+1. **Your AI tool** (Claude Desktop, etc.) handles the conversation with you
+2. **`@konstantly/mcp-server`** — a small Node CLI installed via `npx`, brokers between your AI tool and Konstantly
+3. **Your Konstantly instance** — authenticates the request, applies your existing permissions, returns data
+
+The MCP server is a thin adapter. **All business logic, permission checks, license gating, and audit logging happen in your Konstantly backend** — exactly like the browser UI. An MCP key acts as you; your permissions apply.
+
+## What you can do
+
+### Read (always available with an MCP key)
+
+<CardGroup cols={2}>
+  <Card title="Compliance reports" icon="shield-check">
+    `get_compliance_status` — who's done what training, who's overdue, ready for OSHA / SOC 2 / HIPAA audits
+  </Card>
+  <Card title="Find people and courses" icon="magnifying-glass">
+    `find_user`, `find_course`, `get_user`, `get_course` — semantic lookup by name/email
+  </Card>
+  <Card title="Track assignments" icon="list-check">
+    `list_assignments`, `list_my_assignments` — per-user, per-group, by status
+  </Card>
+  <Card title="Certificates" icon="certificate">
+    `list_certificates` — including expiry dates for recertification planning
+  </Card>
+  <Card title="Statistics + leaderboard" icon="chart-line">
+    `get_statistics`, `get_leaderboard` — engagement, completion rates, top learners
+  </Card>
+  <Card title="Audit log" icon="scroll">
+    `get_audit_log` — investigate who did what, when
+  </Card>
+</CardGroup>
+
+### Write (Enterprise plan)
+
+<CardGroup cols={2}>
+  <Card title="Assign training" icon="user-plus">
+    `assign_training`, `bulk_assign`, `assign_chain` — single learner, whole group, or full learning path
+  </Card>
+  <Card title="User management" icon="user-shield">
+    `ban_user`, `unban_user`, `change_user_email` — offboarding and account hygiene
+  </Card>
+  <Card title="Clone courses" icon="copy">
+    `clone_course` — duplicate for a new audience, location, or compliance year
+  </Card>
+</CardGroup>
+
+The complete tool reference lives in the [Tools Reference](/api-reference/mcp/tools-reference) page.
+
+## When to use MCP vs the REST API
+
+<Note>
+**Use the REST API** when you're building a custom integration with a known shape — a Zapier flow, a HRIS sync, a dashboard, a one-off ETL job.
+
+**Use MCP** when you want an AI agent (yours or your customers') to access Konstantly conversationally — when the prompt is "who's overdue on safety training" not "GET /api/v2/courses/123/statistics/users".
+</Note>
+
+The two are complementary. MCP is just a different consumption pattern over the same v2 API surface.
+
+## Licensing
+
+| Plan | MCP access |
+|------|-----------|
+| Free / Starter | Not available |
+| **Pro** | Read-only tools (compliance reports, queries, statistics) |
+| **Enterprise** | Full read + write tools (assignments, user management, course cloning) |
+
+If your plan doesn't include MCP, the **MCP Keys** tab in your settings won't appear. Upgrade or contact your administrator.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/api-reference/mcp/quickstart">
+    Generate a key and connect Claude Desktop in 5 minutes
+  </Card>
+  <Card title="Authentication" icon="key" href="/api-reference/mcp/authentication">
+    How keys work, scopes, license tiers
+  </Card>
+  <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
+    All 18 tools with parameters and examples
+  </Card>
+  <Card title="Security" icon="lock" href="/api-reference/mcp/security">
+    Key rotation, rate limits, audit log
+  </Card>
+</CardGroup>
