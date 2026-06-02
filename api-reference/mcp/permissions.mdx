@@ -15,7 +15,7 @@ This page maps each MCP tool to the underlying permission alias and shows which 
    - `"none"` → MCP server disabled entirely (401)
    - `"read"` → all write scopes clamped to false; only read tools available
    - `"full"` → both read and write tools available per key scope
-3. **`restrictions.mcpAiAccess` is a separate, additional gate** for the AI course-generation tools. Requires `mcpAccess: "full"` AND `mcpAiAccess: true`. Default off — Gemini calls cost real money, so this is a deliberate per-tenant unlock.
+3. **`restrictions.mcpAiAccess` is a separate, additional gate** for the AI course-generation tools. Requires `mcpAccess: "full"` AND `mcpAiAccess: true`. Default on for Business and Enterprise; can be flipped off per-tenant for abuse mitigation.
 4. **The `mcp_manage` permission gates KEY CREATION/REVOCATION**, not key USAGE. A user without `mcp_manage` cannot create new keys but their existing keys keep working until revoked.
 
 ## Tool → permission map
@@ -136,7 +136,7 @@ Every MCP write-tool call writes two entries to the audit log:
 
 This lets compliance reports filter "actions taken by an agent vs by a human admin". Query the audit log for `eventType=88` to see the MCP-driven action history.
 
-`MCP_TOOL_CALL` is emitted only on **write** tools — read tools are too high-volume to log per-call and are tracked via the `chat_usage` table instead (visible at `/api/v2/chat/usage` with `intentType="mcp_tool"`).
+`MCP_TOOL_CALL` is emitted only on **write** tools — read tools are too high-volume to log per-call and are tracked in the AI Usage dashboard alongside other AI-driven activity.
 
 ## Next steps
 

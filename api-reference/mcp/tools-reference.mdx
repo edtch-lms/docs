@@ -504,7 +504,7 @@ Poll a queued generation job. Call every 3–5 seconds until `status` is `comple
 
 ## AI course refinement
 
-Three additional MCP tools that operate on courses you (or the agent) already generated. Same license tier as the generation tools (**Business and Enterprise**) and they share the same daily quota — 5 calls per key per day, 50 per tenant per day. Each call burns one Gemini request.
+Three additional MCP tools that operate on courses you (or the agent) already generated. Same license tier as the generation tools (**Business and Enterprise**) and they share the same daily quota — 5 calls per key per day, 50 per tenant per day. Each call counts as one.
 
 The agent uses these three tools in addition to `create_course_from_prompt` / `create_course_from_files` to iterate on a course rather than starting fresh. Pick the narrowest tool for the user's intent: `regenerate_question` for one bad question, `regenerate_lesson` to rethink a lesson's brief, `refine_course` to add new structure to the whole course.
 

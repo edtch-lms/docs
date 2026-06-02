@@ -31,7 +31,7 @@ The full key is shown **once** at creation time. Konstantly stores only the SHA-
 | **Revoke** | Settings → MCP Keys → trash icon. Takes effect within seconds; agent stops working immediately. |
 
 <Note>
-**Keys do not expire automatically in v1.** Add a calendar reminder to rotate periodically. Optional key expiry is on the v1.1 roadmap.
+**Keys do not expire automatically.** Add a calendar reminder to rotate periodically. Optional key expiry is on the roadmap.
 </Note>
 
 ## Who the key authenticates as
@@ -51,7 +51,7 @@ When generating a key, you choose its scopes:
 | Scope | What it allows |
 |---|---|
 | **read** | All read tools (`find_user`, `get_compliance_status`, `list_certificates`, etc.) |
-| **write** | All write tools (`assign_training`, `ban_user`, `clone_course`, etc.). Requires Enterprise plan. |
+| **write** | All write tools (`assign_training`, `ban_user`, `clone_course`, etc.). Requires Business or Enterprise plan. |
 
 The MCP server consults the [capabilities endpoint](#capabilities-endpoint) on startup to learn which scopes your key has, then registers only the tools the agent can actually call. **Tools the agent can't invoke aren't shown to the LLM** — the model never picks a tool that's guaranteed to 403.
 
@@ -154,7 +154,7 @@ There's no built-in limit on key count per user. Revoke unused keys regularly to
 
 <CardGroup cols={2}>
   <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
-    All 18 tools, parameters, examples
+    All 25 tools, parameters, examples
   </Card>
   <Card title="Permissions matrix" icon="user-shield" href="/api-reference/mcp/permissions">
     Which role can invoke which tool

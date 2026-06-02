@@ -8,7 +8,7 @@ The MCP server's security posture mirrors the rest of Konstantly's API: bearer-t
 
 ## Rate limits
 
-Three layers, all implemented as Redis sliding windows:
+Three layers, each a sliding window:
 
 ### Per-key limits
 
@@ -32,7 +32,7 @@ The MCP server **automatically retries** up to 3 times with backoff, honoring th
 
 ### AI course-generation limits (separate, stricter)
 
-Every tool that triggers a Gemini call shares a single tighter quota on top of the standard per-tier limit:
+Every AI-powered tool shares a single tighter quota on top of the standard per-tier limit:
 
 - `create_course_from_prompt`
 - `create_course_from_files`
@@ -89,7 +89,7 @@ The key lives in plaintext in your AI tool's config file:
 
 If your laptop is compromised, the key is too. Treat it accordingly.
 
-OS-keychain integration is on the roadmap for v1.1 — for now, the file-on-disk model is the same as how AWS CLI and many other developer tools handle credentials.
+OS-keychain integration is on the roadmap — for now, the file-on-disk model is the same as how AWS CLI and many other developer tools handle credentials.
 
 ### Revoke on device loss
 
@@ -103,12 +103,12 @@ The key stops working within seconds. No re-deploy needed; the next MCP call fro
 
 ### Rotation
 
-v1 keys don't expire automatically. Best practice:
+Keys don't expire automatically. Best practice:
 - Calendar reminder to rotate every 90 days
 - After each org change (someone leaves, role changes)
 - Whenever you suspect compromise
 
-Optional expiry / auto-rotation is on the v1.1 roadmap. Until then, rotation is manual.
+Optional expiry / auto-rotation is on the roadmap. Until then, rotation is manual.
 
 ## Audit log
 
@@ -122,16 +122,16 @@ This gives you two views:
 - **"What happened?"** — filter audit log normally; results include both UI and MCP-driven actions, indistinguishable from each other (which is correct — they're the same logical action).
 - **"What did MCP do?"** — filter on `eventType=88` (`MCP_TOOL_CALL`) for a fleet-wide view of agent-driven activity per quarter, per user, per tool.
 
-**Read tools are not audited per-call** — too high-volume. Instead they're tracked in `chat_usage` (visible via `/api/v2/chat/usage` with `intentType="mcp_tool"`).
+**Read tools are not audited per-call** — too high-volume. Instead they're tracked in the AI Usage dashboard alongside other AI-driven activity.
 
 ## Telemetry you get for free
 
 Each MCP call generates:
 
-- **`chat_usage` row** — `intentType="mcp_tool"`, `context=toolName`, `mcpApiKeyId`, `durationMs`, `isSuccess`. Visible in the existing AI Usage dashboard.
-- **PostHog event `mcp_tool_invoked`** — fleet-wide analytics for tool-selection rates, success/failure ratios, per-tier usage.
+- **An AI Usage dashboard entry** — tool name, key, duration, success/failure. Visible in the existing AI Usage view alongside other AI-driven activity.
+- **An internal analytics event** — fleet-wide tool-selection rates, success/failure ratios, per-tier usage.
 
-For ops teams: spike in `success: false` for a given tool is a strong signal of either a misconfigured key, a tool description the LLM is misunderstanding, or a backend regression.
+For ops teams: a spike in failures for a given tool is a strong signal of either a misconfigured key, a tool description the LLM is misunderstanding, or a backend regression.
 
 ## Threat model
 
@@ -142,7 +142,7 @@ What the security posture defends against:
 | Threat | Mitigation |
 |---|---|
 | **Key brute-force** | 256 bits of entropy = ~10⁷⁷ guesses required. Mathematically infeasible. Per-IP rate limit on auth failures adds telemetry signal. |
-| **Cross-tenant data access** | Per-request tenant resolution by subdomain. Key from tenant A used on tenant B's URL fails at lookup (B's `mcp_api_key` table doesn't have A's hash). |
+| **Cross-tenant data access** | Per-request tenant resolution by subdomain. Keys are stored per-tenant; a key from tenant A used against tenant B's URL fails at lookup. |
 | **Privilege escalation** | Capabilities endpoint filters tools by permission BEFORE registering with the LLM. Each endpoint independently re-checks server-side. Layered defense. |
 | **License downgrade bypass** | License tier read fresh per request. Pre-issued write keys silently clamped. |
 | **Permission revocation lag** | No permission cache. Revoking a permission immediately blocks the next MCP call requiring it. |
@@ -166,7 +166,7 @@ If you're rolling MCP out to a team or customer base:
 - [ ] **Audit your existing MCP keys** — are any held by users who've left? Revoke them.
 - [ ] **Document key-naming convention** — *"alex-laptop"*, *"prod-slack-bot"* makes revoke decisions obvious. *"key1"* doesn't.
 - [ ] **Set a rotation calendar** — 90 days is reasonable for human-held keys; CI bots can rotate weekly via automated re-issue.
-- [ ] **Enable PostHog access** for your security team — `mcp_tool_invoked` events show all agent activity in near-real-time.
+- [ ] **Surface MCP activity to your security team** — the AI Usage dashboard shows all agent activity in near-real-time.
 - [ ] **Wire audit log to your SIEM** — events 86 (`MCP_KEY_CREATE`), 87 (`MCP_KEY_REVOKE`), 88 (`MCP_TOOL_CALL`) are the MCP-relevant ones.
 - [ ] **Train your admins** to revoke keys before offboarding (same workflow as disabling SSO accounts).
 

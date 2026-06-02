@@ -67,7 +67,7 @@ The MCP server is a thin adapter. **All business logic, permission checks, licen
   </Card>
 </CardGroup>
 
-### Write (Enterprise plan)
+### Write (Business and Enterprise)
 
 <CardGroup cols={2}>
   <Card title="Assign training" icon="user-plus">
@@ -97,7 +97,7 @@ The MCP server is a thin adapter. **All business logic, permission checks, licen
 
 ### AI course refinement (Business and Enterprise)
 
-Once a course exists, the agent can iterate on it without starting fresh. All three tools share the same daily AI quota as generation (5 per key, 50 per tenant) — each call is one Gemini request.
+Once a course exists, the agent can iterate on it without starting fresh. All three tools share the same daily AI quota as generation (5 per key, 50 per tenant) — each call counts as one.
 
 <CardGroup cols={3}>
   <Card title="Refine a course" icon="layer-plus">
@@ -131,7 +131,7 @@ The two are complementary. MCP is just a different consumption pattern over the 
 | **Business** | All 25 tools (read, write, AI course generation + refinement). 60 calls/min + 1,000/day. |
 | **Enterprise** | All 25 tools. 600 calls/min + 100,000/day. |
 
-AI tools (generation + refinement) share a separate, stricter daily quota — 5 calls per key per day, 50 per tenant per day — since each call burns Gemini quota.
+AI tools (generation + refinement) share a separate, stricter daily quota — 5 calls per key per day, 50 per tenant per day — to ensure sustainable usage.
 
 If your plan doesn't include MCP, the **MCP Keys** tab in your settings won't appear. Upgrade or contact your administrator.
 
