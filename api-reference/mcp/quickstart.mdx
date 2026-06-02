@@ -8,7 +8,7 @@ This guide gets you from no setup to asking Claude Desktop *"who's overdue on sa
 
 <Note>
 **Prerequisites**
-- A Konstantly tenant on **Pro or Enterprise plan** (the MCP Keys settings tab is hidden on Free/Starter)
+- A Konstantly tenant on **Business or Enterprise plan** (the MCP Keys settings tab is hidden on Free)
 - Admin or super-user role on that tenant (the `mcp_manage` permission)
 - [Claude Desktop](https://claude.ai/download), [Claude Code](https://docs.claude.com/en/docs/claude-code), or [Cursor](https://cursor.sh/) installed
 - [Node.js 18+](https://nodejs.org/) on your machine (required by `npx`)
@@ -151,7 +151,7 @@ Common issues:
 |---|---|---|
 | "Konstantly rejected the API key" | Key revoked or never existed | Generate a new key |
 | "license does not include MCP access" | Plan doesn't include MCP | Upgrade in **Settings → Billing** |
-| Tool list missing write tools | Your account doesn't have write permission, OR your plan is Pro (read-only) | Check your role's permissions; if Pro, upgrade to Enterprise |
+| Tool list missing write tools | Your account doesn't have write permission, OR your key was issued without the `write` scope | Check your role's permissions; if needed, revoke + re-issue the key with write scope |
 | "KONSTANTLY_URL must use https://" | You typed `http://` | Fix the URL (must be `https://`) |
 | Nothing happens when you ask | Your AI tool didn't restart after config change | Quit and reopen |
 

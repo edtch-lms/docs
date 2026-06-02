@@ -65,7 +65,7 @@ Your tenant's license tier sets an **upper bound** on what any MCP key can do, r
 | `"read"` | All keys treated as read-only, even keys originally issued with `write: true` |
 | `"full"` | Read and write tools available per key scope |
 
-If you downgrade from Enterprise to Pro mid-life-of-a-key, write tools fail silently for that key — no re-issue required. The clamp is applied on every request.
+If your tenant's `mcpAccess` is changed mid-life-of-a-key (e.g. clamped to `"read"` or `"none"`), write tools fail silently for that key — no re-issue required. The clamp is applied on every request.
 
 ## Capabilities endpoint
 

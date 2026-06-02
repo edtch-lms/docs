@@ -102,9 +102,9 @@ If the hierarchy check fails, the tool returns:
 
 ## License tier behavior in detail
 
-### Tier downgrade scenario
+### License-clamp scenario
 
-You issued a key with `scopes = { read: true, write: true }` on Enterprise. Your license is later downgraded to Pro (`mcpAccess: "read"`).
+You issued a key with `scopes = { read: true, write: true }`. The tenant's `mcpAccess` is later clamped to `"read"` (e.g. abuse mitigation, or a downgrade to a tier that doesn't include MCP).
 
 The next MCP call from that key:
 1. Authenticates successfully (key still valid)
@@ -112,21 +112,20 @@ The next MCP call from that key:
 3. Effective scopes after clamp: `{ read: true, write: false }`
 4. Write tool invocations 403; read tool invocations succeed
 
-**No re-issue required.** The clamp is dynamic. If you upgrade back to Enterprise, the same key regains write capability without any action.
+**No re-issue required.** The clamp is dynamic. If `mcpAccess` returns to `"full"`, the same key regains write capability without any action.
 
 The capabilities endpoint reflects the effective scopes at the time it's called, so the MCP server will deregister write tools from the LLM on next startup.
 
-### Tier upgrade scenario
+### Read-only-key scenario
 
-You issued a key on Pro (`scopes = { read: true, write: false }` because `write` was disabled at issuance). You upgrade to Enterprise.
+You issued a key with `scopes = { read: true, write: false }`. The key always behaves read-only — even if `mcpAccess` allows write — because **stored scopes are the floor**:
 
-The next MCP call:
 1. Authenticates successfully
-2. License tier is now `"full"` — clamp allows write
+2. License tier permits write
 3. But the key's STORED scopes are still `{ read: true, write: false }`
-4. Effective scopes: `{ read: true, write: false }` (stored scopes are the floor)
+4. Effective scopes: `{ read: true, write: false }`
 
-Result: you need to **revoke + re-issue the key** with `write: true` to gain write capability. Stored scopes are not upgraded automatically.
+To grant write to that key, **revoke + re-issue** with `write: true`. Stored scopes are not upgraded automatically.
 
 ## Auditing who did what
 
