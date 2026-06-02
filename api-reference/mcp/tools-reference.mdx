@@ -1,6 +1,6 @@
 ---
 title: 'Tools Reference'
-description: 'All 22 MCP tools — parameters, permissions, example prompts, and what they return'
+description: 'All 25 MCP tools — parameters, permissions, example prompts, and what they return'
 icon: 'wrench'
 ---
 
@@ -502,11 +502,83 @@ Poll a queued generation job. Call every 3–5 seconds until `status` is `comple
 
 ---
 
+## AI course refinement
+
+Three additional MCP tools that operate on courses you (or the agent) already generated. Same license tier as the generation tools (**Enterprise + AI add-on**) and they share the same daily quota — 5 calls per key per day, 50 per tenant per day. Each call burns one Gemini request.
+
+The agent uses these three tools in addition to `create_course_from_prompt` / `create_course_from_files` to iterate on a course rather than starting fresh. Pick the narrowest tool for the user's intent: `regenerate_question` for one bad question, `regenerate_lesson` to rethink a lesson's brief, `refine_course` to add new structure to the whole course.
+
+### refine_course
+
+Append new elements to an existing course. **Append-only by design** — this tool cannot delete or modify anything that already exists, only add. Use when the author says "add a section on X" or "add more practice" or "tack a survey at the end".
+
+<ResponseField name="courseId" type="integer" required>
+  The course to extend. Get this from `find_course` or `get_course`.
+</ResponseField>
+
+<ResponseField name="feedback" type="string" required>
+  Plain-English description of what to add. Examples: *"Add a section on emergency procedures"*, *"Add two more practice quizzes after lesson 3"*, *"Add a final survey for course feedback"*.
+</ResponseField>
+
+**Permission**: `course_edit` on the specific course (not just the role alias — the user must actually own / share / administer this course).
+
+**Returns**: `{ courseId, elementsAdded, transitionsAdded, message }`.
+
+**Example prompt**: *"For course 248, add a section on confined-space rescue procedures after the current safety lesson — 2 lessons + a quiz."*
+
+**Backend**: `POST /api/v2/ai/courses/:courseId/refine` with `{ feedback }`
+
+---
+
+### regenerate_question
+
+Replace a single quiz question's text and options. The new question stays on the **same concept** as the old one (we're not drifting to a new subject — just rewriting). Previous content is preserved in your workspace audit log.
+
+<ResponseField name="questionId" type="integer" required>
+  The question to regenerate. Single-choice questions only.
+</ResponseField>
+
+<ResponseField name="feedback" type="string">
+  Optional. What's wrong with the current question and how to improve it. Examples: *"Make it harder"*, *"The distractors are too obvious"*, *"Reword for clarity"*. Omit for a generic "clearer version".
+</ResponseField>
+
+**Permission**: `course_edit` on the parent course.
+
+**Returns**: `{ questionId, text, options, message }` with the new question content.
+
+**Example prompt**: *"Question #5821 in course 248 has confusing wording — make it clearer."*
+
+**Backend**: `POST /api/v2/ai/questions/:questionId/regenerate` with `{ feedback? }`
+
+---
+
+### regenerate_lesson
+
+Regenerate the AI-authored brief that drives the lesson's content. **Safe by construction** — this does NOT touch any pages the author has already created; it only updates the brief that the editor uses to bootstrap new content.
+
+<ResponseField name="lessonId" type="integer" required>
+  The lesson to regenerate the brief for.
+</ResponseField>
+
+<ResponseField name="feedback" type="string">
+  Optional. What's wrong with the current brief and how to improve it. Examples: *"Add a section on the regulatory context"*, *"Reduce to 3 key points"*, *"Target supervisors, not learners"*. Omit for a generic clarity pass.
+</ResponseField>
+
+**Permission**: `course_edit` on the parent course.
+
+**Returns**: `{ lessonId, brief }` with the new brief content (topic, title, description, keyPoints, targetAudience).
+
+**Example prompt**: *"Lesson 312's brief is too theoretical — make it practical with concrete examples."*
+
+**Backend**: `POST /api/v2/ai/lessons/:lessonId/regenerate` with `{ feedback? }`
+
+---
+
 ## Coming soon (not yet shipped)
 
-### extend_deadline + send_reminder *(v1.1 — preview)*
+### extend_deadline + send_reminder *(preview)*
 
-Push an assignment's deadline back, or nudge overdue learners. Currently not shipped because no corresponding v2 backend endpoint exists. Planned for v1.1 alongside the deadline-management work.
+Push an assignment's deadline back, or nudge overdue learners. Currently not shipped because no corresponding v2 backend endpoint exists.
 
 ## Error handling
 

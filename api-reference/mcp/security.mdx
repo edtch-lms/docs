@@ -32,7 +32,15 @@ The MCP server **automatically retries** up to 3 times with backoff, honoring th
 
 ### AI course-generation limits (separate, stricter)
 
-The AI course-generation tools (`create_course_from_prompt`, `create_course_from_files`) hit a tighter quota on top of the standard per-tier limit, because each call burns real Gemini quota:
+Every tool that triggers a Gemini call shares a single tighter quota on top of the standard per-tier limit:
+
+- `create_course_from_prompt`
+- `create_course_from_files`
+- `refine_course`
+- `regenerate_question`
+- `regenerate_lesson`
+
+Each call consumes one unit of the daily AI quota regardless of which of the five tools fired it:
 
 | Scope | Limit |
 |---|---|
@@ -176,7 +184,7 @@ How Konstantly handles AI processing — including which third-party providers r
     Role-by-role tool matrix
   </Card>
   <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
-    All 18 tools
+    All 25 tools
   </Card>
   <Card title="Quickstart" icon="rocket" href="/api-reference/mcp/quickstart">
     Try it in 5 minutes

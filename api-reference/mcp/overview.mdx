@@ -95,6 +95,22 @@ The MCP server is a thin adapter. **All business logic, permission checks, licen
   </Card>
 </CardGroup>
 
+### AI course refinement (Enterprise + AI add-on)
+
+Once a course exists, the agent can iterate on it without starting fresh. All three tools share the same daily AI quota as generation (5 per key, 50 per tenant) — each call is one Gemini request.
+
+<CardGroup cols={3}>
+  <Card title="Refine a course" icon="layer-plus">
+    `refine_course` — append new lessons / tests / sections to an existing course. Append-only by design: never deletes or modifies existing content.
+  </Card>
+  <Card title="Rewrite a question" icon="pen-line">
+    `regenerate_question` — surgical fix for a single quiz question. Stays on the same concept; previous text preserved in the audit log.
+  </Card>
+  <Card title="Rethink a lesson" icon="lightbulb">
+    `regenerate_lesson` — refresh a lesson's AI brief without touching pages the author already created.
+  </Card>
+</CardGroup>
+
 The complete tool reference lives in the [Tools Reference](/api-reference/mcp/tools-reference) page.
 
 ## When to use MCP vs the REST API
@@ -128,7 +144,7 @@ If your plan doesn't include MCP, the **MCP Keys** tab in your settings won't ap
     How keys work, scopes, license tiers
   </Card>
   <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
-    All 18 tools with parameters and examples
+    All 25 tools with parameters and examples
   </Card>
   <Card title="Security" icon="lock" href="/api-reference/mcp/security">
     Key rotation, rate limits, audit log

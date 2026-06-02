@@ -44,6 +44,9 @@ This page maps each MCP tool to the underlying permission alias and shows which 
 | `create_course_from_prompt` | `course_edit` | W | **full** + `mcpAiAccess` |
 | `create_course_from_files` | `course_edit` | W | **full** + `mcpAiAccess` |
 | `get_course_generation_status` | `course_edit` (write-scope only) | W | **full** + `mcpAiAccess` |
+| `refine_course` | `course_edit` **on the specific course** | W | **full** + `mcpAiAccess` |
+| `regenerate_question` | `course_edit` **on the question's parent course** | W | **full** + `mcpAiAccess` |
+| `regenerate_lesson` | `course_edit` **on the lesson's parent course** | W | **full** + `mcpAiAccess` |
 
 ## Role → tool map (built-in roles)
 
@@ -61,6 +64,7 @@ Implicitly has all permissions. Every tool is available.
 | `change_user_email` | `user_edit` |
 | `clone_course` | `course_edit` |
 | AI course generation (`upload_source_material`, `create_course_from_prompt`, `create_course_from_files`, `get_course_generation_status`) | `course_edit` + `mcpAiAccess` license flag |
+| AI course refinement (`refine_course`, `regenerate_question`, `regenerate_lesson`) | `course_edit` on the specific course + `mcpAiAccess` |
 | Audit access | `audit_view` |
 | MCP key management | `mcp_manage` (seeded with the MCP feature) |
 
@@ -72,6 +76,7 @@ In practice, an admin's MCP key is functionally equivalent to a super-user key f
 | `find_user`, `find_course`, `get_course`, `list_my_assignments`, `list_certificates`, `get_statistics`, `get_leaderboard` (read access) |
 | `clone_course` |
 | AI course generation tools — when the tenant has the `mcpAiAccess` license flag enabled, course-creator roles get these four tools too (`course_edit` is the only required alias) |
+| AI course refinement tools (`refine_course`, `regenerate_question`, `regenerate_lesson`) — same license flag, but each call additionally requires that the user can edit THIS course (per-course access check, not just the role alias) |
 
 Cannot ban users, cannot assign to others.
 
@@ -138,7 +143,7 @@ This lets compliance reports filter "actions taken by an agent vs by a human adm
 
 <CardGroup cols={2}>
   <Card title="Tools Reference" icon="wrench" href="/api-reference/mcp/tools-reference">
-    All 18 tools with parameters
+    All 25 tools with parameters
   </Card>
   <Card title="Security" icon="lock" href="/api-reference/mcp/security">
     Rate limits, key hygiene, audit
