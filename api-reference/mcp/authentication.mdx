@@ -61,7 +61,7 @@ Your tenant's license tier sets an **upper bound** on what any MCP key can do, r
 
 | License tier (`restrictions.mcpAccess`) | Effect |
 |---|---|
-| `"none"` (default) | MCP server completely disabled. All requests return 402. |
+| `"none"` (default) | MCP server disabled. Requests return `403` with code `MCP_LICENSE_DISABLED` and the message *"MCP is not enabled on this workspace. Talk to your administrator."* |
 | `"read"` | All keys treated as read-only, even keys originally issued with `write: true` |
 | `"full"` | Read and write tools available per key scope |
 
@@ -103,14 +103,16 @@ Response:
 
 The `tools` array reflects what the calling key can actually invoke after permission + scope + license filtering. The MCP server uses this to register tools with the LLM.
 
-Failed authentication returns `401 Unauthorized` with no body — no information leaks about whether the key existed, was revoked, or simply was wrong.
+Failed authentication on missing/invalid/revoked-key returns `401 Unauthorized` with no body — no information leaks. The `403 MCP_LICENSE_DISABLED` case is distinct: it's only reachable with a valid key, so it deliberately tells the caller MCP isn't enabled for the workspace instead of falling through to an opaque 401.
 
 ## Error semantics
 
 | HTTP status | Code | When |
 |---|---|---|
-| `401` | `UNAUTHORIZED` | Missing, invalid, or revoked key; banned user; license is `"none"` |
-| `402` | `LICENSE_RESTRICTED` | License doesn't permit MCP at all (only on key-management endpoints) |
+| `401` | `UNAUTHORIZED` | Missing, invalid, or revoked key; banned user |
+| `402` | `LICENSE_RESTRICTED` | Session-authed key-management endpoints when the tenant has no MCP license at all |
+| `403` | `MCP_LICENSE_DISABLED` | Key is valid but tenant's `mcpAccess` is `"none"` |
+| `403` | `MCP_AI_DISABLED` | AI tool invoked while tenant's `mcpAiAccess` is `false` |
 | `403` | (varies per endpoint) | Key is valid, but the owning user lacks permission for the requested action |
 | `429` | `MCP_RATE_LIMITED` | Per-key rate limit exceeded ([see Security](/api-reference/mcp/security#rate-limits)) |
 | `429` | `MCP_AUTH_RATE_LIMITED` | Per-IP rate limit on failed auth attempts (anti-enumeration) |
@@ -136,8 +138,8 @@ HTTP/2 401
 {"error":"Unauthorized","code":"UNAUTHORIZED"}
 
 # Tier is "none"
-HTTP/2 401
-{"error":"Unauthorized","code":"UNAUTHORIZED"}
+HTTP/2 403
+{"error":"MCP is not enabled on this workspace. Talk to your administrator.","code":"MCP_LICENSE_DISABLED"}
 
 # Too many bad-key attempts from this IP
 HTTP/2 429

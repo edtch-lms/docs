@@ -147,7 +147,7 @@ What the security posture defends against:
 | **License downgrade bypass** | License tier read fresh per request. Pre-issued write keys silently clamped. |
 | **Permission revocation lag** | No permission cache. Revoking a permission immediately blocks the next MCP call requiring it. |
 | **Timing attack on key validation** | Constant-time SHA-256 hash comparison (`crypto.timingSafeEqual`). |
-| **Information leak via error responses** | All auth failures return the same opaque 401. No distinction between "bad key" / "revoked key" / "license off". |
+| **Information leak via error responses** | Bad-key / revoked-key / banned-user failures return the same opaque 401 with no body — no distinction between them. The license-disabled case is a deliberate exception: it returns 403 + `MCP_LICENSE_DISABLED`, which is only reachable with a valid key, so the leak is intentional (admin can act on the message instead of filing a support ticket). |
 | **CSRF** | Not applicable — MCP server is server-to-server, browser never sees `X-MCP-Key`. |
 | **Session fixation via MCP** | MCP auth synthesizes a SessionData but never sets a cookie. No persistent session created. |
 
@@ -156,8 +156,8 @@ What the security posture defends against:
 | Risk | Why we accept it | What you can do |
 |---|---|---|
 | Key stored plaintext on customer device | Industry-standard for developer tools today (AWS CLI, gh, npm). Keychain integration on roadmap. | Treat the file like a password store. Encrypt the disk. Revoke on device loss. |
-| Compromised npm publisher account → poisoned package | Real but not preventable from your side. We publish from a locked-down account and plan to ship sigstore provenance signatures so customers can verify via `npm audit signatures`. | Pin a specific version in enterprise installs (`@konstantly/mcp-server@0.1.0` instead of just the latest tag) to limit auto-flow of a compromised release. |
-| Customer types wrong `KONSTANTLY_URL` and ships key to wrong host | The MCP server now refuses non-HTTPS URLs (since v0.1.0), but it still trusts whatever host the customer typed. | Use the install snippets from `/settings/api-keys` — copy-paste with the correct URL already filled in. Don't hand-edit URLs. |
+| Compromised npm publisher account → poisoned package | Real but not preventable from your side. We publish from a locked-down account and plan to ship sigstore provenance signatures so customers can verify via `npm audit signatures`. | Pin a specific version in enterprise installs (`@konstantly/mcp-server@0.2.0` instead of just the latest tag) to limit auto-flow of a compromised release. |
+| Customer types wrong `KONSTANTLY_URL` and ships key to wrong host | The MCP server refuses non-HTTPS URLs, but it still trusts whatever host the customer typed. | Use the install snippets from `/settings/api-keys` — copy-paste with the correct URL already filled in. Don't hand-edit URLs. |
 
 ## Operational checklist before public-facing use
 
